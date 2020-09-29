@@ -2,6 +2,11 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Book-A-Desk.Domain", "Book-A-Desk.Domain\Book-A-Desk.Domain.fsproj", "{A261E890-AD94-4A17-A321-229D5BF5BB5D}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".circleci", ".circleci", "{43A6506C-C939-4F4D-A124-DA09B7CD1219}"
+ProjectSection(SolutionItems) = preProject
+	.circleci\config.yml = .circleci\config.yml
+EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
