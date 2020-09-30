@@ -1,12 +1,13 @@
  version: 2.1
 
- orbs:
-  win: circleci/windows@2.2.0
-
  jobs:
-   build:
-     executor: win/default     
+  build:
+    docker:
+      - image: mcr.microsoft.com/dotnet/core/sdk:3.1
+        auth:
+          username: mydockerhub-user
+          password: $DOCKERHUB_PASSWORD 
     
-     steps:
+    steps:
        - checkout
        - run: dotnet build
