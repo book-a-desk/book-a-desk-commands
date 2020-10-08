@@ -4,9 +4,11 @@ open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.DependencyInjection
 open Giraffe
 
+open BookADesk.Api.HttpHandlers
+
 let webApp =
     choose [
-        route "/hello"   >=> text "Hello, world!" ]
+        route "/hello" >=> handleGetHello ]
 
 let configureApp (app : IApplicationBuilder) =
     app.UseGiraffe webApp
