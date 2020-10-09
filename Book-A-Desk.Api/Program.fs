@@ -8,7 +8,11 @@ open BookADesk.Api.HttpHandlers
 
 let webApp =
     choose [
-        route "/hello" >=> handleGetHello ]
+        POST >=> choose [
+            route "/book-a-desk" >=> handleBookADesk 
+        ]
+        RequestErrors.NOT_FOUND "Not Found"
+    ]
 
 let configureApp (app : IApplicationBuilder) =
     app.UseGiraffe webApp
