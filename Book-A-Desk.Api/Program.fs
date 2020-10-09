@@ -3,19 +3,10 @@ open Microsoft.AspNetCore.Hosting
 open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.DependencyInjection
 open Giraffe
-
-open BookADesk.Api.HttpHandlers
-
-let webApp =
-    choose [
-        POST >=> choose [
-            route "/book-a-desk" >=> handleBookADesk 
-        ]
-        RequestErrors.NOT_FOUND "Not Found"
-    ]
+open BookADesk.Api.Routes
 
 let configureApp (app : IApplicationBuilder) =
-    app.UseGiraffe webApp
+    app.UseGiraffe routes
 
 let configureServices (services : IServiceCollection) =
     services.AddGiraffe() |> ignore
