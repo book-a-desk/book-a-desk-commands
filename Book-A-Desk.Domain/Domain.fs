@@ -4,6 +4,7 @@ open System
 type OfficeID = OfficeID of string
 type EmailAddress = EmailAddress of string
 
+//Commands
 type BookADesk =
     {
         Date: DateTime
@@ -11,6 +12,14 @@ type BookADesk =
         OfficeID: OfficeID
     }
 
+//Events
+type DeskBooked =
+    {
+        Date: DateTime
+        EmailAddress: EmailAddress
+        OfficeID: OfficeID
+    }
+    
 module BookADeskCommandHandler =
     let Handle command =
     //
