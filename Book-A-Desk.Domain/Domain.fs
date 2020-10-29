@@ -1,4 +1,4 @@
-namespace bookadesk.commands.domain
+namespace Bookadesk.Commands.Domain
 open System
 
 type OfficeID = OfficeID of string
@@ -21,7 +21,7 @@ type DeskBooked =
     }
     
 module BookADeskCommandHandler =
-    let Handle command storeEvent =
+    let Handle (command : BookADesk) storeEvent =
         if command.EmailAddress = EmailAddress "" then
             Error "The e-mail address must not be empty."
         else if command.Date > DateTime.Now then
@@ -51,4 +51,4 @@ module InMemoryEventStore =
             store.Add (event.OfficeID, event)
             Ok ()
         with
-        | _ -> Error "Error occurred while storing event"
+        | _ -> Error "Error while storing event"

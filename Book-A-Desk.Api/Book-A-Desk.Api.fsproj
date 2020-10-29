@@ -16,4 +16,8 @@
     <PackageReference Include="Giraffe" Version="4.1.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Book-A-Desk.Domain\Book-A-Desk.Domain.fsproj" />
+  </ItemGroup>
+
 </Project>
