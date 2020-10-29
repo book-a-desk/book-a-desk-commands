@@ -21,10 +21,10 @@ module BookADeskCommandHandler =
         else if command.Date > DateTime.Now then
             Error "Date must be greater than today."
         else if command.OfficeID <> OfficeID "Berlin" && command.OfficeID <> OfficeID "Montreal" then
-            Error "You must enter a valid ofiice ID."
+            Error "You must enter a valid office ID."
         else
             //Create the event.
-
+            
 
             Ok ""
 
