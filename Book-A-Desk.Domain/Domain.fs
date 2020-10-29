@@ -41,3 +41,10 @@ module BookADeskCommandHandler =
             | Ok _ -> Ok event
             | Error e -> Error e
 
+module InMemoryEventStore =
+    open System.Collections.Generic
+    
+    let store = Dictionary<OfficeID, DeskBooked> ()
+    
+    let storeEvent event =
+        store.Add (event.OfficeID, event)
