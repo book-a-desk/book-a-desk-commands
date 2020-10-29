@@ -38,6 +38,6 @@ module BookADeskCommandHandler =
                 }
            
             match storeEvent event with
-            | Ok _-> Ok event
+            | Ok _ -> Ok event
             | Error e -> Error e
 
