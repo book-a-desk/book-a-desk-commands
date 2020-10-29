@@ -11,21 +11,21 @@ type BookADesk =
         OfficeID: OfficeID
     }
 
-module BookADeskCommandHandler = 
-    let Handle command = 
+module BookADeskCommandHandler =
+    let Handle command =
     //
     //Implementation will follow here.
     //
         if command.EmailAddress = EmailAddress "" then
             Error "The e-mail address must not be empty."
-        else if command.Date > DateTime.now then
+        else if command.Date > DateTime.Now then
             Error "Date must be greater than today."
-        else if command.OfficeID != OfficeID "Berlin" && commands.OfficeID != OfficeID "Montreal" then
+        else if command.OfficeID <> OfficeID "Berlin" && command.OfficeID <> OfficeID "Montreal" then
             Error "You must enter a valid ofiice ID."
         else
             //Create the event.
 
 
-            Ok
-        
+            Ok ""
+
 
