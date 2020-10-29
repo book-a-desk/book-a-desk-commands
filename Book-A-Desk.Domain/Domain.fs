@@ -47,4 +47,8 @@ module InMemoryEventStore =
     let store = Dictionary<OfficeID, DeskBooked> ()
     
     let storeEvent event =
-        store.Add (event.OfficeID, event)
+        try
+            store.Add (event.OfficeID, event)
+            Ok ()
+        with
+        | _ -> Error "Error occurred while storing event"
