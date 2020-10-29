@@ -22,9 +22,6 @@ type DeskBooked =
     
 module BookADeskCommandHandler =
     let Handle command =
-    //
-    //Implementation will follow here.
-    //
         if command.EmailAddress = EmailAddress "" then
             Error "The e-mail address must not be empty."
         else if command.Date > DateTime.Now then
@@ -33,8 +30,11 @@ module BookADeskCommandHandler =
             Error "You must enter a valid office ID."
         else
             //Create the event.
-            
-
-            Ok ""
+            {
+                DeskBooked.Date = command.Date
+                EmailAddress = command.EmailAddress
+                OfficeID = command.OfficeID
+            }
+            |> Ok
 
 
