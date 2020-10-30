@@ -8,7 +8,10 @@ open Bookadesk.Commands.Domain
 let handleBookADesk (next : HttpFunc) (ctx : HttpContext) =
     task {
         let! model = ctx.BindModelAsync<BookADesk>()
-        let result = BookADeskCommandHandler.Handle model InMemoryEventStore.storeEvent
+        let command = BookADesk model
+        let commandHandler = BookADeskCommandHandler.provide InMemoryEventStore.storeEvent
+
+        let result = commandHandler.Handle command
         match result with
         | Ok _ -> return! json model next ctx
         | Error e -> return! failwith e
