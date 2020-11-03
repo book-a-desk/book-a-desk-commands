@@ -1,0 +1,102 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Book a desk",
+    "description": "This is a server to book a desk.",
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/bookings": {
+      "post": {
+        "tags": [
+          "pet"
+        ],
+        "summary": "Add a new pet to the store",
+        "operationId": "addBooking",
+        "requestBody": {
+          "description": "Booking object that needs to be added to the list of extsing bookings",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Booking"
+              }
+            },
+          },
+          "required": true
+        },
+        "responses": {
+          "405": {
+            "description": "Invalid input",
+            "content": {}
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Booking"
+                }
+              },
+            }
+          }
+        },
+        "security": [
+          {
+            "book-a-desk_auth": [
+              "write:bookings",
+              "read:bookings"
+            ]
+          }
+        ],
+        "x-codegen-request-body-name": "body"
+      }
+    },
+  },
+  "components": {
+    "schemas": {
+      "Booking": {
+        "required": [
+          "officeId",
+          "bookingdate",
+          "emailaddress"
+        ],
+        "type": "object",
+        "properties": {
+          "officeId": {
+            "type": "string"
+          },
+          "bookingdate" : {
+            "type": "string",
+            "format": "date"
+          }, 
+          "emailaddress" : {
+            "type": "string"
+          },           
+        },
+      },
+    },
+    "securitySchemes": {
+      "book-a-desk_auth": {
+        "type": "oauth2",
+        "flows": {
+          "implicit": {
+            "authorizationUrl": "http://petstore.swagger.io/oauth/dialog",
+            "scopes": {
+              "write:bookings": "modify bookings in your account",
+              "read:bookings": "read your bookings"
+            }
+          }
+        }
+      },
+      "api_key": {
+        "type": "apiKey",
+        "name": "api_key",
+        "in": "header"
+      }
+    }
+  }
+}
