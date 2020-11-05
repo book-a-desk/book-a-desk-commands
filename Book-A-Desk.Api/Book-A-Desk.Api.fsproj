@@ -10,10 +10,15 @@
     <Compile Include="HttpHandlers.fs" />
     <Compile Include="Routes.fs" />
     <Compile Include="Program.fs" />
+    <Content Include="docs\bookADeskOpenAPISpecification.json" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Giraffe" Version="4.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Book-A-Desk.Domain\Book-A-Desk.Domain.fsproj" />
   </ItemGroup>
 
 </Project>
