@@ -3,10 +3,14 @@ open Microsoft.AspNetCore.Hosting
 open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.DependencyInjection
 open Giraffe
-open BookADesk.Api.Routes
+
+open Book_A_Desk.Api
+open Book_A_Desk.Commands.Domain
 
 let configureApp (app : IApplicationBuilder) =
-    app.UseGiraffe routes
+    let eventStore = InMemoryEventStore.storeEvent
+    let routes = Routes.provide eventStore
+    app.UseGiraffe routes.HttpHandlers
 
 let configureServices (services : IServiceCollection) =
     services.AddGiraffe() |> ignore
