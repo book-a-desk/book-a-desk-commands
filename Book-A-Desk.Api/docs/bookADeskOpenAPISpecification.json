@@ -15,10 +15,10 @@
         "tags": [
           "pet"
         ],
-        "summary": "Add a new pet to the store",
+        "summary": "Add a new booking to the bookings",
         "operationId": "addBooking",
         "requestBody": {
-          "description": "Booking object that needs to be added to the list of extsing bookings",
+          "description": "Booking object that needs to be added to the list of existing bookings",
           "content": {
             "application/json": {
               "schema": {
@@ -72,10 +72,10 @@
           "bookingdate" : {
             "type": "string",
             "format": "date"
-          }, 
+          },
           "emailaddress" : {
             "type": "string"
-          },           
+          },
         },
       },
     },

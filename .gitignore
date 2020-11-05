@@ -1,7 +1,7 @@
-.idea/
 bin/
 obj/
 out/
 
 .fake
-.ionide
+/.ionide/
+/.idea/
