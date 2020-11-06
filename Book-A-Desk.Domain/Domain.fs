@@ -1,4 +1,5 @@
-namespace Bookadesk.Commands.Domain
+namespace Book_A_Desk.Commands.Domain
+
 open System
 
 type OfficeID = OfficeID of string
