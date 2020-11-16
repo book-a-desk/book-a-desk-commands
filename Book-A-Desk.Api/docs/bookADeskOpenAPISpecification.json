@@ -97,7 +97,7 @@
         "type": "object",
         "properties": {
           "office": {
-            "$ref": "#/components/schemas/office"
+            "$ref": "#/components/schemas/Office"
           },
           "bookingdate" : {
             "type": "string",
