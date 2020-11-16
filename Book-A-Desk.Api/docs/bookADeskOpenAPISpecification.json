@@ -92,7 +92,7 @@
         "required": [
           "office",
           "date",
-          "email"
+          "user"
         ],
         "type": "object",
         "properties": {
@@ -103,7 +103,18 @@
             "type": "string",
             "format": "date"
           },
-          "email" : {
+          "user" : {
+            "$ref": "#/components/schemas/UserReference"
+          }
+        }
+      },
+      "UserReference": {
+        "required": [
+          "email"
+        ],
+        "type": "object",
+        "properties": {
+          "email": {
             "type": "string"
           }
         }
