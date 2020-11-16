@@ -91,19 +91,30 @@
       "Booking": {
         "required": [
           "office",
-          "bookingdate",
-          "emailaddress"
+          "date",
+          "email"
         ],
         "type": "object",
         "properties": {
           "office": {
-            "$ref": "#/components/schemas/Office"
+            "$ref": "#/components/schemas/OfficeReference"
           },
-          "bookingdate" : {
+          "date" : {
             "type": "string",
             "format": "date"
           },
-          "emailaddress" : {
+          "email" : {
+            "type": "string"
+          }
+        }
+      },
+      "OfficeReference": {
+        "required": [
+          "id"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
             "type": "string"
           }
         }
