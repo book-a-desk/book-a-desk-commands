@@ -13,7 +13,7 @@
     "/bookings": {
       "post": {
         "tags": [
-          "pet"
+          "booking"
         ],
         "summary": "Add a new booking to the bookings",
         "operationId": "addBooking",
@@ -24,7 +24,7 @@
               "schema": {
                 "$ref": "#/components/schemas/Booking"
               }
-            },
+            }
           },
           "required": true
         },
@@ -40,7 +40,7 @@
                 "schema": {
                   "$ref": "#/components/schemas/Booking"
                 }
-              },
+              }
             }
           }
         },
@@ -55,29 +55,107 @@
         "x-codegen-request-body-name": "body"
       }
     },
+    "/offices": {
+      "get": {
+        "tags": [
+          "office",
+          "booking"
+        ],
+        "summary": "Retrieve all existing offices.",
+        "operationId": "getOffices",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Offices"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "book-a-desk_auth": [
+              "read:offices"
+            ]
+          }
+        ],
+        "x-codegen-request-body-name": "body"
+      }
+    }
   },
   "components": {
     "schemas": {
       "Booking": {
         "required": [
-          "officeId",
-          "bookingdate",
-          "emailaddress"
+          "office",
+          "date",
+          "user"
         ],
         "type": "object",
         "properties": {
-          "officeId": {
-            "type": "string"
+          "office": {
+            "$ref": "#/components/schemas/OfficeReference"
           },
-          "bookingdate" : {
+          "date" : {
             "type": "string",
             "format": "date"
           },
-          "emailaddress" : {
+          "user" : {
+            "$ref": "#/components/schemas/UserReference"
+          }
+        }
+      },
+      "UserReference": {
+        "required": [
+          "email"
+        ],
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          }
+        }
+      },
+      "OfficeReference": {
+        "required": [
+          "id"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "Office": {
+        "required": [
+          "id",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
             "type": "string"
           },
-        },
+          "name" : {
+            "type": "string"
+          }
+        }
       },
+      "Offices": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Office"
+            }
+          }
+        }
+      }
     },
     "securitySchemes": {
       "book-a-desk_auth": {
