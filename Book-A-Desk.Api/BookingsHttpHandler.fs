@@ -3,9 +3,11 @@
 open Giraffe
 open FSharp.Control.Tasks.V2.ContextInsensitive
 
-open Book_A_Desk.Api.Models
-open Book_A_Desk.Commands.Domain
+open Book_A_Desk.Domain
+open Book_A_Desk.Domain.Reservation.Commands
+open Book_A_Desk.Domain.CommandHandler
 
+open Book_A_Desk.Api.Models
 type BookingsHttpHandler =
     {
         HandlePostWith: Booking -> HttpHandler

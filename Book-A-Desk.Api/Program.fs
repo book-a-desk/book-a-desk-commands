@@ -1,14 +1,16 @@
-﻿open Microsoft.AspNetCore.Builder
+﻿
+open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Hosting
 open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.DependencyInjection
 open Giraffe
 
+open Book_A_Desk.Domain
+
 open Book_A_Desk.Api
-open Book_A_Desk.Commands.Domain
 
 let configureApp (app : IApplicationBuilder) =
-    let eventStore = InMemoryEventStore.storeEvent
+    let eventStore = InMemoryEventStore.provide ()
     let routes = Routes.provide eventStore
     app.UseGiraffe routes.HttpHandlers
 

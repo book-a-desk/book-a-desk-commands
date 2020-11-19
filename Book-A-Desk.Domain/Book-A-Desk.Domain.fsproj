@@ -1,14 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <OutputType>Exe</OutputType>
         <TargetFramework>netcoreapp3.1</TargetFramework>
         <RootNamespace>Book_A_Desk.Domain</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="Domain.fs" />
-        <Compile Include="Program.fs" />
+        <Compile Include="Domain.Common.fs" />
+        <Compile Include="Reservation.Domain.fs" />
+        <Compile Include="Reservation.Events.fs" />
+        <Compile Include="Reservation.Commands.fs" />
+        <Compile Include="Reservation.Aggregate.fs" />
+        <Compile Include="Reservation.Command.BookADesk.fs" />
+        <Compile Include="Domain.Events.fs" />
+        <Compile Include="Domain.Commands.fs" />
+        <Compile Include="EventStore.fs" />
+        <Compile Include="CommandHandler.Reservations.fs" />
     </ItemGroup>
 
 </Project>
