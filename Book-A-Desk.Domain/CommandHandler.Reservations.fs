@@ -25,16 +25,15 @@ module BookADeskCommandHandler =
                 |> Result.map (fun _ ->  events |> List.map ReservationEvent)
 
             let run executeCommandWith cmd (ReservationId aggregateId) =
-//                eventStore.GetEvents aggregateId
-//                |> List.map (function | ReservationEvent event -> event | _ -> failwithf "There is an unexpected event type for AggregateId:%s" (aggregateId.ToString()))
-//                |> ReservationAggregate.getCurrentStateFrom
-//                |>
-                executeCommandWith cmd
+                eventStore.GetEvents aggregateId
+                |> List.map (function | ReservationEvent event -> event | _ -> failwithf "There is an unexpected event type for AggregateId:%s" (aggregateId.ToString()))
+                |> ReservationAggregate.getCurrentStateFrom
+                |> executeCommandWith cmd
                 |> Result.bind (storeEventsForBatch aggregateId)
 
             match command with
             | BookADesk command ->
-                let commandExecutor = // batchCommandFactory.CreateGenerateBatchCommand ()
+                let commandExecutor = // ToDo: use a reservationCommandFactory.CreateBookADeskReservationCommand ()
                     BookADeskReservationCommand.provide getValidationResultOf
                 run commandExecutor.ExecuteWith command ReservationAggregate.Id
             | _ -> failwith " ........"

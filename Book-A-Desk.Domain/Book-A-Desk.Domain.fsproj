@@ -7,6 +7,7 @@
 
     <ItemGroup>
         <Compile Include="Domain.Common.fs" />
+        <Compile Include="Office.Domain.fs" />
         <Compile Include="Reservation.Domain.fs" />
         <Compile Include="Reservation.Events.fs" />
         <Compile Include="Reservation.Commands.fs" />
