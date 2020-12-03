@@ -1,9 +1,12 @@
 ﻿namespace Book_A_Desk.Api
 
+open System
+
 open Giraffe
 open FSharp.Control.Tasks.V2.ContextInsensitive
 
 open Book_A_Desk.Domain
+open Book_A_Desk.Domain.Office.Domain
 open Book_A_Desk.Domain.Reservation.Commands
 open Book_A_Desk.Domain.CommandHandler
 
@@ -20,7 +23,7 @@ module BookingsHttpHandler =
             task {
                 let cmd =
                     {
-                        BookADesk.OfficeID = OfficeID booking.OfficeId
+                        BookADesk.OfficeId = Guid.Parse(booking.OfficeId) |> OfficeId // Consider TryParse and return 400 if not valid
                         Date = booking.BookingDate
                         EmailAddress = EmailAddress booking.EmailAddress
                     }

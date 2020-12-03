@@ -3,13 +3,14 @@ namespace Book_A_Desk.Domain.Reservation.Commands
 open System
 
 open Book_A_Desk.Domain
+open Book_A_Desk.Domain.Office.Domain
 
 //Commands
 type BookADesk =
     {
         Date: DateTime
         EmailAddress: EmailAddress
-        OfficeID: OfficeID
+        OfficeId: OfficeId
     }
 
 type ReservationCommand =
