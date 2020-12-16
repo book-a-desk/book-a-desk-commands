@@ -9,8 +9,8 @@ type Routes =
         HttpHandlers: HttpHandler
     }
 module Routes =
-    let provide eventStore =
-        let handlers = HttpHandlers.initialize eventStore
+    let provide eventStore reservationCommandsFactory =
+        let handlers = HttpHandlers.initialize eventStore reservationCommandsFactory
 
         let httpHandlers : HttpHandler =
             choose [

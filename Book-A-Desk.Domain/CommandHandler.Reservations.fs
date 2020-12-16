@@ -13,10 +13,8 @@ type BookADeskCommandHandler =
     }
 
 module BookADeskCommandHandler =
-   let provide (eventStore:EventStore) =
-       let getValidationResultOf = fun f -> f()
-
-       let handle (command : ReservationCommand) =
+   let provide eventStore reservationCommandsFactory =
+       let handle command =
             let storeEventsForBatch aggregateId events =
                 (aggregateId, events |> List.map ReservationEvent)
                 |> List.singleton
@@ -33,8 +31,7 @@ module BookADeskCommandHandler =
 
             match command with
             | BookADesk command ->
-                let commandExecutor = // ToDo: use a reservationCommandFactory.CreateBookADeskReservationCommand ()
-                    BookADeskReservationCommand.provide getValidationResultOf
+                let commandExecutor = reservationCommandsFactory.CreateBookADeskCommand ()
                 run commandExecutor.ExecuteWith command ReservationAggregate.Id
             | _ -> failwith " ........"
 

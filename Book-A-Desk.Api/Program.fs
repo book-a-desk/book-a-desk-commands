@@ -1,4 +1,5 @@
 ﻿
+open Book_A_Desk.Domain.CommandHandler
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Hosting
 open Microsoft.Extensions.Hosting
@@ -11,7 +12,9 @@ open Book_A_Desk.Api
 
 let configureApp (app : IApplicationBuilder) =
     let eventStore = InMemoryEventStore.provide ()
-    let routes = Routes.provide eventStore
+    let reservationCommandsFactory = ReservationCommandsFactory.provide ()
+
+    let routes = Routes.provide eventStore reservationCommandsFactory
     app.UseGiraffe routes.HttpHandlers
 
 let configureServices (services : IServiceCollection) =
