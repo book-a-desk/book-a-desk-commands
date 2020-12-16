@@ -12,7 +12,7 @@ type OfficesHttpHandler =
     }
     
 module OfficesHttpHandler =
-    let initialize =
+    let initialize () =
         let handleGet () = fun next context ->
             task {
                 let offices =
