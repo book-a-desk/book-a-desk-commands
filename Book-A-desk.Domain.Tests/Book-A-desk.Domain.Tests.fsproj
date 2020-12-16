@@ -9,7 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="Tests.fs" />
+        <Compile Include="Reservation.Command.BookADesk.Tests.fs" />
         <Compile Include="Reservation.CommandHandler.Tests.fs" />
         <Compile Include="Program.fs" />
     </ItemGroup>
