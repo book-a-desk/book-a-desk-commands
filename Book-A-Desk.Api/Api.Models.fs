@@ -8,4 +8,10 @@ type Booking =
         BookingDate: DateTime
         EmailAddress: string
     }
+    
+type Office =
+    {
+        Id: string
+        Name: string
+    }
 
