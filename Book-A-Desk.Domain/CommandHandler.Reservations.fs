@@ -1,8 +1,8 @@
 namespace Book_A_Desk.Domain.CommandHandler
 
-open System
 open Book_A_Desk.Domain
 open Book_A_Desk.Domain.Events
+open Book_A_Desk.Domain.Office.Domain
 open Book_A_Desk.Domain.Reservation
 open Book_A_Desk.Domain.Reservation.Domain
 open Book_A_Desk.Domain.Reservation.Commands
@@ -32,8 +32,9 @@ module BookADeskCommandHandler =
 
             match command with
             | BookADesk command ->
+                let getOffices = fun () -> Offices.All
                 let commandExecutor = // ToDo: use a reservationCommandFactory.CreateBookADeskReservationCommand ()
-                    BookADeskReservationCommand.provide ()
+                    BookADeskReservationCommand.provide (BookADeskReservationValidator.validateCommand getOffices)
                 run commandExecutor.ExecuteWith command ReservationAggregate.Id
 
        {

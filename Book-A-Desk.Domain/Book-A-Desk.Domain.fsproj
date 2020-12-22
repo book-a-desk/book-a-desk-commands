@@ -20,4 +20,8 @@
         <Compile Include="CommandHandler.Reservations.fs" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Book-A-Desk.Common\Book-A-Desk.Common.fsproj" />
+    </ItemGroup>
+
 </Project>

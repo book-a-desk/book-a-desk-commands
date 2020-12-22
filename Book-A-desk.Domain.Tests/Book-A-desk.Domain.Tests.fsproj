@@ -9,6 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <Compile Include="DomainBuilders.fs" />
         <Compile Include="Reservation.Command.BookADesk.Tests.fs" />
         <Compile Include="Reservation.Validator.Tests.fs" />
         <Compile Include="Program.fs" />
