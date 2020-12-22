@@ -1,4 +1,4 @@
-module Tests
+module Book_A_Desk.Domain.Reservation.Commands.Tests
 
 open System
 open Book_A_Desk.Domain
@@ -7,7 +7,6 @@ open Book_A_Desk.Domain.Reservation
 open Book_A_Desk.Domain.Reservation.Commands
 open Xunit
 
-let validationResultsOf f = f()
 let initialReservationAggregate =
     {
         Id = ReservationAggregate.Id
@@ -17,7 +16,7 @@ let initialReservationAggregate =
 
 [<Fact>]
 let ``GIVEN A Book-A-Desk Reservation command, WHEN validating the command, THEN I expect E-Mail address is not empty`` () =
-    let command = BookADeskReservationCommand.provide validationResultsOf
+    let command = BookADeskReservationCommand.provide ()
     let bookADesk = {
         BookADesk.EmailAddress = EmailAddress ""
         BookADesk.Date = DateTime.Now
@@ -30,7 +29,7 @@ let ``GIVEN A Book-A-Desk Reservation command, WHEN validating the command, THEN
 
 [<Fact>]
 let ``GIVEN A Book-A-Desk Reservation command, WHEN validating the command, THEN I expect Date must be greater then today`` () =
-    let command = BookADeskReservationCommand.provide validationResultsOf
+    let command = BookADeskReservationCommand.provide ()
     let bookADesk = {
         BookADesk.EmailAddress = EmailAddress "something@something.com"
         BookADesk.Date = DateTime.Now.AddDays(-1.)
@@ -44,7 +43,7 @@ let ``GIVEN A Book-A-Desk Reservation command, WHEN validating the command, THEN
 
 [<Fact>]
 let ``GIVEN A Book-A-Desk Reservation command, WHEN validating the command, THEN I expect valid office id`` () =
-    let command = BookADeskReservationCommand.provide validationResultsOf
+    let command = BookADeskReservationCommand.provide ()
     let bookADesk = {
         BookADesk.EmailAddress = EmailAddress "something@something.com"
         BookADesk.Date = DateTime.Now.AddDays(1.)
@@ -57,7 +56,7 @@ let ``GIVEN A Book-A-Desk Reservation command, WHEN validating the command, THEN
 
 [<Fact>]
 let ``GIVEN A Book-A-Desk Reservation command, WHEN validating the command, THEN ensure only specified number of bookings per office is allowed.`` () =
-    let command = BookADeskReservationCommand.provide validationResultsOf
+    let command = BookADeskReservationCommand.provide ()
 
     let office = Offices.All.[0]
     let bookADesk = {
@@ -81,7 +80,7 @@ let ``GIVEN A Book-A-Desk Reservation command, WHEN validating the command, THEN
 
 [<Fact>]
 let ``GIVEN A Book-A-Desk Reservation command, WHEN validating the command and desks are available, THEN an event should be created`` () =
-    let command = BookADeskReservationCommand.provide validationResultsOf
+    let command = BookADeskReservationCommand.provide ()
 
     let office = Offices.All.[0]
     let bookADesk = {
