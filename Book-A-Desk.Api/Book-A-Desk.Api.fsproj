@@ -9,6 +9,7 @@
   <ItemGroup>
     <Compile Include="Api.Models.fs" />
     <Compile Include="JsonSerialization.fs" />
+    <Compile Include="OfficesHttpHandler.fs" />
     <Compile Include="BookingsHttpHandler.fs" />
     <Compile Include="HttpHandlers.fs" />
     <Compile Include="Routes.fs" />

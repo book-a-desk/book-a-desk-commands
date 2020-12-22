@@ -2,10 +2,26 @@
 
 open System
 
+type UserReference =
+    {
+        Email: string
+    }
+    
+type OfficeReference = 
+    {
+        Id: string
+    }
+
 type Booking =
     {
-        OfficeId: string
-        BookingDate: DateTime
-        EmailAddress: string
+        Office: OfficeReference
+        Date: DateTime
+        User: UserReference
+    }
+    
+type Office =
+    {
+        Id: string
+        Name: string
     }
 

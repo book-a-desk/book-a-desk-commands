@@ -14,6 +14,9 @@ module Routes =
 
         let httpHandlers : HttpHandler =
             choose [
+                GET >=> choose [
+                    route "/offices" >=> handlers.Offices.HandleGet ()
+                ]
                 POST >=> choose [
                     route "/bookings"
                                 >=> JsonBodyValidator.parseBody<Booking>
