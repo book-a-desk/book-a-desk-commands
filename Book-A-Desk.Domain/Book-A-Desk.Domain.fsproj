@@ -12,11 +12,16 @@
         <Compile Include="Reservation.Events.fs" />
         <Compile Include="Reservation.Commands.fs" />
         <Compile Include="Reservation.Aggregate.fs" />
+        <Compile Include="Reservation.Validator.fs" />
         <Compile Include="Reservation.Command.BookADesk.fs" />
         <Compile Include="Domain.Events.fs" />
         <Compile Include="Domain.Commands.fs" />
         <Compile Include="EventStore.fs" />
         <Compile Include="CommandHandler.Reservations.fs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Book-A-Desk.Core\Book-A-Desk.Core.fsproj" />
     </ItemGroup>
 
 </Project>
