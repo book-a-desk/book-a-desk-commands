@@ -1,4 +1,4 @@
-﻿namespace Book_A_Desk.Common
+﻿namespace Book_A_Desk.Core
 
 [<AutoOpen>]
 module ResultBuilder =

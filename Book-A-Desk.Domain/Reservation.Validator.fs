@@ -2,7 +2,7 @@
 
 open System
 
-open Book_A_Desk.Common
+open Book_A_Desk.Core
 open Book_A_Desk.Domain
 open Book_A_Desk.Domain.Office.Domain
 open Book_A_Desk.Domain.Reservation.Commands

@@ -12,7 +12,7 @@ open Book_A_desk.Domain.Tests
 let getOffices () = List.Empty
 
 [<Fact>]
-let ``GIVEN A Book-A-Desk Reservation validator, WHEN validating the command, THEN I expect E-Mail address is not empty`` () =
+let ``GIVEN A Book-A-Desk Reservation command WITH an empty email address, WHEN validating, THEN validation should fail`` () =
     let commandWithEmptyEmailAddress =
         {
             EmailAddress = EmailAddress ""
@@ -26,7 +26,7 @@ let ``GIVEN A Book-A-Desk Reservation validator, WHEN validating the command, TH
     | Error _ -> ()
 
 [<Fact>]
-let ``GIVEN A Book-A-Desk Reservation command, WHEN validating the command, THEN I expect Date must be greater then today`` () =
+let ``GIVEN A Book-A-Desk Reservation command WITH a date in the past, WHEN validating, THEN validation should fail`` () =
     let commandWithPastDate =
         {
             EmailAddress = EmailAddress "anEmailAddress@fake.com"
@@ -40,8 +40,8 @@ let ``GIVEN A Book-A-Desk Reservation command, WHEN validating the command, THEN
     | Error _ -> ()
 
 [<Fact>]
-let ``GIVEN A Book-A-Desk Reservation command, WHEN validating the command, THEN I expect valid office id`` () =
-    let getOfficesHasAnOffice () = [Office.Create]
+let ``GIVEN A Book-A-Desk Reservation command WITH an invalid office id, WHEN validating, THEN validation should fail`` () =
+    let getOfficesHasAnOffice () = []
     
     let commandWithInvalidOfficeId =
         {
@@ -56,8 +56,8 @@ let ``GIVEN A Book-A-Desk Reservation command, WHEN validating the command, THEN
     | Error _ -> ()
 
 [<Fact>]
-let ``GIVEN A Book-A-Desk Reservation command, WHEN validating the command, THEN ensure only specified number of bookings per office is allowed.`` () =
-    let office = { Office.Create with BookableDesksPerDay = 1 }
+let ``GIVEN A Book-A-Desk Reservation command WITH no desks available, WHEN validating, THEN validation should fail`` () =
+    let office = { An.office with BookableDesksPerDay = 1 }
     let getOfficesHasAnOffice () = [office]
     let command =
         {
@@ -69,7 +69,7 @@ let ``GIVEN A Book-A-Desk Reservation command, WHEN validating the command, THEN
     let someReservationAggregate =
         {
             Id = ReservationAggregate.Id
-            BookedDesks = [{ Booking.Create with OfficeId = office.Id}]
+            BookedDesks = [{ A.booking with OfficeId = office.Id}]
         }
         |> Some
     
@@ -79,8 +79,8 @@ let ``GIVEN A Book-A-Desk Reservation command, WHEN validating the command, THEN
     | Error _ -> ()
     
 [<Fact>]
-let ``GIVEN A valid Book-A-Desk Reservation command, WHEN validating the command, THEN should validate.`` () =
-    let office = Office.Create
+let ``GIVEN A valid Book-A-Desk Reservation command, WHEN validating the command, THEN validation should pass.`` () =
+    let office = An.office
     let getOfficesHasAnOffice () = [office]
     let command =
         {

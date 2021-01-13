@@ -21,7 +21,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Book-A-Desk.Common\Book-A-Desk.Common.fsproj" />
+      <ProjectReference Include="..\Book-A-Desk.Core\Book-A-Desk.Core.fsproj" />
     </ItemGroup>
 
 </Project>

@@ -6,34 +6,33 @@
     open Book_A_Desk.Domain.Office.Domain
     open Book_A_Desk.Domain.Reservation
 
-    module ReservationAggregate  =
-        let Create =            
+    module A =
+        let reservationAggregate =
             {
                 Id = ReservationAggregate.Id
                 BookedDesks = []
             }
             |> Some
-            
-        let CreateFullyBooked () =  
+    
+        let fullyBookedReservationAggregate () =  
             let maxAllowedBookingsPerOffice =
                  Offices.All
                  |> List.sumBy (fun office -> office.BookableDesksPerDay)
             {
                 Id = ReservationAggregate.Id
-                BookedDesks = [for _ in 1 .. maxAllowedBookingsPerOffice -> Booking.Create]
+                BookedDesks = [for _ in 1 .. maxAllowedBookingsPerOffice -> booking]
             }
             |> Some
             
-    module Booking =
-        let Create =
+        let booking = 
             {
                 OfficeId = OfficeId (Guid.NewGuid())
                 EmailAddress = EmailAddress "anEmailAddress@fake.com"
                 Date = DateTime.MaxValue
             }
             
-    module Office =
-        let Create =
+    module An =
+        let office = 
             {
                 Id = Guid.NewGuid() |> OfficeId
                 City = CityName "Montreal"
