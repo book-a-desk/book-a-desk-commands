@@ -41,8 +41,8 @@ module BookADeskReservationValidator =
              Error "You must enter a valid office ID."
     
     let private validateOfficeIsAvailable reservationAggregate officeId getOffices (date : DateTime) = result {
-        let! reservationAggregate = validateReservationAggregate reservationAggregate                
-        let! maxAllowedBookingsPerOffice = getNumberOfAvailableDesk officeId getOffices
+        let! reservationAggregate = validateReservationAggregate reservationAggregate        
+        and! maxAllowedBookingsPerOffice = getNumberOfAvailableDesk officeId getOffices
         
         let isAvailable =
              reservationAggregate.BookedDesks
