@@ -1,5 +1,6 @@
 namespace Book_A_Desk.Domain.CommandHandler
 
+open Book_A_Desk.Core
 open Book_A_Desk.Domain
 open Book_A_Desk.Domain.Events
 open Book_A_Desk.Domain.Office.Domain
@@ -9,7 +10,7 @@ open Book_A_Desk.Domain.Reservation.Commands
 
 type BookADeskCommandHandler =
     {
-        Handle: ReservationCommand -> Result<DomainEvent list,string>
+        Handle: ReservationCommand -> Result<unit,string>
     }
 
 module BookADeskCommandHandler =
@@ -21,14 +22,17 @@ module BookADeskCommandHandler =
                 |> List.singleton
                 |> Map.ofList
                 |> eventStore.AppendEvents
-                |> Result.map (fun _ ->  events |> List.map ReservationEvent)
+                Result.Ok ()
 
-            let run executeCommandWith cmd (ReservationId aggregateId) =
-                eventStore.GetEvents aggregateId
-                |> List.map (function | ReservationEvent event -> event)
-                |> ReservationAggregate.getCurrentStateFrom
-                |> executeCommandWith cmd
-                |> Result.bind (storeEventsForBatch aggregateId)
+            let run executeCommandWith cmd (ReservationId aggregateId) = result {
+                let! events = eventStore.GetEvents aggregateId
+                return!
+                    events
+                    |> List.map (function | ReservationEvent event -> event)
+                    |> ReservationAggregate.getCurrentStateFrom
+                    |> executeCommandWith cmd
+                    |> Result.bind(storeEventsForBatch aggregateId)
+            }
 
             match command with
             | BookADesk command ->
