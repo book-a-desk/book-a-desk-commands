@@ -7,29 +7,54 @@ open Book_A_Desk.Domain.Reservation.Events
 
 type EventStore =
     {
-        GetEvents: Guid -> DomainEvent list
-        AppendEvents: Map<Guid, DomainEvent list> -> Result<unit, string>
+        GetEvents: Guid -> Result<DomainEvent list, string>
+        AppendEvents: Map<Guid, DomainEvent list> -> unit
     }
 
-module InMemoryEventStore =
-    open System.Collections.Generic
+module EventsReader =
+    let getEvents aggregateId events =
+        match Map.tryFind aggregateId events with
+        | Some events ->
+            Result.Ok events
+        | None ->
+            Result.Error "could not find aggregate id"
+  
+module EventsWriter =          
+    let appendEvents previousEventsById newEventsById =
+        newEventsById
+        |> Map.fold (fun (appendedEvents : Map<Guid, DomainEvent list>) aggregateId newEvents ->
+            appendedEvents.Add(aggregateId, newEvents)) previousEventsById
+
+module InMemoryEventStore =    
+    type private MailboxEventStore =
+    | GetEvents of Guid * AsyncReplyChannel<Result<DomainEvent list, string>>
+    | AppendEvents of Map<Guid, DomainEvent list>
+    
+    let private memoryStore =
+        MailboxProcessor.Start(fun inbox ->
+            let events = Map.empty
+            
+            let rec loop events = async {
+                let! msg = inbox.Receive()
+                
+                let newEvents =
+                    match msg with
+                    | GetEvents (aggregateId, replyChannel) ->
+                        replyChannel.Reply(EventsReader.getEvents aggregateId events)
+                        events
+                    | AppendEvents newEventsById ->
+                        EventsWriter.appendEvents events newEventsById
+                    
+                return! loop newEvents
+            }
+            loop events)
 
     let provide () =
-        let store = Dictionary<Guid, List<DomainEvent>> ()
-
         let getEvents aggregateId =
-            []
+            memoryStore.PostAndReply(fun rc -> (aggregateId, rc) |> GetEvents)
 
         let storeEvents mapOfEvents =
-
-            try
-                mapOfEvents
-                |> Map.iter (fun aggregateId (events: DomainEvent list) -> store.[aggregateId].AddRange events )
-
-                Ok ()
-            with
-            | _ -> Error "Error while storing event"
-
+            memoryStore.Post(AppendEvents mapOfEvents)
 
         {
             GetEvents = getEvents
