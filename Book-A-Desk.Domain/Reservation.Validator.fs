@@ -52,7 +52,7 @@ module BookADeskReservationValidator =
         if isAvailable then
             return ()
         else
-            return! Error (sprintf "The office is booked out at %s" (date.ToShortDateString()))
+            return! Error ($"The office is booked out at {date.ToShortDateString()}" )
     }
             
     let validateCommand getOffices (cmd : BookADesk) reservationAggregate = result {
