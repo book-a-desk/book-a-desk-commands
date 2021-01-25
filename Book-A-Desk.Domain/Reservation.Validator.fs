@@ -41,8 +41,8 @@ module BookADeskReservationValidator =
              Error "You must enter a valid office ID."
     
     let private validateOfficeIsAvailable reservationAggregate officeId getOffices (date : DateTime) = result {
-        let! reservationAggregate = validateReservationAggregate reservationAggregate                
-        let! maxAllowedBookingsPerOffice = getNumberOfAvailableDesk officeId getOffices
+        let! reservationAggregate = validateReservationAggregate reservationAggregate        
+        and! maxAllowedBookingsPerOffice = getNumberOfAvailableDesk officeId getOffices
         
         let isAvailable =
              reservationAggregate.BookedDesks
@@ -52,7 +52,7 @@ module BookADeskReservationValidator =
         if isAvailable then
             return ()
         else
-            return! Error (sprintf "The office is booked out at %s" (date.ToShortDateString()))
+            return! Error ($"The office is booked out at {date.ToShortDateString()}" )
     }
             
     let validateCommand getOffices (cmd : BookADesk) reservationAggregate = result {
