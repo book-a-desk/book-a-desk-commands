@@ -22,16 +22,15 @@ module BookADeskCommandHandler =
                 |> List.singleton
                 |> Map.ofList
                 |> eventStore.AppendEvents
-                Result.Ok ()
 
             let run executeCommandWith cmd (ReservationId aggregateId) = result {
                 let! events = eventStore.GetEvents aggregateId
-                return!
+                let! commandResult =
                     events
                     |> List.map (function | ReservationEvent event -> event)
                     |> ReservationAggregate.getCurrentStateFrom
-                    |> executeCommandWith cmd
-                    |> Result.bind(storeEventsForBatch aggregateId)
+                    |> executeCommandWith cmd                    
+                return storeEventsForBatch aggregateId commandResult
             }
 
             match command with
