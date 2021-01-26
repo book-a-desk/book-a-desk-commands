@@ -9,8 +9,8 @@ type Routes =
         HttpHandlers: HttpHandler
     }
 module Routes =
-    let provide eventStore =
-        let handlers = HttpHandlers.initialize eventStore
+    let provide eventStore getOffices =
+        let handlers = HttpHandlers.initialize eventStore getOffices
 
         let httpHandlers : HttpHandler =
             choose [

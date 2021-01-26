@@ -17,7 +17,7 @@ type BookingsHttpHandler =
     }
 
 module BookingsHttpHandler =
-    let initialize eventStore =
+    let initialize eventStore getOffices =
 
         let handlePostWith booking = fun next context ->
             task {
@@ -29,11 +29,13 @@ module BookingsHttpHandler =
                     }
 
                 let command = BookADesk cmd
-                let commandHandler = BookADeskCommandHandler.provide eventStore
+                let commandHandler = BookADeskCommandHandler.provide eventStore getOffices
 
                 let result = commandHandler.Handle command
                 match result with
-                | Ok _ -> return! json cmd next context
+                | Ok _ ->
+                    let! result = json cmd next context
+                    return result
                 | Error e -> return! failwith e
             }
 

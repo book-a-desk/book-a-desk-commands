@@ -7,11 +7,21 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Program.fs" />
+    <Compile Include="TestServer.fs" />
+    <Compile Include="HttpRequest.fs" />
+    <Compile Include="OfficesTests.fs" />
+    <Compile Include="BookingsTests.fs" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Giraffe" Version="4.1.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.8.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="xunit" Version="2.4.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Book-A-Desk.Api\Book-A-Desk.Api.fsproj" />
   </ItemGroup>
 
 </Project>

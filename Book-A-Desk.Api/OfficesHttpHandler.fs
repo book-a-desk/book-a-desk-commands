@@ -12,11 +12,11 @@ type OfficesHttpHandler =
     }
     
 module OfficesHttpHandler =
-    let initialize () =
+    let initialize getOffices =
         let handleGet () = fun next context ->
             task {
                 let offices =
-                    Offices.All
+                    getOffices ()
                     |> List.map (fun o ->
                         let (OfficeId officeId) = o.Id
                         let (CityName cityName) = o.City

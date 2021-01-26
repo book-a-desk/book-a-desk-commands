@@ -1,7 +1,7 @@
 ﻿namespace Book_A_Desk.Api
 
-open Giraffe
 open FSharp.Control.Tasks.V2.ContextInsensitive
+open Giraffe
 open Newtonsoft.Json
 
 module JsonBodyValidator =

@@ -5,7 +5,7 @@ open Book_A_Desk.Domain.Reservation.Events
 
 type BookADeskReservationCommand =
     {
-        ExecuteWith: BookADesk -> ReservationAggregate option -> Result<ReservationEvent list, string>
+        ExecuteWith: BookADesk -> ReservationAggregate -> Result<ReservationEvent list, string>
     }
 
 module BookADeskReservationCommand =
