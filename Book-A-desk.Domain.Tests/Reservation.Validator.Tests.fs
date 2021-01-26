@@ -10,6 +10,12 @@ open Book_A_Desk.Domain.Reservation.Commands
 open Book_A_desk.Domain.Tests
 
 let getOffices () = List.Empty
+    
+let aReservationAggregate =
+    {
+        Id = ReservationAggregate.Id
+        BookedDesks = []
+    }
 
 [<Fact>]
 let ``GIVEN A Book-A-Desk Reservation command WITH an empty email address, WHEN validating, THEN validation should fail`` () =
@@ -20,7 +26,7 @@ let ``GIVEN A Book-A-Desk Reservation command WITH an empty email address, WHEN 
             OfficeId = OfficeId (Guid.NewGuid())
         } : BookADesk
     
-    let result = BookADeskReservationValidator.validateCommand getOffices commandWithEmptyEmailAddress None
+    let result = BookADeskReservationValidator.validateCommand getOffices commandWithEmptyEmailAddress aReservationAggregate
     match result with
     | Ok _ -> failwith "Validation should fail because email is empty"
     | Error _ -> ()
@@ -34,7 +40,7 @@ let ``GIVEN A Book-A-Desk Reservation command WITH a date in the past, WHEN vali
             OfficeId = OfficeId (Guid.NewGuid())
         } : BookADesk
     
-    let result = BookADeskReservationValidator.validateCommand getOffices commandWithPastDate None
+    let result = BookADeskReservationValidator.validateCommand getOffices commandWithPastDate aReservationAggregate
     match result with
     | Ok _ -> failwith "Validation should fail because date is in the past"
     | Error _ -> ()
@@ -50,7 +56,7 @@ let ``GIVEN A Book-A-Desk Reservation command WITH an invalid office id, WHEN va
             OfficeId = OfficeId Guid.Empty
         } : BookADesk
     
-    let result = BookADeskReservationValidator.validateCommand getOfficesHasAnOffice commandWithInvalidOfficeId None
+    let result = BookADeskReservationValidator.validateCommand getOfficesHasAnOffice commandWithInvalidOfficeId aReservationAggregate
     match result with
     | Ok _ -> failwith "Validation should fail because the office id is invalid"
     | Error _ -> ()
@@ -66,14 +72,13 @@ let ``GIVEN A Book-A-Desk Reservation command WITH no desks available, WHEN vali
             OfficeId = office.Id
         } : BookADesk
     
-    let someReservationAggregate =
+    let aReservationAggregate =
         {
             Id = ReservationAggregate.Id
             BookedDesks = [{ A.booking with OfficeId = office.Id}]
         }
-        |> Some
     
-    let result = BookADeskReservationValidator.validateCommand getOfficesHasAnOffice command someReservationAggregate
+    let result = BookADeskReservationValidator.validateCommand getOfficesHasAnOffice command aReservationAggregate
     match result with
     | Ok _ -> failwith "Validation should fail because all reservations are taken"
     | Error _ -> ()
@@ -89,14 +94,7 @@ let ``GIVEN A valid Book-A-Desk Reservation command, WHEN validating the command
             OfficeId = office.Id
         } : BookADesk
     
-    let someReservationAggregate =
-        {
-            Id = ReservationAggregate.Id
-            BookedDesks = []
-        }
-        |> Some
-    
-    let result = BookADeskReservationValidator.validateCommand getOfficesHasAnOffice command someReservationAggregate
+    let result = BookADeskReservationValidator.validateCommand getOfficesHasAnOffice command aReservationAggregate
     match result with
     | Error _ -> failwith "Validation should have succeeded"
     | Ok _ -> ()

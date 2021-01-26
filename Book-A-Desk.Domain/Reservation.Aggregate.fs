@@ -24,26 +24,23 @@ module ReservationAggregate =
     let Id = Guid.Parse("DCD544FB-8DB3-489E-805C-B6F41F32910D") |> ReservationId
 
     let applyEventTo reservation event =
-        match reservation with
-        | None ->
+        match event with
+        | DeskBooked event ->
+            let booking =
+                {
+                   OfficeId = event.OfficeId
+                   EmailAddress = event.EmailAddress
+                   Date = event.Date
+                }
+            { reservation with BookedDesks = booking :: reservation.BookedDesks }
+
+
+    let getCurrentStateFrom events =
+        let initialAggregate =
             {
                 ReservationAggregate.Id = Id
                 BookedDesks = []
             }
-            |> Some
-        | Some reservation ->
-            match event with
-            | DeskBooked event ->
-                let booking =
-                    {
-                       OfficeId = event.OfficeId
-                       EmailAddress = event.EmailAddress
-                       Date = event.Date
-                    }
-                { reservation with BookedDesks = booking :: reservation.BookedDesks }
-                |> Some
-
-
-    let getCurrentStateFrom events =
         events
-        |> Seq.fold applyEventTo None
+        |> Seq.fold applyEventTo initialAggregate
+                   

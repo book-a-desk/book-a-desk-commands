@@ -12,7 +12,6 @@
                 Id = ReservationAggregate.Id
                 BookedDesks = []
             }
-            |> Some
     
         let fullyBookedReservationAggregate () =  
             let maxAllowedBookingsPerOffice =
@@ -22,7 +21,6 @@
                 Id = ReservationAggregate.Id
                 BookedDesks = [for _ in 1 .. maxAllowedBookingsPerOffice -> booking]
             }
-            |> Some
             
         let booking = 
             {

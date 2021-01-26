@@ -27,11 +27,6 @@ module BookADeskReservationValidator =
             Error "You must enter a valid office ID."
         else
             Ok ()
-             
-    let private validateReservationAggregate reservationAggregate =
-        match reservationAggregate with
-        | Some reservationAggregate -> Ok reservationAggregate
-        | None -> Error "Could not get reservation aggregate"
     
     let private getNumberOfAvailableDesk officeId getOffices =
         match getOffices () |> List.tryFind (fun x -> x.Id = officeId) with
@@ -40,9 +35,8 @@ module BookADeskReservationValidator =
          | None ->
              Error "You must enter a valid office ID."
     
-    let private validateOfficeIsAvailable reservationAggregate officeId getOffices (date : DateTime) = result {
-        let! reservationAggregate = validateReservationAggregate reservationAggregate        
-        and! maxAllowedBookingsPerOffice = getNumberOfAvailableDesk officeId getOffices
+    let private validateOfficeIsAvailable reservationAggregate officeId getOffices (date : DateTime) = result {   
+        let! maxAllowedBookingsPerOffice = getNumberOfAvailableDesk officeId getOffices
         
         let isAvailable =
              reservationAggregate.BookedDesks
