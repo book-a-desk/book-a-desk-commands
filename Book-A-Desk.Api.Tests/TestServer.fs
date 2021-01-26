@@ -1,5 +1,6 @@
 ﻿module Book_A_Desk.Api.Tests.TestServer
 
+open System
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Hosting
 open Microsoft.Extensions.Hosting
@@ -13,15 +14,18 @@ let private configureApp eventStore getOffices (app : IApplicationBuilder) =
     app.UseGiraffe routes.HttpHandlers
 
 let private configureServices (services : IServiceCollection) =
-    services.AddGiraffe() |> ignore    
-let createAndRun eventStore getOffices =
+    services.AddGiraffe() |> ignore
+    
+let createAndRun port eventStore getOffices =
+    let url = $"http://localhost:{port}"
+    
     Host.CreateDefaultBuilder()
         .ConfigureWebHostDefaults(
             fun webHostBuilder ->
                 webHostBuilder
                     .Configure(configureApp eventStore getOffices)
                     .ConfigureServices(configureServices)
-                    .UseUrls([| "http://localhost:5001" |])
+                    .UseUrls([| url |])
                     |> ignore)
         .Build()
         .Run()
