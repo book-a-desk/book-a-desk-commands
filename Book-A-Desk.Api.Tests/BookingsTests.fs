@@ -36,18 +36,16 @@ let ``GIVEN A Book-A-Desk server, WHEN booking a desk, THEN a desk is booked`` (
             Office = { Id = mockOfficeId.ToString() }
             Date = DateTime.MaxValue
             User = { Email = "someEmail" }
-        }
+        } : InputBooking
     
     let serializedBooking = JsonConvert.SerializeObject(booking)
     
     use httpClient = new System.Net.Http.HttpClient()
     let! result = HttpRequest.postAsync httpClient $"http://localhost:{port}/bookings" serializedBooking
         
-    let deserializedResult = JsonConvert.DeserializeObject<BookADesk>(result)
+    let deserializedResult = JsonConvert.DeserializeObject<Booking>(result)
     
-    let (OfficeId officeId) = deserializedResult.OfficeId
-    let (EmailAddress emailAddress) = deserializedResult.EmailAddress
-    Assert.Equal(booking.Office.Id, officeId.ToString())
+    Assert.Equal(booking.Office.Id, deserializedResult.Office.Id)
     Assert.Equal(booking.Date, deserializedResult.Date)
-    Assert.Equal(booking.User.Email, emailAddress)
+    Assert.Equal(booking.User.Email, deserializedResult.User.Email)
 }

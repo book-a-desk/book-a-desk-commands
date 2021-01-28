@@ -12,6 +12,13 @@ type OfficeReference =
         Id: string
     }
 
+type InputBooking = 
+    {
+        Office: OfficeReference
+        Date: DateTime
+        User: UserReference
+    }
+
 type Booking =
     {
         Office: OfficeReference
