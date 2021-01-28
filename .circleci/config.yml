@@ -17,11 +17,11 @@
            name: Run Tests
            command: dotnet test --no-build --logger "trx"
         - run:
-            name: Save Test Results
-            when: always
-            command: |
-              dotnet tool install -g trx2junit
-              export PATH="$PATH:/root/.dotnet/tools"
-              trx2junit tests/**/TestResults/*.trx
+           name: Save Test Results
+           when: always
+           command: |
+             dotnet tool install -g trx2junit
+             export PATH="$PATH:/root/.dotnet/tools"
+             trx2junit tests/**/TestResults/*.trx
        - store_test_results: 
            path: "test_result.xml"
