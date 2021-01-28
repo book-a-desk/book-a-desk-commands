@@ -23,12 +23,9 @@ let mockGetOffices () =
     mockOffice |> List.singleton
 
 [<Fact>]
-let ``GIVEN A Book-A-Desk server, WHEN getting the offices endpoint, THEN offices are returned`` () = async {
-    let port = 5001
-    async { TestServer.createAndRun port mockEventStore mockGetOffices } |> Async.Start   
-    
-    use httpClient = new System.Net.Http.HttpClient()    
-    let! result = HttpRequest.getAsync httpClient $"http://localhost:{port}/offices"
+let ``GIVEN A Book-A-Desk server, WHEN getting the offices endpoint, THEN offices are returned`` () = async {    
+    use httpClient = TestServer.createAndRun mockEventStore mockGetOffices
+    let! result = HttpRequest.getAsync httpClient $"http://localhost/offices"
     
     let deserializeOptions = JsonSerializerOptions(JsonSerializerDefaults.Web)
     let offices = JsonSerializer.Deserialize<Book_A_Desk.Api.Models.Office array>(result, deserializeOptions)

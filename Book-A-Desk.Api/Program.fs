@@ -1,5 +1,4 @@
-﻿
-open Book_A_Desk.Domain.Office.Domain
+﻿open Book_A_Desk.Domain.Office.Domain
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Hosting
 open Microsoft.Extensions.Hosting

@@ -11,6 +11,4 @@
     steps:
        - checkout
        - run: dotnet build
-       - run: dotnet test --results-directory:test_results --collect:"XPlat Code Coverage"
-       - store_artifacts:
-           path: ./test_results
+       - run: dotnet test

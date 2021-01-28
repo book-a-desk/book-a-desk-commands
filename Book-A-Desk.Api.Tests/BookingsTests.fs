@@ -27,9 +27,8 @@ let mockGetOffices () =
     mockOffice |> List.singleton
 
 [<Fact>]
-let ``GIVEN A Book-A-Desk server, WHEN booking a desk, THEN a desk is booked`` () = async {
-    let port = 5002
-    async { TestServer.createAndRun port mockEventStore mockGetOffices } |> Async.Start
+let ``GIVEN A Book-A-Desk server, WHEN booking a desk, THEN a desk is booked`` () = async {    
+    use httpClient = TestServer.createAndRun mockEventStore mockGetOffices
     
     let booking  = 
         {
@@ -40,8 +39,7 @@ let ``GIVEN A Book-A-Desk server, WHEN booking a desk, THEN a desk is booked`` (
     
     let serializedBooking = JsonConvert.SerializeObject(booking)
     
-    use httpClient = new System.Net.Http.HttpClient()
-    let! result = HttpRequest.postAsync httpClient $"http://localhost:{port}/bookings" serializedBooking
+    let! result = HttpRequest.postAsync httpClient $"http://localhost:/bookings" serializedBooking
         
     let deserializedResult = JsonConvert.DeserializeObject<Booking>(result)
     
