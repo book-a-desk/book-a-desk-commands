@@ -22,6 +22,6 @@
            command: |
              export PATH="$PATH:/root/.dotnet/tools"
              dotnet tool install -g trx2junit
-             trx2junit *.Tests/**/TestResults/*.trx
+             trx2junit *.Tests/TestResults/*.trx
        - store_test_results: 
            path: "test_result.xml"
