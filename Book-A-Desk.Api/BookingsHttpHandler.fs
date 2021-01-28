@@ -34,7 +34,13 @@ module BookingsHttpHandler =
                 let result = commandHandler.Handle command
                 match result with
                 | Ok _ ->
-                    let! result = json cmd next context
+                    let output =
+                        {                            
+                            Office = { Id = booking.Office.Id }
+                            Date = booking.Date
+                            User = { Email = booking.User.Email }
+                        }
+                    let! result = json output next context
                     return result
                 | Error e -> return! failwith e
             }
