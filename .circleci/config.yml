@@ -10,7 +10,18 @@
     
     steps:
        - checkout
-       - run: dotnet build
-       - run: dotnet test --logger:"xunit;LogFilePath=test_result.xml"
+       - run: 
+           name: Build
+           command: dotnet build
+       - run:
+           name: Run Tests
+           command: dotnet test --no-build --logger "trx"
+        - run:
+            name: Save Test Results
+            when: always
+            command: |
+              dotnet tool install -g trx2junit
+              export PATH="$PATH:/root/.dotnet/tools"
+              trx2junit tests/**/TestResults/*.trx
        - store_test_results: 
            path: "test_result.xml"
