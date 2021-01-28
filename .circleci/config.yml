@@ -11,4 +11,6 @@
     steps:
        - checkout
        - run: dotnet build
-       - run: dotnet test
+       - run: dotnet test --logger:"xunit;LogFilePath=test_result.xml"
+       - store_test_results: 
+           path: "test_result.xml"
