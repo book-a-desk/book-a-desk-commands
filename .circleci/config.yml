@@ -16,7 +16,7 @@
        - run:
            name: Run Tests
            command: dotnet test --no-build --logger "trx"
-        - run:
+       - run:
            name: Save Test Results
            when: always
            command: |
