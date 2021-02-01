@@ -1,8 +1,8 @@
 ﻿module Book_A_Desk.Api.Tests.TestServer
 
-open System
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Hosting
+open Microsoft.AspNetCore.TestHost
 open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.DependencyInjection
 open Giraffe
@@ -15,17 +15,16 @@ let private configureApp eventStore getOffices (app : IApplicationBuilder) =
 
 let private configureServices (services : IServiceCollection) =
     services.AddGiraffe() |> ignore
-    
-let createAndRun port eventStore getOffices =
-    let url = $"http://localhost:{port}"
-    
+
+let createAndRun eventStore getOffices =
     Host.CreateDefaultBuilder()
         .ConfigureWebHostDefaults(
             fun webHostBuilder ->
                 webHostBuilder
                     .Configure(configureApp eventStore getOffices)
                     .ConfigureServices(configureServices)
-                    .UseUrls([| url |])
-                    |> ignore)
-        .Build()
-        .Run()
+                    .UseTestServer()
+                    |> ignore
+                )
+        .Start()
+        .GetTestClient()

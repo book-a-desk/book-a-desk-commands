@@ -1,7 +1,30 @@
  version: 2.1
-
+ workflows:
+   pull-request:
+     unless:
+       equal: ["master", << pipeline.git.branch >>]
+     jobs:
+       - build_and_test
+         
+ commands:
+   publish-test-results:
+     description: Converts and publishes test results (.NET only)
+     parameters:
+       path:
+         description: Path to the test results folder
+         type: string
+     steps:
+       - run:
+           name: Convert test results to CircleCI format - will not work until trx2junit fixes bug
+           command: |
+             dotnet tool install --global trx2junit
+             export PATH="$PATH:$HOME/.dotnet/tools"
+             cat << parameters.path >>/*.trx
+             trx2junit << parameters.path >>/*.trx
+       - store_test_results:
+           path: << parameters.path >>
  jobs:
-  build:
+   build_and_test:
     docker:
       - image: mcr.microsoft.com/dotnet/sdk:5.0-alpine
         auth:
@@ -10,4 +33,14 @@
     
     steps:
        - checkout
-       - run: dotnet build
+       - run: 
+           name: Build
+           command: dotnet build
+       - run:
+           name: Run unit tests
+           command: |
+               dotnet test \
+               --verbosity normal \
+               --filter "FullyQualifiedName~Tests" \
+               --results-directory ./tests/unit/results \
+               --logger "trx"
