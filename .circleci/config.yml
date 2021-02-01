@@ -20,6 +20,7 @@
              dotnet tool install -g trx2junit
              export PATH="$PATH:$HOME/.dotnet/tools"
              trx2junit << parameters.path >>/*.trx
+             0
        - store_test_results:
            path: << parameters.path >>
  jobs:
