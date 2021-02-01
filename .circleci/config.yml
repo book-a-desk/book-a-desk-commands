@@ -37,7 +37,7 @@
            command: dotnet build
        - run:
            name: Run unit tests
-             command: |
+           command: |
                dotnet test \
                --verbosity normal \
                --filter "FullyQualifiedName~Tests" \
