@@ -4,7 +4,7 @@
      unless:
        equal: ["master", << pipeline.git.branch >>]
      jobs:
-       - unit-test
+       - build_and_test
          
  commands:
    publish-test-results:
@@ -17,13 +17,13 @@
        - run:
            name: Convert test results to CircleCI format
            command: |
-             dotnet tool install --global trx2junit --version 1.4.0
+             dotnet tool install --global trx2junit --version 1.3.1
              export PATH="$PATH:$HOME/.dotnet/tools"
              trx2junit << parameters.path >>/*.trx
        - store_test_results:
            path: << parameters.path >>
  jobs:
-   unit-test:
+   build_and_test:
     docker:
       - image: mcr.microsoft.com/dotnet/sdk:5.0-alpine
         auth:
