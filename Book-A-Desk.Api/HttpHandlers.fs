@@ -10,5 +10,5 @@ module HttpHandlers =
     let initialize eventStore getOffices =
         {
             Bookings = BookingsHttpHandler.initialize eventStore getOffices
-            Offices = OfficesHttpHandler.initialize getOffices
+            Offices = OfficesHttpHandler.initialize eventStore getOffices
         }

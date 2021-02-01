@@ -11,7 +11,14 @@ type Office =
         City : CityName
         BookableDesksPerDay : int
     }
-
+    
+type OfficeAvailability =
+    {        
+        Id : OfficeId
+        TotalDesks : int
+        AvailableDesks : int
+    }
+    
 module Offices =
     let All =
         [

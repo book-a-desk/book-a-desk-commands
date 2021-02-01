@@ -2,30 +2,35 @@
 
 open System
 open System.Text.Json
-open Book_A_Desk.Domain.Office.Domain
 open Xunit
-open Book_A_Desk.Domain
 
-let mockEventStore =
-    {
-        GetEvents = fun _ -> failwith "should not be called"
-        AppendEvents = fun _ -> failwith "should not be called"
-    }
-    
+open Book_A_Desk.Domain
+open Book_A_Desk.Domain.Events
+open Book_A_Desk.Domain.Office.Domain
+open Book_A_Desk.Domain.Reservation
+open Book_A_Desk.Domain.Reservation.Events
+  
+let officeId = Guid.NewGuid ()
+let totalDesks = 32
 let mockOffice =
     {
-        Id = Guid.NewGuid () |> OfficeId
+        Id = officeId |> OfficeId
         City = CityName "SomeCityName"
-        BookableDesksPerDay = 32
+        BookableDesksPerDay = totalDesks
     } 
     
 let mockGetOffices () =
     mockOffice |> List.singleton
 
 [<Fact>]
-let ``GIVEN A Book-A-Desk server, WHEN getting the offices endpoint, THEN offices are returned`` () = async {    
+let ``GIVEN A Book-A-Desk server, WHEN getting the offices endpoint, THEN offices are returned`` () = async {
+    let mockEventStore =
+        {
+            GetEvents = fun _ -> failwith "should not be called"
+            AppendEvents = fun _ -> failwith "should not be called"
+        }
     use httpClient = TestServer.createAndRun mockEventStore mockGetOffices
-    let! result = HttpRequest.getAsync httpClient $"http://localhost/offices"
+    let! result = HttpRequest.getAsync httpClient "http://localhost/offices"
     
     let deserializeOptions = JsonSerializerOptions(JsonSerializerDefaults.Web)
     let offices = JsonSerializer.Deserialize<Book_A_Desk.Api.Models.Office array>(result, deserializeOptions)
@@ -36,4 +41,34 @@ let ``GIVEN A Book-A-Desk server, WHEN getting the offices endpoint, THEN office
     let (CityName cityName) = mockOffice.City
     Assert.Equal(id.ToString(), office.Id)
     Assert.Equal(cityName, office.Name)
+}
+
+[<Fact>]
+let ``GIVEN A Book-A-Desk server, WHEN getting the office availability by date, THEN office availability is returned`` () = async {
+    let date = DateTime(2021,02,01)
+    let aBooking =            
+        {
+            ReservationId = ReservationAggregate.Id
+            Date = date
+            EmailAddress = "anEmail" |> EmailAddress
+            OfficeId = officeId |> OfficeId
+        } |> DeskBooked |> ReservationEvent
+        
+    let mockEventStore =
+        {
+            GetEvents = fun _ -> Ok [aBooking]
+            AppendEvents = fun _ -> failwith "should not be called"
+        }  
+    use httpClient = TestServer.createAndRun mockEventStore mockGetOffices
+    
+    
+    let! result = HttpRequest.getAsync httpClient $"http://localhost/offices/{officeId.ToString()}?date={date.ToString()}"
+    
+    let deserializeOptions = JsonSerializerOptions(JsonSerializerDefaults.Web)
+    let officeAvailability = JsonSerializer.Deserialize<Book_A_Desk.Api.Models.OfficeAvailability>(result, deserializeOptions)
+    
+    let (OfficeId id) = mockOffice.Id
+    Assert.Equal(id.ToString(), officeAvailability.Id)
+    Assert.Equal(totalDesks, officeAvailability.TotalDesks)
+    Assert.Equal(totalDesks - 1, officeAvailability.AvailableDesks)
 }
