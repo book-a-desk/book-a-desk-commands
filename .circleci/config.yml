@@ -17,7 +17,7 @@
        - run:
            name: Convert test results to CircleCI format
            command: |
-             dotnet tool install -g trx2junit
+             dotnet tool install --global trx2junit --version 1.4.0
              export PATH="$PATH:$HOME/.dotnet/tools"
              trx2junit << parameters.path >>/*.trx
        - store_test_results:
