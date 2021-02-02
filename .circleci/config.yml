@@ -44,3 +44,5 @@
                --filter "FullyQualifiedName~Tests" \
                --results-directory ./tests/unit/results \
                --logger "trx"
+       - publish-test-results:
+           path: ./tests/unit/results
