@@ -90,7 +90,7 @@
                --results-directory ./tests/unit/results \
                --logger "trx"
        - publish-test-results:
-           path: ./tests/unit/results
+           path: ./tests/unit/results 
            
    build_image:
     machine: true
