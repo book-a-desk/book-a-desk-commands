@@ -19,7 +19,7 @@
        equal: ["trunk", << pipeline.git.branch >>]
      jobs:
        - build_and_test
-       - build_image
+       - build_image:
           requires:
               - build_and_test
        
@@ -28,10 +28,10 @@
        equal: ["trunk", << pipeline.git.branch >>]
      jobs:
        - build_and_test
-       - build_image
+       - build_image:
           requires:
              - build_and_test
-       - deploy
+       - deploy:
           requires:
              - build_image
            
