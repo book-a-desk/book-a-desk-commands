@@ -15,7 +15,7 @@
  version: 2.1
  workflows:
    pull-request:
-     when:
+     unless:
        equal: ["trunk", << pipeline.git.branch >>]
      jobs:
        - build_and_test
@@ -31,9 +31,16 @@
        - build_image:
           requires:
              - build_and_test
-       - deploy:
+       - publish:
           requires:
-             - build_image
+             - build_image             
+      - aws-ecs/deploy-service-update:
+          requires:
+             - publish
+          cluster-name: 'Book-A-Desk-Cluster'
+          container-image-name-updates: 'container=Book-A-Desk-Container,tag=<< pipeline.parameters.docker-img-version >>'
+          service-name: 'Book-A-Desk'
+          family: 'Book-A-Desk-Backend'
            
  orbs:
    aws-ecr: circleci/aws-ecr@6.15.3
@@ -112,7 +119,7 @@
           paths:
             - << pipeline.parameters.docker-tar-filename >>
            
-   deploy:
+   publish:
     machine: true
 
     steps:
@@ -134,8 +141,3 @@
       - aws-ecr/push-image:
           repo: << pipeline.parameters.docker-repo >>
           tag: << pipeline.parameters.docker-img-version >>
-      - aws-ecs/deploy-service-update:
-          cluster-name: 'Book-A-Desk-Cluster'
-          container-image-name-updates: 'container=Book-A-Desk-Container,tag=<< pipeline.parameters.docker-img-version >>'
-          service-name: 'Book-A-Desk'
-          family: 'Book-A-Desk-Backend'
