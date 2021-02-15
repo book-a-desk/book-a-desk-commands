@@ -106,6 +106,10 @@
             docker save \
               -o << pipeline.parameters.docker-tar-filename >> \
               << pipeline.parameters.docker-repo >>:<< pipeline.parameters.docker-img-version >>
+       - persist_to_workspace:
+          root: .
+          paths:
+            - << pipeline.parameters.docker-tar-filename >>
            
    deploy:
     machine: true
