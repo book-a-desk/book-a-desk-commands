@@ -20,8 +20,8 @@
      jobs:
        - build_and_test
        - build_image
-         requires:
-           - build_and_test
+          requires:
+              - build_and_test
        
    production:
      when:
@@ -29,11 +29,11 @@
      jobs:
        - build_and_test
        - build_image
-         requires:
-           - build_and_test
+          requires:
+             - build_and_test
        - deploy
-         requires:
-           - build_image
+          requires:
+             - build_image
            
    orbs:
      aws-ecr: circleci/aws-ecr@6.15.3
