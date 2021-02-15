@@ -126,7 +126,7 @@
       - aws-ecr/ecr-login:
           aws-access-key-id: AWS_ECR_ACCESS_KEY_ID
           aws-secret-access-key: AWS_ECR_SECRET_ACCESS_KEY
-          region: $AWS_REGION
+          region: AWS_REGION
       - aws-ecr/push-image:
           repo: << pipeline.parameters.docker-repo >>
           tag: << pipeline.parameters.docker-img-version >>
