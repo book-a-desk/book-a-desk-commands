@@ -94,11 +94,6 @@
            
    build_image:
     machine: true
-    docker:
-      - image: mcr.microsoft.com/dotnet/sdk:5.0-alpine
-        auth:
-          username: mydockerhub-user
-          password: $DOCKERHUB_PASSWORD 
     
     steps:
        - checkout
