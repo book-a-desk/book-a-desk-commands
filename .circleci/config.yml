@@ -135,6 +135,7 @@
           repo: << pipeline.parameters.docker-repo >>
           tag: << pipeline.parameters.docker-img-version >>
       - aws-ecs/update-service:
-          cluster-name: '<< pipeline.parameters.docker-repo >>-Cluster'
-          container-image-name-updates: '<< pipeline.parameters.docker-repo >>-Container,tag=<< pipeline.parameters.docker-img-version >>'
-          family: '<< pipeline.parameters.docker-repo >>-Backend'
+          cluster-name: 'Book-A-Desk-Cluster'
+          container-image-name-updates: 'container=Book-A-Desk-Container,tag=<< pipeline.parameters.docker-img-version >>'
+          service-name: 'Book-A-Desk'
+          family: 'Book-A-Desk-Backend'
