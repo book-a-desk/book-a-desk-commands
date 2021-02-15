@@ -138,5 +138,3 @@
           cluster-name: '<< pipeline.parameters.docker-repo >>-Cluster'
           container-image-name-updates: '<< pipeline.parameters.docker-repo >>-Container,tag=<< pipeline.parameters.docker-img-version >>'
           family: '<< pipeline.parameters.docker-repo >>-Backend'
-          requires:
-            - aws-ecr/push-image
