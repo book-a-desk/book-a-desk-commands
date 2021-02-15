@@ -85,7 +85,7 @@
         "x-codegen-request-body-name": "body"
       }
     },
-    "/offices/{officeId}": {
+    "/offices/{officeId}/availabilities": {
       "get": {
         "tags": [
           "office",
