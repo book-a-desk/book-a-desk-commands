@@ -31,16 +31,9 @@
        - build_image:
           requires:
              - build_and_test
-       - publish:
+       - deploy:
           requires:
-             - build_image             
-      - aws-ecs/deploy-service-update:
-          requires:
-             - publish
-          cluster-name: 'Book-A-Desk-Cluster'
-          container-image-name-updates: 'container=Book-A-Desk-Container,tag=<< pipeline.parameters.docker-img-version >>'
-          service-name: 'Book-A-Desk'
-          family: 'Book-A-Desk-Backend'
+             - build_image
            
  orbs:
    aws-ecr: circleci/aws-ecr@6.15.3
@@ -119,7 +112,7 @@
           paths:
             - << pipeline.parameters.docker-tar-filename >>
            
-   publish:
+   deploy:
     machine: true
 
     steps:
@@ -141,3 +134,8 @@
       - aws-ecr/push-image:
           repo: << pipeline.parameters.docker-repo >>
           tag: << pipeline.parameters.docker-img-version >>
+      - aws-ecs/update-service:
+          cluster-name: 'Book-A-Desk-Cluster'
+          container-image-name-updates: 'container=Book-A-Desk-Container,tag=<< pipeline.parameters.docker-img-version >>'
+          service-name: 'Book-A-Desk'
+          family: 'Book-A-Desk-Backend'
