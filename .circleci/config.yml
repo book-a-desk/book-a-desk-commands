@@ -1,10 +1,6 @@
 # Usage Notes
 # Add the following environment variables to your CircleCI project:
 
-## Datadog
-# - DATADOG_API_KEY
-# - DATADOG_APPLICATION_KEY
-
 ## AWS
 # (see https://circleci.com/orbs/registry/orb/circleci/aws-cli)
 # - AWS_REGION
