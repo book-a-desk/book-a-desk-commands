@@ -37,6 +37,7 @@
            
  orbs:
    aws-ecr: circleci/aws-ecr@6.15.3
+   aws-ecs: circleci/aws-ecs@2.0.0
        
  parameters:
    docker-repo:
@@ -133,3 +134,7 @@
       - aws-ecr/push-image:
           repo: << pipeline.parameters.docker-repo >>
           tag: << pipeline.parameters.docker-img-version >>
+      -aws-ecs/deploy-service-update:
+          cluster-name: '<< pipeline.parameters.docker-repo >>-Cluster'
+          container-image-name-updates: '<< pipeline.parameters.docker-repo >>-Container,tag=<< pipeline.parameters.docker-img-version >>'
+          family: '<< pipeline.parameters.docker-repo >>-Backend'
