@@ -1,11 +1,60 @@
+# Usage Notes
+# Add the following environment variables to your CircleCI project:
+
+## Datadog
+# - DATADOG_API_KEY
+# - DATADOG_APPLICATION_KEY
+
+## AWS
+# (see https://circleci.com/orbs/registry/orb/circleci/aws-cli)
+# - AWS_REGION
+
+## AWS ECR (Platform)
+# (see https://circleci.com/orbs/registry/orb/circleci/aws-ecr)
+# Note: These are provided by the platform-aws-ecr context
+# - AWS_ECR_ACCESS_KEY_ID
+# - AWS_ECR_SECRET_ACCESS_KEY
+# - AWS_ECR_ACCOUNT_URL
+ 
  version: 2.1
  workflows:
    pull-request:
      unless:
-       equal: ["master", << pipeline.git.branch >>]
+       equal: ["trunk", << pipeline.git.branch >>]
      jobs:
        - build_and_test
-         
+       - build_image
+         requires:
+           - build_and_test
+       
+   production:
+     when:
+       equal: ["trunk", << pipeline.git.branch >>]
+     jobs:
+       - build_and_test
+       - build_image
+         requires:
+           - build_and_test
+       - deploy
+         requires:
+           - build_image
+           
+   orbs:
+     aws-ecr: circleci/aws-ecr@6.15.3
+       
+   parameters:
+     docker-repo:
+       type: string
+       default: book-a-desk
+
+     docker-img-version:
+       type: string
+       default: "build-<< pipeline.number >>"
+
+     docker-tar-filename:
+       type: string
+       default: "book-a-desk_latest.tar"
+       
  commands:
    publish-test-results:
      description: Converts and publishes test results (.NET only)
@@ -46,3 +95,77 @@
                --logger "trx"
        - publish-test-results:
            path: ./tests/unit/results
+           
+   build_image:
+    machine: true
+    docker:
+      - image: mcr.microsoft.com/dotnet/sdk:5.0-alpine
+        auth:
+          username: mydockerhub-user
+          password: $DOCKERHUB_PASSWORD 
+    
+    steps:
+       - checkout
+       - run:
+          name: Build Docker image
+          command: |
+            docker build -t << pipeline.parameters.docker-repo >>:<< pipeline.parameters.docker-img-version >> .
+       - run:
+          name: Save Docker image
+          command: |
+            docker save \
+              -o << pipeline.parameters.docker-tar-filename >> \
+              << pipeline.parameters.docker-repo >>:<< pipeline.parameters.docker-img-version >>
+           
+   deploy:
+    machine: true
+
+    steps:
+      - attach_workspace:
+          at: ./
+      - run:
+          name: Load Docker image
+          command: docker load -i ./<< pipeline.parameters.docker-tar-filename >>
+      - run:
+          name: Tag Docker image for ECR
+          command: |
+            docker tag \
+              << pipeline.parameters.docker-repo >>:<< pipeline.parameters.docker-img-version >> \
+              "${AWS_ECR_ACCOUNT_URL}/<< pipeline.parameters.docker-repo >>:<< pipeline.parameters.docker-img-version >>"
+      - aws-ecr/ecr-login:
+          aws-access-key-id: AWS_ECR_ACCESS_KEY_ID
+          aws-secret-access-key: AWS_ECR_SECRET_ACCESS_KEY
+          region: $AWS_REGION
+      - aws-ecr/push-image:
+          repo: << pipeline.parameters.docker-repo >>
+          tag: << pipeline.parameters.docker-img-version >>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
