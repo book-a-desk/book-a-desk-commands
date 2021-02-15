@@ -62,7 +62,7 @@ let ``GIVEN A Book-A-Desk server, WHEN getting the office availability by date, 
     use httpClient = TestServer.createAndRun mockEventStore mockGetOffices
     
     
-    let! result = HttpRequest.getAsync httpClient $"http://localhost/offices/{officeId.ToString()}?date={date.ToString()}"
+    let! result = HttpRequest.getAsync httpClient $"http://localhost/offices/{officeId.ToString()}/availabilities?date={date.ToString()}"
     
     let deserializeOptions = JsonSerializerOptions(JsonSerializerDefaults.Web)
     let officeAvailability = JsonSerializer.Deserialize<Book_A_Desk.Api.Models.OfficeAvailability>(result, deserializeOptions)

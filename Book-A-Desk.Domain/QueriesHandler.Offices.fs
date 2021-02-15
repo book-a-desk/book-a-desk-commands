@@ -9,12 +9,12 @@ module rec OfficeQueriesHandler =
     let getAll getOffices =
         Ok(getOffices ())
         
-    let getByDate getOffices getBookingsCountPerDate (query : GetOfficeAvailabilitiesByDate) = result {
+    let getAvailabilities getOffices getBookingsForDate (query : GetOfficeAvailabilitiesByDate) = result {
         let offices = getOffices ()
         match List.tryFind (fun (office : Office) -> office.Id = query.OfficeId) offices with
         | None -> return! Error "Could not find office"
         | Some office ->
-            let! bookings = getBookingsCountPerDate query.Date
+            let! bookings = getBookingsForDate query.Date
             let bookingsForOffice = List.where (fun booking -> booking.OfficeId = office.Id ) bookings
             let officeAvailability =
                 {        

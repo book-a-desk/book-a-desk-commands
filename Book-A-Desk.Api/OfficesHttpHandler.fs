@@ -50,14 +50,14 @@ module rec OfficesHttpHandler =
                 context.SetStatusCode(400)
                 return! text "Date could not be parsed" next context
             | Some date ->                
-                let getBookingsCountPerDate = ReservationsQueriesHandler.get eventStore
+                let getBookingsForDate = ReservationsQueriesHandler.get eventStore
                 let query =
                     {                    
                         OfficeId = officeId |> OfficeId
                         Date = date
                     }
                 
-                let result = OfficeQueriesHandler.getByDate getOffices getBookingsCountPerDate query
+                let result = OfficeQueriesHandler.getAvailabilities getOffices getBookingsForDate query
                 
                 match result with
                 | Ok officeAvailability ->

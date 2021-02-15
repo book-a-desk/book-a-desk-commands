@@ -17,7 +17,7 @@ module Routes =
             choose [
                 GET >=> choose [
                     route "/offices" >=> handlers.Offices.HandleGetAll ()
-                    routef "/offices/%O" handlers.Offices.HandleGetByDate
+                    routef "/offices/%O/availabilities" handlers.Offices.HandleGetByDate
                 ]
                 POST >=> choose [
                     route "/bookings"

@@ -12,6 +12,7 @@
         <Compile Include="Reservation.Command.BookADesk.Tests.fs" />
         <Compile Include="Reservation.Validator.Tests.fs" />
         <Compile Include="EventsTests.fs" />
+        <Compile Include="QueriesHandler.Offices.Tests.fs" />
     </ItemGroup>
 
     <ItemGroup>
