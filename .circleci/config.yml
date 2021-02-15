@@ -41,7 +41,7 @@
  parameters:
    docker-repo:
      type: string
-       default: book-a-desk
+     default: book-a-desk
 
    docker-img-version:
      type: string
