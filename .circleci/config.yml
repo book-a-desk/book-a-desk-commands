@@ -64,7 +64,6 @@
            command: |
              dotnet tool install --global trx2junit
              export PATH="$PATH:$HOME/.dotnet/tools"
-             cat << parameters.path >>/*.trx
              trx2junit << parameters.path >>/*.trx
        - store_test_results:
            path: << parameters.path >>
