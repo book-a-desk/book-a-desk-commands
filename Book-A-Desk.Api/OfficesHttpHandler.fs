@@ -38,7 +38,9 @@ module rec OfficesHttpHandler =
                             Name = cityName
                         })
                 return! json offices next context
-            | Error e -> return! failwith e
+            | Error e ->
+                context.SetStatusCode(500)
+                return! text ("Internal Error: " + e) next context
         }
         
     let handleGetByDate eventStore getOffices officeId = fun next context ->
@@ -69,6 +71,8 @@ module rec OfficesHttpHandler =
                             AvailableDesks = officeAvailability.AvailableDesks
                         } : Book_A_Desk.Api.Models.OfficeAvailability
                     return! json officeAvailability next context
-                | Error e -> return! failwith e
+                | Error e ->
+                    context.SetStatusCode(500)
+                    return! text ("Internal Error: " + e) next context
         }
         

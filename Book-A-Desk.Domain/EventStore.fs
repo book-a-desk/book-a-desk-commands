@@ -17,13 +17,17 @@ module EventsReader =
         | Some events ->
             Result.Ok events
         | None ->
-            Result.Error "could not find aggregate id"
+            match Map.count events with
+            | 0 -> Result.Ok []
+            | _ -> Result.Error "could not find aggregate id"
   
 module EventsWriter =          
     let appendEvents previousEventsById newEventsById =
         newEventsById
         |> Map.fold (fun (appendedEvents : Map<Guid, DomainEvent list>) aggregateId newEvents ->
-            appendedEvents.Add(aggregateId, newEvents)) previousEventsById
+            match appendedEvents.TryFind aggregateId with
+            | Some events -> appendedEvents.Add(aggregateId, List.concat [events; newEvents])
+            | None -> appendedEvents.Add(aggregateId, newEvents)) previousEventsById
 
 module InMemoryEventStore =    
     type private MailboxEventStore =
