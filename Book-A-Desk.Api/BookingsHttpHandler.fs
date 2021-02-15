@@ -41,7 +41,9 @@ module BookingsHttpHandler =
                             User = { Email = booking.User.Email }
                         }
                     return! json output next context
-                | Error e -> return! failwith e
+                | Error e ->
+                    context.SetStatusCode(500)
+                    return! text ("Internal Error: " + e) next context
             }
 
         {
