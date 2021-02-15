@@ -35,21 +35,21 @@
           requires:
              - build_image
            
-   orbs:
-     aws-ecr: circleci/aws-ecr@6.15.3
+ orbs:
+   aws-ecr: circleci/aws-ecr@6.15.3
        
-   parameters:
-     docker-repo:
-       type: string
+ parameters:
+   docker-repo:
+     type: string
        default: book-a-desk
 
-     docker-img-version:
-       type: string
-       default: "build-<< pipeline.number >>"
+   docker-img-version:
+     type: string
+     default: "build-<< pipeline.number >>"
 
-     docker-tar-filename:
-       type: string
-       default: "book-a-desk_latest.tar"
+   docker-tar-filename:
+     type: string
+     default: "book-a-desk_latest.tar"
        
  commands:
    publish-test-results:
