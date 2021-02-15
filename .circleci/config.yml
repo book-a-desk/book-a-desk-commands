@@ -137,4 +137,4 @@
       - aws-ecs/update-service:
           cluster-name: 'Book-A-Desk-Cluster'
           container-image-name-updates: 'container=Book-A-Desk-Container,tag=<< pipeline.parameters.docker-img-version >>'
-          family: 'Book-A-Desk'
+          family: 'Book-A-Desk-Backend'
