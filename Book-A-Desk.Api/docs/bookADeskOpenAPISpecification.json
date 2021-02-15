@@ -84,6 +84,64 @@
         ],
         "x-codegen-request-body-name": "body"
       }
+    },
+    "/offices/{officeId}/availabilities": {
+      "get": {
+        "tags": [
+          "office",
+          "booking"
+        ],
+        "summary": "Retrieve the availabilities for a given office and date",
+        "operationId": "getOfficesByDate",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "officeId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "date",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OfficeAvailability"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "book-a-desk_auth": [
+              "read:offices"
+            ]
+          }
+        ],
+        "x-codegen-request-body-name": "body"
+      }
     }
   },
   "components": {
@@ -173,6 +231,25 @@
             "items": {
               "$ref": "#/components/schemas/Office"
             }
+          }
+        }
+      },
+      "OfficeAvailability": {
+        "required": [
+          "id",
+          "totalDesks",
+          "availableDesks"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "totalDesks" : {
+            "type": "integer"
+          },
+          "availableDesks" : {
+            "type": "integer"
           }
         }
       }

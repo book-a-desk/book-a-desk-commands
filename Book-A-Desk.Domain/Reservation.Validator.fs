@@ -5,6 +5,7 @@ open System
 open Book_A_Desk.Core
 open Book_A_Desk.Domain
 open Book_A_Desk.Domain.Office.Domain
+open Book_A_Desk.Domain.Office.Queries
 open Book_A_Desk.Domain.Reservation.Commands
 
 module BookADeskReservationValidator =
@@ -22,14 +23,14 @@ module BookADeskReservationValidator =
         else
             Ok ()
             
-    let private validateOfficeIdIsValid officeId getOffices =
-        if getOffices () |> List.exists (fun office -> office.Id = officeId) |> not then
+    let private validateOfficeIdIsValid officeId (offices : Office list) =
+        if offices |> List.exists (fun office -> office.Id = officeId) |> not then
             Error "You must enter a valid office ID."
         else
             Ok ()
     
-    let private getNumberOfAvailableDesk officeId getOffices =
-        match getOffices () |> List.tryFind (fun x -> x.Id = officeId) with
+    let private getNumberOfAvailableDesk officeId (offices : Office list) =
+        match offices |> List.tryFind (fun x -> x.Id = officeId) with
          | Some office ->
              Ok office.BookableDesksPerDay
          | None ->
@@ -49,11 +50,12 @@ module BookADeskReservationValidator =
             return! Error ($"The office is booked out at {date.ToShortDateString()}" )
     }
             
-    let validateCommand getOffices (cmd : BookADesk) reservationAggregate = result {
+    let validateCommand (getOffices : unit -> Office list) (cmd : BookADesk) reservationAggregate = result {
+        let offices = getOffices ()
         do! validateEmailIsNotEmpty cmd.EmailAddress
         do! validateDateIsInTheFuture cmd.Date
-        do! validateOfficeIdIsValid cmd.OfficeId getOffices
-        do! validateOfficeIsAvailable reservationAggregate cmd.OfficeId getOffices cmd.Date
+        do! validateOfficeIdIsValid cmd.OfficeId offices
+        do! validateOfficeIsAvailable reservationAggregate cmd.OfficeId offices cmd.Date
         
         return ()        
     }

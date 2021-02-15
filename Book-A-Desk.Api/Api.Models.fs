@@ -31,4 +31,11 @@ type Office =
         Id: string
         Name: string
     }
+    
+type OfficeAvailability =
+    {
+        Id: string
+        TotalDesks: int
+        AvailableDesks: int
+    }
 

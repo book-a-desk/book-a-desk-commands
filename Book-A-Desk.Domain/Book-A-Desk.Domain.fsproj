@@ -8,6 +8,7 @@
     <ItemGroup>
         <Compile Include="Domain.Common.fs" />
         <Compile Include="Office.Domain.fs" />
+        <Compile Include="Office.Queries.fs" />
         <Compile Include="Reservation.Domain.fs" />
         <Compile Include="Reservation.Events.fs" />
         <Compile Include="Reservation.Commands.fs" />
@@ -15,9 +16,11 @@
         <Compile Include="Reservation.Validator.fs" />
         <Compile Include="Reservation.Command.BookADesk.fs" />
         <Compile Include="Domain.Events.fs" />
-        <Compile Include="Domain.Commands.fs" />
         <Compile Include="EventStore.fs" />
+        <Compile Include="Domain.Commands.fs" />
+        <Compile Include="QueriesHandler.Reservation.fs" />
         <Compile Include="CommandHandler.Reservations.fs" />
+        <Compile Include="QueriesHandler.Offices.fs" />
     </ItemGroup>
 
     <ItemGroup>

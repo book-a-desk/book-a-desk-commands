@@ -40,8 +40,7 @@ module BookingsHttpHandler =
                             Date = booking.Date
                             User = { Email = booking.User.Email }
                         }
-                    let! result = json output next context
-                    return result
+                    return! json output next context
                 | Error e -> return! failwith e
             }
 
