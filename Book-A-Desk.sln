@@ -15,6 +15,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Book-A-desk.Domain.Tests", 
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Book-A-Desk.Core", "Book-A-Desk.Core\Book-A-Desk.Core.fsproj", "{31F6523C-33F5-4D7A-8EED-85F6DB6293C2}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Book-A-Desk.Infrastructure", "Book-A-Desk.Infrastructure\Book-A-Desk.Infrastructure.fsproj", "{13B28A90-1DF3-4E80-AF69-E53786573D97}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,5 +43,9 @@ Global
 		{31F6523C-33F5-4D7A-8EED-85F6DB6293C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{31F6523C-33F5-4D7A-8EED-85F6DB6293C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{31F6523C-33F5-4D7A-8EED-85F6DB6293C2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{13B28A90-1DF3-4E80-AF69-E53786573D97}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13B28A90-1DF3-4E80-AF69-E53786573D97}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13B28A90-1DF3-4E80-AF69-E53786573D97}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13B28A90-1DF3-4E80-AF69-E53786573D97}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
