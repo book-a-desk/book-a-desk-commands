@@ -37,16 +37,17 @@ module rec DynamoDbEventStore =
         let events = infraEvents
                    |> Map.toSeq
                    |> Seq.map snd
+                   |> Seq.map batch25Events 
                    |> AsyncSeq.ofSeq
         do! AsyncSeq.iterAsync (fun infraEvents -> table.BatchPutItemsAsync(infraEvents) |> Async.Ignore) events        
     }
     
-    let rec private batch25Events events =
+    let rec private batch25Events (events : DeskBooked seq) =
         match Seq.length events with
         | length when length > 25 ->
             let first25 = Seq.take 25 events
-            batch25Events events
+            let nextBatches = batch25Events (Seq.skip 25 events)
+            seq { yield first25; yield! nextBatches } 
         | _ ->
             seq { yield events }
-        ()
         
