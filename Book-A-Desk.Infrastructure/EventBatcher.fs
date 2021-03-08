@@ -16,4 +16,4 @@ module rec EventBatcher =
                 let nextBatches = batch25Events (Seq.skip 25 events)
                 seq { yield first25; yield! nextBatches } 
             | _ ->
-                seq { yield events }
+                Seq.singleton events
