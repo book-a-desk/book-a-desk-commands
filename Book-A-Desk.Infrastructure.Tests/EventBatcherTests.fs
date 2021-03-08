@@ -23,12 +23,21 @@ let ``Given An EventBatcher When Batching Less Than 25 Events Returns A Single B
     
     Assert.Single(result)
     
-let generateDeskBooked n =
-    
+let generateDeskBooked () =
+    Seq.initInfinite (fun i ->
+        {
+            AggregateId = Guid.NewGuid()
+            Date = DateTime.MaxValue
+            EmailAddress = $"test_{i}@test.com"
+            OfficeId = Guid.NewGuid()
+        })
     
 [<Fact>]
 let ``Given An EventBatcher When Batching More Than 25 Events Returns Multiple Batches`` () =
-    let deskBooked =
-        {
-            
-        }
+    let desksBooked = generateDeskBooked () |> Seq.take 30
+    let batch = Map.empty.Add(Guid.NewGuid(), desksBooked)
+    let result = EventBatcher.batchEvents batch
+    
+    Assert.Equal(2, Seq.length result)
+    Assert.Equal(25, Seq.length(Seq.item 0 result))
+    Assert.Equal(5, Seq.length(Seq.item 1 result))
