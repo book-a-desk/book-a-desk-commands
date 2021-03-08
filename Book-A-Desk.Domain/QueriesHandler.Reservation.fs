@@ -8,17 +8,19 @@ open Book_A_Desk.Domain.Reservation
 open Book_A_Desk.Domain.Reservation.Domain
 
 module rec ReservationsQueriesHandler =
-    let get (eventStore : EventStore) (date : DateTime) : Result<Booking list, string> =
-        result {
-            let (ReservationId aggregateId) = ReservationAggregate.Id
-            let! bookingEvents = eventStore.GetEvents aggregateId 
+    let get (eventStore : EventStore) (date : DateTime) : Result<Booking seq, string> Async = async {
+        let (ReservationId aggregateId) = ReservationAggregate.Id
+        let! bookingEvents = eventStore.GetEvents aggregateId
+        match bookingEvents with
+        | Ok bookingEvents -> 
             let bookingEvents = bookingEvents
-                                |> List.map (function | ReservationEvent event -> event)
+                                |> Seq.map (function | ReservationEvent event -> event)
             
             let bookings = (ReservationAggregate.getCurrentStateFrom bookingEvents).BookedDesks
             let isSameDate = isSameDate date
-            return List.where (fun booking -> isSameDate booking.Date) bookings
-       }
+            return Ok (Seq.where (fun booking -> isSameDate booking.Date) bookings)
+        | Error e -> return (Error e)
+    }
         
     let private isSameDate date1 date2 =
         date1.Day = date2.Day && date1.Month = date2.Month && date1.Year = date2.Year
