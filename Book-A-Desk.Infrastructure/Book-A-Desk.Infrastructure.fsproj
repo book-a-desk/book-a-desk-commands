@@ -9,6 +9,7 @@
         <Compile Include="ReservationEvent.fs" />
         <Compile Include="DomainMapper.fs" />
         <Compile Include="DynamoDbEventStore.fs" />
+        <Compile Include="EventBatcher.fs" />
     </ItemGroup>
 
     <ItemGroup>
