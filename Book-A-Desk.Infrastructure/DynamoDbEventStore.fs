@@ -24,20 +24,29 @@ module rec DynamoDbEventStore =
         }
         
     let private getEvent table aggregateId = async {
-            let! results = table.QueryAsync(keyCondition = <@ fun (r : DeskBooked) -> r.AggregateId = aggregateId @>)
-            
-            let domainResults = DomainMapper.toDomain results
-            
-            return Result.Ok(domainResults)        
+        let! results = table.QueryAsync(keyCondition = <@ fun (r : DeskBooked) -> r.AggregateId = aggregateId @>)
+        
+        let domainResults = DomainMapper.toDomain results
+        
+        return Result.Ok(domainResults)        
     }
     
     let private appendEvent table events = async {
-            let infraEvents = Map.map (fun _ events -> DomainMapper.toInfra events) events
-            
-            let events = infraEvents
-                       |> Map.toSeq
-                       |> Seq.map snd
-                       |> AsyncSeq.ofSeq
-            do! AsyncSeq.iterAsync (fun infraEvents -> table.BatchPutItemsAsync(infraEvents) |> Async.Ignore) events        
+        let infraEvents = Map.map (fun _ events -> DomainMapper.toInfra events) events
+        
+        let events = infraEvents
+                   |> Map.toSeq
+                   |> Seq.map snd
+                   |> AsyncSeq.ofSeq
+        do! AsyncSeq.iterAsync (fun infraEvents -> table.BatchPutItemsAsync(infraEvents) |> Async.Ignore) events        
     }
+    
+    let rec private batch25Events events =
+        match Seq.length events with
+        | length when length > 25 ->
+            let first25 = Seq.take 25 events
+            batch25Events events
+        | _ ->
+            seq { yield events }
+        ()
         
