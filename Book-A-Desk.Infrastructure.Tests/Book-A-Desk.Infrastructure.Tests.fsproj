@@ -24,4 +24,8 @@
         </PackageReference>
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Book-A-Desk.Infrastructure\Book-A-Desk.Infrastructure.fsproj" />
+    </ItemGroup>
+
 </Project>
