@@ -16,9 +16,13 @@
     <Compile Include="Routes.fs" />
     <Compile Include="Program.fs" />
     <Content Include="docs\bookADeskOpenAPISpecification.json" />
+    <Content Include="appsettings.Development.json" />
+    <Content Include="appsettings.json" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.5.4.34" />
+    <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="3.3.101" />
     <PackageReference Include="Giraffe" Version="4.1.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
   </ItemGroup>

@@ -1,6 +1,8 @@
-﻿open Book_A_Desk.Domain.Office.Domain
+﻿open Amazon.DynamoDBv2
+open Book_A_Desk.Domain.Office.Domain
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Hosting
+open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.DependencyInjection
 open Giraffe
@@ -14,7 +16,11 @@ let configureApp (app : IApplicationBuilder) =
     app.UseGiraffe routes.HttpHandlers
 
 let configureServices (services : IServiceCollection) =
-    services.AddGiraffe() |> ignore
+    let serviceProvider = services.BuildServiceProvider()
+    let config = serviceProvider.GetService<IConfiguration>()
+    services.AddGiraffe()
+            .AddDefaultAWSOptions(config.GetAWSOptions())
+            .AddAWSService<IAmazonDynamoDB>() |> ignore
 
 [<EntryPoint>]
 let main _ =

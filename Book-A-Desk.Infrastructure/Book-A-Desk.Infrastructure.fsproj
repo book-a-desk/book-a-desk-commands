@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net5.0</TargetFramework>
+        <RootNamespace>Book_A_Desk.Infrastructure</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="ReservationEvent.fs" />
+        <Compile Include="DomainMapper.fs" />
+        <Compile Include="Library.fs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.5.4.34" />
+      <PackageReference Include="FSharp.AWS.DynamoDB" Version="0.8.2-beta" />
+      <PackageReference Include="FSharp.Control.AsyncSeq" Version="3.0.3" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Book-A-Desk.Domain\Book-A-Desk.Domain.fsproj" />
+    </ItemGroup>
+
+</Project>
