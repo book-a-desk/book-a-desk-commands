@@ -1,5 +1,6 @@
 namespace Book_A_Desk.Api
 
+open Amazon.DynamoDBv2
 open FSharp.Control.Tasks.V2.ContextInsensitive
 open Giraffe
 open System
@@ -51,7 +52,8 @@ module rec OfficesHttpHandler =
             | None ->
                 context.SetStatusCode(400)
                 return! text "Date could not be parsed" next context
-            | Some date ->                
+            | Some date ->
+                let eventStore = eventStore (context.GetService<IAmazonDynamoDB>())
                 let getBookingsForDate = ReservationsQueriesHandler.get eventStore
                 let query =
                     {                    

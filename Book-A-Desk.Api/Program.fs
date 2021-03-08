@@ -1,5 +1,6 @@
 ﻿open Amazon.DynamoDBv2
 open Book_A_Desk.Domain.Office.Domain
+open Book_A_Desk.Infrastructure
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Hosting
 open Microsoft.Extensions.Configuration
@@ -11,7 +12,7 @@ open Book_A_Desk.Api
 open Book_A_Desk.Domain
 
 let configureApp (app : IApplicationBuilder) =
-    let eventStore = InMemoryEventStore.provide ()
+    let eventStore = DynamoDbEventStore.provide 
     let routes = Routes.provide eventStore (fun () -> Offices.All)
     app.UseGiraffe routes.HttpHandlers
 

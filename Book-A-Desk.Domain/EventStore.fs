@@ -7,8 +7,8 @@ open Book_A_Desk.Domain.Reservation.Events
 
 type EventStore =
     {
-        GetEvents: Guid -> Result<DomainEvent list, string>
-        AppendEvents: Map<Guid, DomainEvent list> -> unit
+        GetEvents: Guid -> Result<DomainEvent seq, string> Async
+        AppendEvents: Map<Guid, DomainEvent seq> -> unit Async
     }
 
 module EventsReader =
@@ -53,6 +53,7 @@ module InMemoryEventStore =
             }
             loop events)
 
+(*
     let provide () =
         let getEvents aggregateId =
             memoryStore.PostAndReply(fun rc -> (aggregateId, rc) |> GetEvents)
@@ -64,3 +65,4 @@ module InMemoryEventStore =
             GetEvents = getEvents
             AppendEvents = storeEvents
         }
+*)

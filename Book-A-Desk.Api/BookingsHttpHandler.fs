@@ -27,7 +27,8 @@ module BookingsHttpHandler =
                         Date = booking.Date
                         EmailAddress = EmailAddress booking.User.Email
                     }
-
+ 
+                let eventStore = eventStore (context.GetService<IAmazonDynamoDB>())
                 let command = BookADesk cmd
                 let commandHandler = BookADeskCommandHandler.provide eventStore getOffices
 

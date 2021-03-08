@@ -3,14 +3,7 @@
 open Amazon.DynamoDBv2
 open FSharp.AWS.DynamoDB
 open FSharp.Control
-open System
-open Book_A_Desk.Domain.Events
-
-type EventStore =
-    {
-        GetEvents: Guid -> Result<DomainEvent seq, string> Async
-        AppendEvents: Map<Guid, DomainEvent seq> -> unit Async
-    }
+open Book_A_Desk.Domain
 
 module rec DynamoDbEventStore =
     let provide (dynamoDbClient : IAmazonDynamoDB) =
