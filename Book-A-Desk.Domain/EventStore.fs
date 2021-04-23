@@ -7,8 +7,8 @@ open Book_A_Desk.Domain.Reservation.Events
 
 type EventStore =
     {
-        GetEvents: Guid -> Result<DomainEvent seq, string> Async
-        AppendEvents: Map<Guid, DomainEvent seq> -> unit Async
+        GetEvents: Guid -> Result<DomainEvent seq, string>
+        AppendEvents: Map<Guid, DomainEvent seq> -> unit
     }
 
 module EventsReader =

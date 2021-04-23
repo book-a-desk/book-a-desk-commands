@@ -6,31 +6,31 @@ open Book_A_Desk.Domain.Events
 open Book_A_Desk.Domain.Reservation
 open Book_A_Desk.Domain.Reservation.Domain
 open Book_A_Desk.Domain.Reservation.Commands
+open Book_A_Desk.Domain.Reservation.Events
+
+type CommandResult =
+    | Append of ReservationAggregate
+    | DoNothing
 
 type BookADeskCommandHandler =
     {
-        Handle: ReservationCommand -> Result<unit,string>
+        Handle: ReservationCommand -> Result<CommandResult,string>
     }
 
 module BookADeskCommandHandler =
-   let provide (eventStore:EventStore) getOffices =
-
+   let provide events getOffices =
        let handle (command : ReservationCommand) =
-            let storeEventsForBatch aggregateId events =
-                (aggregateId, events |> List.map ReservationEvent)
-                |> List.singleton
-                |> Map.ofList
-                |> eventStore.AppendEvents
-
-            let run executeCommandWith cmd (ReservationId aggregateId) = result {
-                let! events = eventStore.GetEvents aggregateId
-                let! commandResult =
+            let run executeCommandWith cmd (ReservationId aggregateId) =
+                let commandResult =
                     events
                     |> List.map (function | ReservationEvent event -> event)
                     |> ReservationAggregate.getCurrentStateFrom
-                    |> executeCommandWith cmd                    
-                return storeEventsForBatch aggregateId commandResult
-            }
+                    |> executeCommandWith cmd
+                match commandResult with
+                | Ok reservationEvents ->
+                    Append reservationEvents
+                | Error _ ->
+                    DoNothing
 
             match command with
             | BookADesk command ->

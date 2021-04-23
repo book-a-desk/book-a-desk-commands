@@ -1,15 +1,27 @@
 ﻿namespace Book_A_Desk.Infrastructure
 
+open System
 open Amazon.DynamoDBv2
 open FSharp.AWS.DynamoDB
 open FSharp.Control
 open Book_A_Desk.Domain
+open Book_A_Desk.Domain.Events
 
 module rec DynamoDbEventStore =
+    
+    type DynamoDbEventStore =
+        {        
+            GetEvents: Guid -> Result<DomainEvent seq, string> Async
+            AppendEvents: Map<Guid, DomainEvent seq> -> unit Async
+        }
+    
     let provide (dynamoDbClient : IAmazonDynamoDB) =
-        let table = TableContext.Create<DeskBooked>(dynamoDbClient,
-                                                    tableName = "ReservationEvent",
-                                                    createIfNotExists = false)
+        let table =
+            TableContext
+                .Create<DeskBooked>(
+                    dynamoDbClient,
+                    tableName = "ReservationEvent",
+                    createIfNotExists = false)
         
         {
             GetEvents = getEvent table
