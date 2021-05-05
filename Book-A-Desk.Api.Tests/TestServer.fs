@@ -9,19 +9,19 @@ open Giraffe
 
 open Book_A_Desk.Api
 
-let private configureApp eventStore getOffices (app : IApplicationBuilder) =
-    let routes = Routes.provide eventStore getOffices
+let private configureApp apiDependencyFactory (app : IApplicationBuilder) =
+    let routes = Routes.provide apiDependencyFactory
     app.UseGiraffe routes.HttpHandlers
 
 let private configureServices (services : IServiceCollection) =
     services.AddGiraffe() |> ignore
 
-let createAndRun eventStore getOffices =
+let createAndRun apiDependencyFactory =
     Host.CreateDefaultBuilder()
         .ConfigureWebHostDefaults(
             fun webHostBuilder ->
                 webHostBuilder
-                    .Configure(configureApp eventStore getOffices)
+                    .Configure(configureApp apiDependencyFactory)
                     .ConfigureServices(configureServices)
                     .UseTestServer()
                     |> ignore

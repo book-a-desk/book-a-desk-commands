@@ -19,6 +19,7 @@
         <Compile Include="EventStore.fs" />
         <Compile Include="Domain.Commands.fs" />
         <Compile Include="QueriesHandler.Reservation.fs" />
+        <Compile Include="CommandFactory.Reservation.fs" />
         <Compile Include="CommandHandler.Reservations.fs" />
         <Compile Include="QueriesHandler.Offices.fs" />
     </ItemGroup>

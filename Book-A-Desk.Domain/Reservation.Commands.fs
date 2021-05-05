@@ -15,5 +15,5 @@ type BookADesk =
 
 type ReservationCommand =
     | BookADesk of BookADesk
-//    | UnbookAdesk Of UnbookAdesk
+    //| CancelADesk of CancelADesk
 

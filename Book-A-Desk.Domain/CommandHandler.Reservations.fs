@@ -7,13 +7,13 @@ open Book_A_Desk.Domain.Reservation
 open Book_A_Desk.Domain.Reservation.Domain
 open Book_A_Desk.Domain.Reservation.Commands
 
-type BookADeskCommandHandler =
+type ReservationsCommandHandler =
     {
         Handle: ReservationCommand -> Result<unit,string>
     }
 
-module BookADeskCommandHandler =
-   let provide (eventStore:EventStore) getOffices =
+module ReservationsCommandHandler =
+   let provide (eventStore:EventStore) reservationCommandsFactory =
 
        let handle (command : ReservationCommand) =
             let storeEventsForBatch aggregateId events =
@@ -28,14 +28,13 @@ module BookADeskCommandHandler =
                     events
                     |> List.map (function | ReservationEvent event -> event)
                     |> ReservationAggregate.getCurrentStateFrom
-                    |> executeCommandWith cmd                    
+                    |> executeCommandWith cmd
                 return storeEventsForBatch aggregateId commandResult
             }
 
             match command with
             | BookADesk command ->
-                let commandExecutor = // ToDo: use a reservationCommandFactory.CreateBookADeskReservationCommand ()
-                    BookADeskReservationCommand.provide (BookADeskReservationValidator.validateCommand getOffices)
+                let commandExecutor = reservationCommandsFactory.CreateBookADeskCommand ()
                 run commandExecutor.ExecuteWith command ReservationAggregate.Id
 
        {
