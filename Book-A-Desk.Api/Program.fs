@@ -21,10 +21,13 @@ let configureApp (app : IApplicationBuilder) =
            
 let configureAppConfiguration (builder : IConfigurationBuilder) =
     let region = Environment.GetEnvironmentVariable("AWS_REGION")
-    let profile = Environment.GetEnvironmentVariable("AWS_PROFILE")
+//    let profile = Environment.GetEnvironmentVariable("AWS_PROFILE")
+    let keyID = Environment.GetEnvironmentVariable("AWS_KEY_ID")
+    let secretKey = Environment.GetEnvironmentVariable("AWS_SECRET_KEY")
+    let credentials = BasicAWSCredentials(keyID, secretKey)
     let mutable options = AWSOptions()
     options.Region <- RegionEndpoint.GetBySystemName(region)
-    options.Profile <- profile
+    options.Credentials <- credentials
     builder.AddSystemsManager("/BookADesk", options) |> ignore
     
 let configureDynamoDB (sp : ServiceProvider) =
