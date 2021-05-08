@@ -16,6 +16,7 @@ let private configureApp eventStore getOffices (app : IApplicationBuilder) =
 let private configureServices (services : IServiceCollection) =
     services.AddGiraffe() |> ignore
 
+
 let createAndRun eventStore getOffices =
     Host.CreateDefaultBuilder()
         .ConfigureWebHostDefaults(

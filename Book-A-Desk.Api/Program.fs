@@ -1,4 +1,8 @@
-﻿open Amazon.DynamoDBv2
+﻿open System
+open Amazon
+open Amazon.DynamoDBv2
+open Amazon.Extensions.NETCore.Setup
+open Amazon.Runtime
 open Book_A_Desk.Domain.Office.Domain
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Hosting
@@ -14,6 +18,23 @@ let configureApp (app : IApplicationBuilder) =
     let eventStore = InMemoryEventStore.provide ()
     let routes = Routes.provide eventStore (fun () -> Offices.All)
     app.UseGiraffe routes.HttpHandlers
+           
+let configureAppConfiguration (builder : IConfigurationBuilder) =
+    let region = Environment.GetEnvironmentVariable("AWS_REGION")
+    let profile = Environment.GetEnvironmentVariable("AWS_PROFILE")
+    let mutable options = AWSOptions()
+    options.Region <- RegionEndpoint.GetBySystemName(region)
+    options.Profile <- profile
+    builder.AddSystemsManager("/BookADesk", options) |> ignore
+    
+let configureDynamoDB (sp : ServiceProvider) =
+    let config = sp.GetService<IConfiguration>()
+    let dynamoDBConfiguration =
+        {
+            TableName = config.["DynamoDB:TableName"]
+        }
+    Console.WriteLine(dynamoDBConfiguration.TableName)
+    
 
 let configureServices (services : IServiceCollection) =
     let serviceProvider = services.BuildServiceProvider()
@@ -21,6 +42,7 @@ let configureServices (services : IServiceCollection) =
     services.AddGiraffe()
             .AddDefaultAWSOptions(config.GetAWSOptions())
             .AddAWSService<IAmazonDynamoDB>() |> ignore
+    configureDynamoDB serviceProvider
 
 [<EntryPoint>]
 let main _ =
@@ -29,6 +51,7 @@ let main _ =
             fun webHostBuilder ->
                 webHostBuilder
                     .Configure(configureApp)
+                    .ConfigureAppConfiguration(Action<IConfigurationBuilder> configureAppConfiguration)
                     .ConfigureServices(configureServices)
                     |> ignore)
         .Build()

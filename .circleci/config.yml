@@ -100,7 +100,7 @@
        - run:
           name: Build Docker image
           command: |
-            docker build -t << pipeline.parameters.docker-repo >>:<< pipeline.parameters.docker-img-version >> .
+            docker build -t << pipeline.parameters.docker-repo >>:<< pipeline.parameters.docker-img-version >> --build-arg AWSREGION=AWS_REGION --build-arg AWSPROFILE=AWS_PROFILE .
        - run:
           name: Save Docker image
           command: |
