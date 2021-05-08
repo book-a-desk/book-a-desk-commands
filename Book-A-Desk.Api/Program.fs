@@ -22,19 +22,22 @@ let configureApp (app : IApplicationBuilder) =
 let configureAppConfiguration (builder : IConfigurationBuilder) =
     let region = Environment.GetEnvironmentVariable("AWS_REGION")
     let profile = Environment.GetEnvironmentVariable("AWS_PROFILE")
+    let environment = Environment.GetEnvironmentVariable("ENVIRONMENT")
     let mutable options = AWSOptions()
     options.Region <- RegionEndpoint.GetBySystemName(region)
     options.Profile <- profile
     options.ProfilesLocation <- "/home/.aws/credentials"
-    builder.AddSystemsManager("/BookADesk", options) |> ignore
+    builder.AddSystemsManager($"/BookADesk/{environment}", options) |> ignore
     
 let configureDynamoDB (sp : ServiceProvider) =
     let config = sp.GetService<IConfiguration>()
     let dynamoDBConfiguration =
         {
-            TableName = config.["DynamoDB:TableName"]
+            ReservationTableName = config.["DynamoDB:ReservationTableName"]
+            OfficeTableName = config.["DynamoDB:OfficeTableName"]
         }
-    Console.WriteLine(dynamoDBConfiguration.TableName)
+    Console.WriteLine(dynamoDBConfiguration.ReservationTableName)
+    Console.WriteLine(dynamoDBConfiguration.OfficeTableName)
     
 
 let configureServices (services : IServiceCollection) =

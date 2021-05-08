@@ -100,7 +100,9 @@
        - run:
           name: Build Docker image
           command: |
-            docker build -t << pipeline.parameters.docker-repo >>:<< pipeline.parameters.docker-img-version >> --build-arg AWSREGION=AWS_REGION --build-arg AWSPROFILE=AWS_PROFILE .
+            docker build -t << pipeline.parameters.docker-repo >>:<< pipeline.parameters.docker-img-version >> \
+            --build-arg AWSREGION=AWS_REGION --build-arg AWSPROFILE=AWS_PROFILE --build-arg ENVIRONMENT=$ENVIRONMENT \
+            --build-arg AWSKEYID=$AWSKEYID --build-arg AWSSECRETKEY=$AWSSECRETKEY.
        - run:
           name: Save Docker image
           command: |
