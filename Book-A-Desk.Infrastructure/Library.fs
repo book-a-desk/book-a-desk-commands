@@ -15,7 +15,7 @@ type EventStore =
     }
 
 module rec DynamoDbEventStore =
-    let provide (dynamoDbClient : IAmazonDynamoDB, config: DynamoDBConfiguration) =
+    let provide (dynamoDbClient : IAmazonDynamoDB) (config: DynamoDBConfiguration) =
         let table = TableContext.Create<DeskBooked>(dynamoDbClient,
                                                     tableName = config.ReservationTableName,
                                                     createIfNotExists = false)
