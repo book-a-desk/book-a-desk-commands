@@ -1,9 +1,7 @@
-﻿open System
+open System
 open Amazon
 open Amazon.DynamoDBv2
 open Amazon.Extensions.NETCore.Setup
-open Amazon.Runtime
-open Book_A_Desk.Domain.Office.Domain
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Hosting
 open Microsoft.Extensions.Configuration
@@ -13,10 +11,19 @@ open Giraffe
 
 open Book_A_Desk.Api
 open Book_A_Desk.Domain
+open Book_A_Desk.Domain.CommandHandler
+open Book_A_Desk.Domain.Office.Domain
 
 let configureApp (app : IApplicationBuilder) =
     let eventStore = InMemoryEventStore.provide ()
-    let routes = Routes.provide eventStore (fun () -> Offices.All)
+
+    let getAllOffices = (fun () -> Offices.All)
+
+    let reservationCommandsFactory = ReservationCommandsFactory.provide getAllOffices
+
+    let apiDependencyFactory = ApiDependencyFactory.provide eventStore reservationCommandsFactory getAllOffices
+
+    let routes = Routes.provide apiDependencyFactory
     app.UseGiraffe routes.HttpHandlers
            
 let configureAppConfiguration (builder : IConfigurationBuilder) =

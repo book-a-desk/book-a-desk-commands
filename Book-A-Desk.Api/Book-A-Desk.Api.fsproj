@@ -13,6 +13,7 @@
     <Compile Include="OfficesHttpHandler.fs" />
     <Compile Include="BookingsHttpHandler.fs" />
     <Compile Include="HttpHandlers.fs" />
+    <Compile Include="ApiDependencyFactory.fs" />
     <Compile Include="Routes.fs" />
     <Compile Include="DynamoDB.fs" />
     <Compile Include="Program.fs" />
