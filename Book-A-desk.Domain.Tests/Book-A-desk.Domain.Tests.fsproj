@@ -13,6 +13,7 @@
         <Compile Include="Reservation.Validator.Tests.fs" />
         <Compile Include="EventsTests.fs" />
         <Compile Include="QueriesHandler.Offices.Tests.fs" />
+        <Compile Include="ReservationsCommandHandlerUsingInstructionsTests.fs" />
     </ItemGroup>
 
     <ItemGroup>

@@ -1,5 +1,7 @@
 namespace Book_A_Desk.Api
 
+open Book_A_Desk.Domain
+
 type ApiDependencyFactory =
     {
         CreateBookingsHttpHandler: unit -> BookingsHttpHandler

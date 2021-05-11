@@ -9,6 +9,7 @@
         <Compile Include="ReservationEvent.fs" />
         <Compile Include="DomainMapper.fs" />
         <Compile Include="Library.fs" />
+        <Compile Include="ReservationInstructionInterpreter.fs" />
     </ItemGroup>
 
     <ItemGroup>

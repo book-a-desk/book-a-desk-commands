@@ -1,4 +1,4 @@
-﻿module rec Book_A_desk.Domain.Tests
+﻿namespace rec Book_A_desk.Domain.Tests
 
     open System
     

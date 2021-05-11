@@ -12,10 +12,11 @@
         <Compile Include="Reservation.Domain.fs" />
         <Compile Include="Reservation.Events.fs" />
         <Compile Include="Reservation.Commands.fs" />
+        <Compile Include="Domain.Events.fs" />
         <Compile Include="Reservation.Aggregate.fs" />
+        <Compile Include="Reservation.Instruction.fs" />
         <Compile Include="Reservation.Validator.fs" />
         <Compile Include="Reservation.Command.BookADesk.fs" />
-        <Compile Include="Domain.Events.fs" />
         <Compile Include="EventStore.fs" />
         <Compile Include="Domain.Commands.fs" />
         <Compile Include="QueriesHandler.Reservation.fs" />
