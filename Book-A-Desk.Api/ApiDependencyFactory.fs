@@ -8,19 +8,19 @@ type ApiDependencyFactory =
 
 module ApiDependencyFactory =
     let provide
-        eventStore
+        getEventStore
         reservationCommandsFactory
         getOffices
         =
 
         let createBookingsHttpHandler bearerToken =
             BookingsHttpHandler.initialize
-                eventStore
+                getEventStore
                 reservationCommandsFactory
 
         let createOfficesHttpHandler bearerToken =
             OfficesHttpHandler.initialize
-                eventStore
+                getEventStore
                 getOffices
 
         {

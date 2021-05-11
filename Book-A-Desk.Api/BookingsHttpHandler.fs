@@ -1,20 +1,20 @@
 ﻿namespace Book_A_Desk.Api
 
-open System
-
 open Amazon.DynamoDBv2
-open Book_A_Desk.Domain.Reservation
-open Book_A_Desk.Domain.Reservation.Domain
+open Microsoft.AspNetCore.Http
 open Giraffe
 open FSharp.Control.Tasks.V2.ContextInsensitive
-
-open Book_A_Desk.Domain
-open Book_A_Desk.Domain.Office.Domain
-open Book_A_Desk.Domain.Reservation.Commands
-open Book_A_Desk.Domain.CommandHandler
-open Book_A_Desk.Infrastructure.DynamoDbEventStore
+open System
 
 open Book_A_Desk.Api.Models
+open Book_A_Desk.Domain
+open Book_A_Desk.Domain.CommandHandler
+open Book_A_Desk.Domain.Office.Domain
+open Book_A_Desk.Domain.Reservation
+open Book_A_Desk.Domain.Reservation.Commands
+open Book_A_Desk.Domain.Reservation.Domain
+open Book_A_Desk.Infrastructure.DynamoDbEventStore
+
 type BookingsHttpHandler =
     {
         HandlePostWith: Booking -> HttpHandler
@@ -22,7 +22,7 @@ type BookingsHttpHandler =
 
 module BookingsHttpHandler =
     let initialize (provideEventStore : IAmazonDynamoDB -> DynamoDbEventStore) reservationCommandsFactory =
-        let handlePostWith booking = fun next context ->
+        let handlePostWith booking = fun next (context : HttpContext) ->
             task {
                 let cmd =
                     {
@@ -38,7 +38,7 @@ module BookingsHttpHandler =
                     let (ReservationId eventId) = ReservationAggregate.Id
                     let! events = eventStore.GetEvents eventId
                     
-                    let handler = ReservationsCommandHandler.provide eventStore reservationCommandsFactory
+                    let handler = ReservationsCommandHandler.provide events reservationCommandsFactory
                     let results = handler.Handle command
                     
                     match results with

@@ -29,11 +29,9 @@ let provideEventStore amazonDynamoDb (provideDynamoDbEventStore : IAmazonDynamoD
                 AppendEvents = dynamoDbEventStore.AppendEvents
             } : EventStore        
     }
-
-
+    
 let configureApp (app : IApplicationBuilder) =
-    let eventStore amazonDynamoDb = provideEventStore DynamoDbEventStore.provide 
-    let routes = Routes.provide eventStore (fun () -> Offices.All)
+    let eventStore amazonDynamoDb = provideEventStore DynamoDbEventStore.provide
 
     let getAllOffices = (fun () -> Offices.All)
 
