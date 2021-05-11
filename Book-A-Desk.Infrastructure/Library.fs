@@ -1,10 +1,12 @@
 ﻿namespace Book_A_Desk.Infrastructure
 
 open Amazon.DynamoDBv2
+open Amazon.DynamoDBv2.DataModel
 open FSharp.AWS.DynamoDB
 open FSharp.Control
 open System
 open Book_A_Desk.Domain.Events
+open Book_A_Desk.Api
 
 type EventStore =
     {
@@ -13,9 +15,9 @@ type EventStore =
     }
 
 module rec DynamoDbEventStore =
-    let provide (dynamoDbClient : IAmazonDynamoDB) =
+    let provide (dynamoDbClient : IAmazonDynamoDB) (config: DynamoDBConfiguration) =
         let table = TableContext.Create<DeskBooked>(dynamoDbClient,
-                                                    tableName = "ReservationEvent",
+                                                    tableName = config.ReservationTableName,
                                                     createIfNotExists = false)
         
         {
