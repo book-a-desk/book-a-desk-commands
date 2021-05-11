@@ -7,6 +7,9 @@ open Book_A_Desk.Domain.Reservation.Domain
 
 module ReservationInstructions =
     type ReservationInstruction<'next> =
+        // The pattern is: Input Parameter * Response -> 'next
+        // There can be no input parameter (such as with GetOffices) or no Response (such as AppendEvents)
+        // The Domain defines what it wants and needs
         | AppendEvents of DomainEvent seq * 'next
         | GetReservationAggregate of ReservationId * (ReservationAggregate -> 'next)
         | GetOffices of (Office list -> 'next)
