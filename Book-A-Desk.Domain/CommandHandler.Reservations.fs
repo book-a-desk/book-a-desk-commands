@@ -12,13 +12,13 @@ type CommandResult =
     | Append of ReservationAggregate
     | DoNothing
 
-type BookADeskCommandHandler =
+type ReservationsCommandHandler =
     {
         Handle: ReservationCommand -> Result<CommandResult,string>
     }
-
-module BookADeskCommandHandler =
-   let provide events getOffices =
+    
+module ReservationsCommandHandler =  
+   let provide events reservationCommandsFactory =
        let handle (command : ReservationCommand) =
             let run executeCommandWith cmd (ReservationId aggregateId) =
                 let commandResult =
@@ -34,8 +34,7 @@ module BookADeskCommandHandler =
 
             match command with
             | BookADesk command ->
-                let commandExecutor = // ToDo: use a reservationCommandFactory.CreateBookADeskReservationCommand ()
-                    BookADeskReservationCommand.provide (BookADeskReservationValidator.validateCommand getOffices)
+                let commandExecutor = reservationCommandsFactory.CreateBookADeskCommand ()
                 run commandExecutor.ExecuteWith command ReservationAggregate.Id
 
        {

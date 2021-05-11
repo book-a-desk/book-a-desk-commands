@@ -21,7 +21,7 @@ type BookingsHttpHandler =
     }
 
 module BookingsHttpHandler =
-    let initialize (provideEventStore : IAmazonDynamoDB -> DynamoDbEventStore) getOffices =
+    let initialize (provideEventStore : IAmazonDynamoDB -> DynamoDbEventStore) reservationCommandsFactory =
         let handlePostWith booking = fun next context ->
             task {
                 let cmd =
@@ -38,7 +38,7 @@ module BookingsHttpHandler =
                     let (ReservationId eventId) = ReservationAggregate.Id
                     let! events = eventStore.GetEvents eventId
                     
-                    let handler = BookADeskCommandHandler.provide eventStore getOffices
+                    let handler = ReservationsCommandHandler.provide eventStore reservationCommandsFactory
                     let results = handler.Handle command
                     
                     match results with
@@ -55,7 +55,7 @@ module BookingsHttpHandler =
                 match result with
                 | Ok _ ->
                     let output =
-                        {                            
+                        {
                             Office = { Id = booking.Office.Id }
                             Date = booking.Date
                             User = { Email = booking.User.Email }
