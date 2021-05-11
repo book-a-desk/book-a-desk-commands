@@ -9,8 +9,11 @@ type BookADeskReservationCommand =
     }
 
 module BookADeskReservationCommand =
-    let provide validateCommand =
-        let execute (command:BookADesk) =
+    let provide getAllOffices =
+        let validate (command:BookADesk) reservationAggregate  =
+             BookADeskReservationValidator.validateCommand getAllOffices command reservationAggregate
+
+        let execute (command:BookADesk) reservationAggregate =
             {
                 DeskBooked.ReservationId = ReservationAggregate.Id
                 Date = command.Date
@@ -21,9 +24,10 @@ module BookADeskReservationCommand =
             |> List.singleton
 
         let executeWith cmd reservationAggregate =
-            validateCommand cmd reservationAggregate
-            |> Result.map (fun _ -> execute cmd)
-            
+            (validate cmd reservationAggregate)
+            |> Result.map (execute cmd)
+
+
         {
             ExecuteWith = executeWith
         }
