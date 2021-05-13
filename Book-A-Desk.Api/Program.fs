@@ -2,6 +2,7 @@ open System
 open Amazon
 open Amazon.DynamoDBv2
 open Amazon.Extensions.NETCore.Setup
+open Amazon.Runtime
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Hosting
 open Microsoft.Extensions.Configuration
@@ -28,12 +29,13 @@ let configureApp (app : IApplicationBuilder) =
            
 let configureAppConfiguration (builder : IConfigurationBuilder) =
     let region = Environment.GetEnvironmentVariable("AWS_REGION")
-    let profile = Environment.GetEnvironmentVariable("AWS_PROFILE")
     let environment = Environment.GetEnvironmentVariable("ENVIRONMENT")
+    let awsKeyId = Environment.GetEnvironmentVariable("AWS_KEYID")
+    let awsSecretKey = Environment.GetEnvironmentVariable("AWS_SECRETKEY")
+    let credentials = BasicAWSCredentials(awsKeyId, awsSecretKey)
     let mutable options = AWSOptions()
     options.Region <- RegionEndpoint.GetBySystemName(region)
-    options.Profile <- profile
-    options.ProfilesLocation <- "/home/.aws/credentials"
+    options.Credentials <- credentials
     builder.AddSystemsManager($"/BookADesk/{environment}", options) |> ignore
     
 let configureDynamoDB (sp : ServiceProvider) =
