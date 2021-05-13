@@ -22,9 +22,6 @@ workflows:
       - build_image:
           requires:
             - build_and_test
-      - deploy:
-          requires:
-            - build_image
 
   production:
     when:
