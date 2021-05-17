@@ -103,8 +103,7 @@ jobs:
           name: Build Docker image
           command: |
             docker build -t << pipeline.parameters.docker-repo >>:<< pipeline.parameters.docker-img-version >> \
-              --build-arg AWSREGION=$AWS_REGION --build-arg AWSPROFILE=$AWS_PROFILE --build-arg ENVIRONMENT=$ENVIRONMENT \
-              --build-arg AWSKEYID=$AWSKEYID --build-arg AWSSECRETKEY=$AWSSECRETKEY .
+              --build-arg AWSREGION=$AWS_REGION .
       - run:
           name: Save Docker image
           command: |
@@ -143,3 +142,4 @@ jobs:
           container-image-name-updates: 'container=Book-A-Desk-Container,tag=<< pipeline.parameters.docker-img-version >>'
           service-name: 'Book-A-Desk'
           family: 'Book-A-Desk-Backend'
+          container-env-var-updates: container=Book-A-Desk-Container,name=AWS_KEYID,value=$AWSKEYID,container=Book-A-Desk-Container,name=AWS_SECRETKEY,value=$AWSSECRETKEY,container=Book-A-Desk-Container,name=ENVIRONMENT,value=$ENVIRONMENT
