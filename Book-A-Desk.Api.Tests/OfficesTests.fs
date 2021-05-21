@@ -44,10 +44,10 @@ let ``GIVEN A Book-A-Desk server, WHEN getting the offices endpoint, THEN office
     let! result = HttpRequest.getAsync httpClient "http://localhost/offices"
 
     let deserializeOptions = JsonSerializerOptions(JsonSerializerDefaults.Web)
-    let offices = JsonSerializer.Deserialize<Book_A_Desk.Api.Models.Office array>(result, deserializeOptions)
+    let offices = JsonSerializer.Deserialize<Book_A_Desk.Api.Models.Offices>(result, deserializeOptions)
 
-    Assert.Equal(1, offices.Length)
-    let office = offices.[0]
+    Assert.Equal(1, offices.Items.Length)
+    let office = offices.Items.[0]
     let (OfficeId id) = mockOffice.Id
     let (CityName cityName) = mockOffice.City
     Assert.Equal(id.ToString(), office.Id)
