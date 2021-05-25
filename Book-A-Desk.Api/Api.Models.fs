@@ -6,13 +6,13 @@ type UserReference =
     {
         Email: string
     }
-    
-type OfficeReference = 
+
+type OfficeReference =
     {
         Id: string
     }
 
-type InputBooking = 
+type InputBooking =
     {
         Office: OfficeReference
         Date: DateTime
@@ -25,13 +25,13 @@ type Booking =
         Date: DateTime
         User: UserReference
     }
-    
+
 type Office =
     {
         Id: string
         Name: string
     }
-    
+
 type OfficeAvailability =
     {
         Id: string
@@ -39,3 +39,7 @@ type OfficeAvailability =
         AvailableDesks: int
     }
 
+type Offices =
+    {
+        Items: Office array
+    }
