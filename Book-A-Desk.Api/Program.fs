@@ -69,6 +69,7 @@ let configureServices (services : IServiceCollection) =
     let serviceProvider = services.BuildServiceProvider()
     let config = serviceProvider.GetService<IConfiguration>()
     services.AddGiraffe()
+            .AddCors()
             .AddDefaultAWSOptions(config.GetAWSOptions())
             .AddAWSService<IAmazonDynamoDB>() |> ignore
     configureDynamoDB serviceProvider
