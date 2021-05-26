@@ -4,6 +4,7 @@ open Amazon.DynamoDBv2
 open Amazon.Extensions.NETCore.Setup
 open Amazon.Runtime
 open Microsoft.AspNetCore.Builder
+open Microsoft.AspNetCore.Cors.Infrastructure
 open Microsoft.AspNetCore.Hosting
 open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.Hosting
@@ -15,7 +16,22 @@ open Book_A_Desk.Domain
 open Book_A_Desk.Domain.CommandHandler
 open Book_A_Desk.Domain.Office.Domain
 
-let configureApp (app : IApplicationBuilder) =
+ 
+let configureCors (ctx : WebHostBuilderContext) (builder : CorsPolicyBuilder) =
+    if ctx.HostingEnvironment.IsDevelopment() then
+        builder
+           .AllowAnyOrigin()
+           .AllowAnyMethod()
+           .AllowAnyHeader()
+           |> ignore
+    else
+        builder
+            .WithOrigins(ctx.Configuration.["Book-A-Desk-Frontend:Url"])
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            |> ignore
+
+let configureApp (ctx : WebHostBuilderContext) (app : IApplicationBuilder) =
     let eventStore = InMemoryEventStore.provide ()
 
     let getAllOffices = (fun () -> Offices.All)
@@ -25,7 +41,8 @@ let configureApp (app : IApplicationBuilder) =
     let apiDependencyFactory = ApiDependencyFactory.provide eventStore reservationCommandsFactory getAllOffices
 
     let routes = Routes.provide apiDependencyFactory
-    app.UseGiraffe routes.HttpHandlers
+    app.UseCors(configureCors ctx)
+       .UseGiraffe routes.HttpHandlers
            
 let configureAppConfiguration (builder : IConfigurationBuilder) =
     let region = Environment.GetEnvironmentVariable("AWS_REGION")
@@ -47,7 +64,6 @@ let configureDynamoDB (sp : ServiceProvider) =
         }
     Console.WriteLine(dynamoDBConfiguration.ReservationTableName)
     Console.WriteLine(dynamoDBConfiguration.OfficeTableName)
-    
 
 let configureServices (services : IServiceCollection) =
     let serviceProvider = services.BuildServiceProvider()
@@ -63,7 +79,7 @@ let main _ =
         .ConfigureWebHostDefaults(
             fun webHostBuilder ->
                 webHostBuilder
-                    .Configure(configureApp)
+                    .Configure(Action<_,_> configureApp)
                     .ConfigureAppConfiguration(Action<IConfigurationBuilder> configureAppConfiguration)
                     .ConfigureServices(configureServices)
                     |> ignore)
