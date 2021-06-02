@@ -11,108 +11,111 @@
 # - AWS_ECR_ACCESS_KEY_ID
 # - AWS_ECR_SECRET_ACCESS_KEY
 # - AWS_ECR_ACCOUNT_URL
- 
- version: 2.1
- workflows:
-   pull-request:
-     unless:
-       equal: ["trunk", << pipeline.git.branch >>]
-     jobs:
-       - build_and_test
-       - build_image:
-          requires:
-              - build_and_test
-       
-   production:
-     when:
-       equal: ["trunk", << pipeline.git.branch >>]
-     jobs:
-       - build_and_test
-       - build_image:
-          requires:
-             - build_and_test
-       - deploy:
-          requires:
-             - build_image
-           
- orbs:
-   aws-ecr: circleci/aws-ecr@6.15.3
-   aws-ecs: circleci/aws-ecs@2.0.0
-       
- parameters:
-   docker-repo:
-     type: string
-     default: book-a-desk
 
-   docker-img-version:
-     type: string
-     default: "build-<< pipeline.number >>"
+version: 2.1
+workflows:
+  pull-request:
+    unless:
+      equal: ["trunk", << pipeline.git.branch >>]
+    jobs:
+      - build_and_test
+      - build_image:
+          requires:
+            - build_and_test
 
-   docker-tar-filename:
-     type: string
-     default: "book-a-desk_latest.tar"
-       
- commands:
-   publish-test-results:
-     description: Converts and publishes test results (.NET only)
-     parameters:
-       path:
-         description: Path to the test results folder
-         type: string
-     steps:
-       - run:
-           name: Convert test results to CircleCI format
-           command: |
-             dotnet tool install --global trx2junit
-             export PATH="$PATH:$HOME/.dotnet/tools"
-             trx2junit << parameters.path >>/*.trx
-       - store_test_results:
-           path: << parameters.path >>
- jobs:
-   build_and_test:
+  production:
+    when:
+      equal: ["trunk", << pipeline.git.branch >>]
+    jobs:
+      - build_and_test
+      - build_image:
+          requires:
+            - build_and_test
+      - deploy:
+          requires:
+            - build_image
+
+orbs:
+  aws-ecr: circleci/aws-ecr@6.15.3
+  aws-ecs: circleci/aws-ecs@2.0.0
+
+parameters:
+  docker-repo:
+    type: string
+    default: book-a-desk
+
+  docker-img-version:
+    type: string
+    default: "build-<< pipeline.number >>"
+
+  docker-tar-filename:
+    type: string
+    default: "book-a-desk_latest.tar"
+
+commands:
+  publish-test-results:
+    description: Converts and publishes test results (.NET only)
+    parameters:
+      path:
+        description: Path to the test results folder
+        type: string
+    steps:
+      - run:
+          name: Convert test results to CircleCI format
+          command: |
+            dotnet tool install --global trx2junit
+            export PATH="$PATH:$HOME/.dotnet/tools"
+            trx2junit << parameters.path >>/*.trx
+      - store_test_results:
+          path: << parameters.path >>
+jobs:
+  build_and_test:
     docker:
       - image: mcr.microsoft.com/dotnet/sdk:5.0-alpine
         auth:
           username: mydockerhub-user
-          password: $DOCKERHUB_PASSWORD 
-    
+          password: $DOCKERHUB_PASSWORD
+
     steps:
-       - checkout
-       - run: 
-           name: Build
-           command: dotnet build
-       - run:
-           name: Run unit tests
-           command: |
-               dotnet test \
-               --verbosity normal \
-               --filter "FullyQualifiedName~Tests" \
-               --results-directory ./tests/unit/results \
-               --logger "trx"
-       - publish-test-results:
-           path: ./tests/unit/results
-           
-   build_image:
-    machine: true
-    
+      - checkout
+      - run:
+          name: Build
+          command: dotnet build
+      - run:
+          name: Run unit tests
+          command: |
+            dotnet test \
+            --verbosity normal \
+            --filter "FullyQualifiedName~Tests" \
+            --results-directory ./tests/unit/results \
+            --logger "trx"
+      - publish-test-results:
+          path: ./tests/unit/results
+
+  build_image:
+    docker:
+      - image: circleci/buildpack-deps:latest
+        user: root
     steps:
-       - checkout
-       - run:
+      - checkout
+      - setup_remote_docker
+      - run:
           name: Build Docker image
           command: |
-            docker build -t << pipeline.parameters.docker-repo >>:<< pipeline.parameters.docker-img-version >> .
-       - run:
+            docker build -t << pipeline.parameters.docker-repo >>:<< pipeline.parameters.docker-img-version >> \
+              --build-arg AWSREGION=$AWS_REGION .
+      - run:
           name: Save Docker image
           command: |
             docker save \
               -o << pipeline.parameters.docker-tar-filename >> \
               << pipeline.parameters.docker-repo >>:<< pipeline.parameters.docker-img-version >>
-       - persist_to_workspace:
+      - persist_to_workspace:
           root: .
           paths:
             - << pipeline.parameters.docker-tar-filename >>
-           
-   deploy:
+
+  deploy:
     machine: true
 
     steps:
@@ -139,3 +142,4 @@
           container-image-name-updates: 'container=Book-A-Desk-Container,tag=<< pipeline.parameters.docker-img-version >>'
           service-name: 'Book-A-Desk'
           family: 'Book-A-Desk-Backend'
+          container-env-var-updates: container=Book-A-Desk-Container,name=AWS_KEYID,value=$AWSKEYID,container=Book-A-Desk-Container,name=AWS_SECRETKEY,value=$AWSSECRETKEY,container=Book-A-Desk-Container,name=ENVIRONMENT,value=$ENVIRONMENT

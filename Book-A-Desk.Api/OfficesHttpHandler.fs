@@ -16,38 +16,40 @@ type OfficesHttpHandler =
         HandleGetAll: unit -> HttpHandler
         HandleGetByDate: Guid -> HttpHandler
     }
-    
+
 module rec OfficesHttpHandler =
     let initialize eventStore getOffices =
         {
             HandleGetAll = fun () -> handleGet getOffices
             HandleGetByDate = handleGetByDate eventStore getOffices
-        }        
-    
-    let handleGet (getOffices : unit -> Office list) = fun next context ->
+        }
+
+    let handleGet getOffices = fun next context ->
         task {
-            let result = OfficeQueriesHandler.getAll getOffices            
+            let result = OfficeQueriesHandler.getAll getOffices
             match result with
             | Ok offices ->
                 let offices =
                     offices
-                    |> List.map (fun o ->
+                    |> List.map (fun (o:Office) ->
                         let (OfficeId officeId) = o.Id
                         let (CityName cityName) = o.City
                         {
                             Id = officeId.ToString()
                             Name = cityName
                         })
+                    |> List.toArray
+                    |> fun l -> { Offices.Items = l }
                 return! json offices next context
             | Error e ->
                 context.SetStatusCode(500)
                 return! text ("Internal Error: " + e) next context
         }
-        
+
     let handleGetByDate eventStore getOffices officeId = fun next context ->
         task {
             let date = InputParser.parseDateFromContext context
-                    
+
             match date with
             | None ->
                 context.SetStatusCode(400)
@@ -56,13 +58,13 @@ module rec OfficesHttpHandler =
                 let eventStore = eventStore (context.GetService<IAmazonDynamoDB>())
                 let getBookingsForDate = ReservationsQueriesHandler.get eventStore
                 let query =
-                    {                    
+                    {
                         OfficeId = officeId |> OfficeId
                         Date = date
                     }
-                
+
                 let result = OfficeQueriesHandler.getAvailabilities getOffices getBookingsForDate query
-                
+
                 match result with
                 | Ok officeAvailability ->
                     let (OfficeId officeId) = officeAvailability.Id
@@ -77,4 +79,3 @@ module rec OfficesHttpHandler =
                     context.SetStatusCode(500)
                     return! text ("Internal Error: " + e) next context
         }
-        
