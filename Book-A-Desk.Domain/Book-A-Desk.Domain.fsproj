@@ -16,7 +16,6 @@
         <Compile Include="Reservation.Commands.fs" />
         <Compile Include="Reservation.Validator.fs" />
         <Compile Include="Reservation.Command.BookADesk.fs" />
-        <Compile Include="EventStore.fs" />
         <Compile Include="Domain.Commands.fs" />
         <Compile Include="QueriesHandler.Reservation.fs" />
         <Compile Include="CommandFactory.Reservation.fs" />
