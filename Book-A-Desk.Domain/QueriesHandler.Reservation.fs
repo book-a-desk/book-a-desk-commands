@@ -8,9 +8,7 @@ open Book_A_Desk.Domain.Reservation
 open Book_A_Desk.Domain.Reservation.Domain
 
 module rec ReservationsQueriesHandler =
-    let get (eventStore : EventStore) (date : DateTime) : Result<Booking list, string> = result {
-        let (ReservationId aggregateId) = ReservationAggregate.Id
-        let! bookingEvents = eventStore.GetEvents aggregateId
+    let get (bookingEvents : seq<DomainEvent>) (date : DateTime) : Result<Booking list, string> = result {
         let bookingEvents =
                 bookingEvents
                 |> Seq.map (function | ReservationEvent event -> event)

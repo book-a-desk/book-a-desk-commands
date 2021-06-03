@@ -1,7 +1,11 @@
 namespace Book_A_Desk.Api
 
 open Amazon.DynamoDBv2
+open Book_A_Desk.Domain.Reservation
+open Book_A_Desk.Domain.Reservation.Domain
+open Book_A_Desk.Infrastructure.DynamoDbEventStore
 open FSharp.Control.Tasks.V2.ContextInsensitive
+open FsToolkit.ErrorHandling
 open Giraffe
 open System
 
@@ -46,7 +50,7 @@ module rec OfficesHttpHandler =
                 return! text ("Internal Error: " + e) next context
         }
 
-    let handleGetByDate eventStore getOffices officeId = fun next context ->
+    let handleGetByDate (provideEventStore : IAmazonDynamoDB -> DynamoDbEventStore) getOffices officeId = fun next context ->
         task {
             let date = InputParser.parseDateFromContext context
 
@@ -55,16 +59,9 @@ module rec OfficesHttpHandler =
                 context.SetStatusCode(400)
                 return! text "Date could not be parsed" next context
             | Some date ->
-                let eventStore = eventStore (context.GetService<IAmazonDynamoDB>())
-                let getBookingsForDate = ReservationsQueriesHandler.get eventStore
-                let query =
-                    {
-                        OfficeId = officeId |> OfficeId
-                        Date = date
-                    }
-
-                let result = OfficeQueriesHandler.getAvailabilities getOffices getBookingsForDate query
-
+                let eventStore = provideEventStore (context.GetService<IAmazonDynamoDB>())
+                let! result = handleGetByDateFromEventStore eventStore getOffices date officeId
+                
                 match result with
                 | Ok officeAvailability ->
                     let (OfficeId officeId) = officeAvailability.Id
@@ -79,3 +76,16 @@ module rec OfficesHttpHandler =
                     context.SetStatusCode(500)
                     return! text ("Internal Error: " + e) next context
         }
+        
+    let private handleGetByDateFromEventStore eventStore getOffices date officeId = asyncResult {
+        let (ReservationId aggregateId) = ReservationAggregate.Id
+        let! bookingEvents = eventStore.GetEvents aggregateId
+        let getBookingsForDate = ReservationsQueriesHandler.get bookingEvents
+        let query =
+            {
+                OfficeId = officeId |> OfficeId
+                Date = date
+            }
+
+        return! OfficeQueriesHandler.getAvailabilities getOffices getBookingsForDate query
+    }

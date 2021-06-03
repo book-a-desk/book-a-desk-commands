@@ -3,6 +3,7 @@
 open Amazon.DynamoDBv2
 open Microsoft.AspNetCore.Http
 open Giraffe
+open FsToolkit.ErrorHandling
 open FSharp.Control.Tasks.V2.ContextInsensitive
 open System
 
@@ -17,7 +18,7 @@ open Book_A_Desk.Infrastructure.DynamoDbEventStore
 
 type BookingsHttpHandler =
     {
-        HandlePostWith: Booking -> HttpHandler
+        HandlePostWith: Models.Booking -> HttpHandler
     }
 
 module BookingsHttpHandler =
@@ -34,20 +35,24 @@ module BookingsHttpHandler =
                 let eventStore = provideEventStore (context.GetService<IAmazonDynamoDB>())
                 let command = BookADesk cmd
                 
-                let handleCommand command = async {
-                    let (ReservationId eventId) = ReservationAggregate.Id
-                    let! events = eventStore.GetEvents eventId
+                let handleCommand command = asyncResult {
+                    let (ReservationId aggregateId) = ReservationAggregate.Id
+                    let! events = eventStore.GetEvents aggregateId
                     
-                    let handler = ReservationsCommandHandler.provide events reservationCommandsFactory
+                    let handler = ReservationsCommandHandler.provide (events |> List.ofSeq) reservationCommandsFactory
                     let results = handler.Handle command
                     
                     match results with
                     | Ok events ->
-                        do!
+                        let appendEvents eventsToAppend : Async<unit> = 
                             events
+                            |> Seq.ofList
+                            |> (fun events -> aggregateId, events)
                             |> List.singleton
                             |> Map.ofList
                             |> eventStore.AppendEvents
+                            
+                        return! appendEvents events
                     | Error _ -> return ()
                 }
 
