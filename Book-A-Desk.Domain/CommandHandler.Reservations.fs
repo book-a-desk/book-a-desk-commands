@@ -26,7 +26,10 @@ module ReservationsCommandHandler =
                 let! events = eventStore.GetEvents aggregateId
                 let! commandResult =
                     events
-                    |> List.map (function | ReservationEvent event -> event)
+                    |> List.map (function
+                        | ReservationEvent event -> event
+                        | otherType -> failwithf $"There is an unexpected event type %A{otherType}"
+                     )
                     |> ReservationAggregate.getCurrentStateFrom
                     |> executeCommandWith cmd
                 return storeEventsForBatch aggregateId commandResult

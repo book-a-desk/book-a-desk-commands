@@ -12,7 +12,10 @@ module rec ReservationsQueriesHandler =
         let (ReservationId aggregateId) = ReservationAggregate.Id
         let! bookingEvents = eventStore.GetEvents aggregateId
         let bookingEvents = bookingEvents
-                            |> List.map (function | ReservationEvent event -> event)
+                            |> List.map (function
+                                | ReservationEvent event -> event
+                                | otherType -> failwithf $"There is an unexpected event type %A{otherType}"
+                                )
         
         let bookings = (ReservationAggregate.getCurrentStateFrom bookingEvents).BookedDesks
         let isSameDate = isSameDate date
