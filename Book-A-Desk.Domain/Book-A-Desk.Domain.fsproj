@@ -15,17 +15,13 @@
         <Compile Include="Reservation.Aggregate.fs" />
         <Compile Include="Reservation.Validator.fs" />
         <Compile Include="Reservation.Command.BookADesk.fs" />
-        <Compile Include="Notification.Events.fs" />
-        <Compile Include="Notification.Commands.fs" />
-        <Compile Include="Notification.Command.NotifyBooking.fs" />
+        <Compile Include="Reservation.Command.NotifyBooking.fs" />
         <Compile Include="Domain.Events.fs" />
         <Compile Include="EventStore.fs" />
         <Compile Include="Domain.Commands.fs" />
         <Compile Include="QueriesHandler.Reservation.fs" />
         <Compile Include="CommandFactory.Reservation.fs" />
         <Compile Include="CommandHandler.Reservations.fs" />
-        <Compile Include="CommandFactory.Notification.fs" />
-        <Compile Include="CommandHandler.Notifications.fs" />
         <Compile Include="QueriesHandler.Offices.fs" />
     </ItemGroup>
 

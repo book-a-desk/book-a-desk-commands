@@ -13,6 +13,14 @@ type DeskBooked =
         EmailAddress: EmailAddress
         OfficeId: OfficeId
     }
+type BookingNotified =
+    {
+        ReservationId: ReservationId
+        Date: DateTime
+        EmailAddress: EmailAddress
+        OfficeId: OfficeId
+    }
 
 type ReservationEvent =
     | DeskBooked of DeskBooked
+    | BookingNotified of BookingNotified

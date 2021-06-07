@@ -39,6 +39,9 @@ module ReservationsCommandHandler =
             | BookADesk command ->
                 let commandExecutor = reservationCommandsFactory.CreateBookADeskCommand ()
                 run commandExecutor.ExecuteWith command ReservationAggregate.Id
+            | NotifyBooking command ->
+                let commandExecutor = reservationCommandsFactory.CreateNotifyBookingCommand ()
+                run commandExecutor.ExecuteWith command ReservationAggregate.Id
 
        {
             Handle = handle
