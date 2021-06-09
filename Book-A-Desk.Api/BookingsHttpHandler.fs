@@ -40,6 +40,7 @@ module BookingsHttpHandler =
                             Date = booking.Date
                             User = { Email = booking.User.Email }
                         }
+                    // TODO Sending message management Option 2
                     return! json output next context
                 | Error e ->
                     context.SetStatusCode(500)

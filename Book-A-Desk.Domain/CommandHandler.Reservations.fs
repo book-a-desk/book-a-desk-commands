@@ -39,6 +39,7 @@ module ReservationsCommandHandler =
             | BookADesk command ->
                 let commandExecutor = reservationCommandsFactory.CreateBookADeskCommand ()
                 run commandExecutor.ExecuteWith command ReservationAggregate.Id
+                // TODO: Send email management Option 1
             | NotifyBooking command ->
                 let commandExecutor = reservationCommandsFactory.CreateNotifyBookingCommand ()
                 run commandExecutor.ExecuteWith command ReservationAggregate.Id
