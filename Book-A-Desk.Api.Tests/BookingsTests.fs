@@ -36,7 +36,11 @@ let mockReservationCommandFactory : ReservationCommandsFactory =
 
 [<Fact>]
 let ``GIVEN A Book-A-Desk server, WHEN booking a desk, THEN a desk is booked`` () = async {
-    let mockApiDependencyFactory = ApiDependencyFactory.provide mockEventStore mockReservationCommandFactory mockGetOffices
+    let mutable emailWasSent = false
+    let mockEmailNotification booking =
+        emailWasSent <- true
+        ()
+    let mockApiDependencyFactory = ApiDependencyFactory.provide mockEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification
     use httpClient = TestServer.createAndRun mockApiDependencyFactory
 
     let booking  =
@@ -55,4 +59,5 @@ let ``GIVEN A Book-A-Desk server, WHEN booking a desk, THEN a desk is booked`` (
     Assert.Equal(booking.Office.Id, deserializedResult.Office.Id)
     Assert.Equal(booking.Date, deserializedResult.Date)
     Assert.Equal(booking.User.Email, deserializedResult.User.Email)
+    Assert.True(emailWasSent)
 }

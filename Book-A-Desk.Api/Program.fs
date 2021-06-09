@@ -3,6 +3,7 @@ open Amazon
 open Amazon.DynamoDBv2
 open Amazon.Extensions.NETCore.Setup
 open Amazon.Runtime
+open Book_A_Desk.Api.Models
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Cors.Infrastructure
 open Microsoft.AspNetCore.Hosting
@@ -38,7 +39,9 @@ let configureApp (ctx : WebHostBuilderContext) (app : IApplicationBuilder) =
 
     let reservationCommandsFactory = ReservationCommandsFactory.provide getAllOffices
 
-    let apiDependencyFactory = ApiDependencyFactory.provide eventStore reservationCommandsFactory getAllOffices
+    let emailNotification = EmailNotification.initialize getAllOffices
+    
+    let apiDependencyFactory = ApiDependencyFactory.provide eventStore reservationCommandsFactory getAllOffices emailNotification.SendEmailNotification
 
     let routes = Routes.provide apiDependencyFactory
     app.UseCors(configureCors ctx)

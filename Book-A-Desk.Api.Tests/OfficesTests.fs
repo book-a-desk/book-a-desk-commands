@@ -38,8 +38,8 @@ let ``GIVEN A Book-A-Desk server, WHEN getting the offices endpoint, THEN office
             GetEvents = fun _ -> failwith "should not be called"
             AppendEvents = fun _ -> failwith "should not be called"
         }
-
-    let mockApiDependencyFactory = ApiDependencyFactory.provide mockEventStore mockReservationCommandFactory mockGetOffices
+    let mockEmailNotification booking = ()
+    let mockApiDependencyFactory = ApiDependencyFactory.provide mockEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification
     use httpClient = TestServer.createAndRun mockApiDependencyFactory
     let! result = HttpRequest.getAsync httpClient "http://localhost/offices"
 
@@ -70,7 +70,9 @@ let ``GIVEN A Book-A-Desk server, WHEN getting the office availability by date, 
             GetEvents = fun _ -> Ok [aBooking]
             AppendEvents = fun _ -> failwith "should not be called"
         }
-    let mockApiDependencyFactory = ApiDependencyFactory.provide mockEventStore mockReservationCommandFactory mockGetOffices
+        
+    let mockEmailNotification booking = ()
+    let mockApiDependencyFactory = ApiDependencyFactory.provide mockEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification
     use httpClient = TestServer.createAndRun mockApiDependencyFactory
 
     let! result = HttpRequest.getAsync httpClient $"http://localhost/offices/{officeId.ToString()}/availabilities?date={date.ToString()}"

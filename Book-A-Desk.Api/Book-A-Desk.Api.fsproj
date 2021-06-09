@@ -16,6 +16,7 @@
     <Compile Include="ApiDependencyFactory.fs" />
     <Compile Include="Routes.fs" />
     <Compile Include="DynamoDB.fs" />
+    <Compile Include="EmailNotification.fs" />
     <Compile Include="Program.fs" />
     <Content Include="docs\bookADeskOpenAPISpecification.json" />
     <Content Include="appsettings.Development.json" />

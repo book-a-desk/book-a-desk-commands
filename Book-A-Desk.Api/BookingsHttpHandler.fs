@@ -2,6 +2,8 @@
 
 open System
 
+open System.Net.Mail
+open Book_A_Desk.Domain.QueriesHandler
 open Giraffe
 open FSharp.Control.Tasks.V2.ContextInsensitive
 
@@ -16,9 +18,18 @@ type BookingsHttpHandler =
         HandlePostWith: Booking -> HttpHandler
     }
 
-module BookingsHttpHandler =
-    let initialize eventStore reservationCommandsFactory =
+type EmailDetails =
+    {
+        toAddress : string
+        fromAddress : string
+        body : string
+    }
 
+type MessageDetails =
+    | Email of EmailDetails
+
+module BookingsHttpHandler =
+    let initialize eventStore reservationCommandsFactory sendEmailNotification =        
         let handlePostWith booking = fun next context ->
             task {
                 let cmd =
@@ -40,7 +51,9 @@ module BookingsHttpHandler =
                             Date = booking.Date
                             User = { Email = booking.User.Email }
                         }
-                    // TODO Sending message management Option 2
+                    sendEmailNotification booking
+                    |> ignore
+                    
                     return! json output next context
                 | Error e ->
                     context.SetStatusCode(500)
