@@ -46,14 +46,13 @@ let configureApp (ctx : WebHostBuilderContext) (app : IApplicationBuilder) =
            
 let configureAppConfiguration (builder : IConfigurationBuilder) =
     let region = Environment.GetEnvironmentVariable("AWS_REGION")
-    let environment = Environment.GetEnvironmentVariable("ENVIRONMENT")
     let awsKeyId = Environment.GetEnvironmentVariable("AWS_KEYID")
     let awsSecretKey = Environment.GetEnvironmentVariable("AWS_SECRETKEY")
     let credentials = BasicAWSCredentials(awsKeyId, awsSecretKey)
     let mutable options = AWSOptions()
     options.Region <- RegionEndpoint.GetBySystemName(region)
     options.Credentials <- credentials
-    builder.AddSystemsManager($"/BookADesk/{environment}", options) |> ignore
+    builder.AddSystemsManager($"/BookADesk/", options) |> ignore
     
 let configureDynamoDB (sp : ServiceProvider) =
     let config = sp.GetService<IConfiguration>()
