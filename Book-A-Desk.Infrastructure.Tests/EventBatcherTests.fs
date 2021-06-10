@@ -47,5 +47,5 @@ let ``Given an EventBatcher When Batching Multiple Aggregates Returns Multiple B
     let result = EventBatcher.batchEvents batch
 
     Assert.Equal(2, Seq.length result)
-    Assert.Equal(7, Seq.length(Seq.item 0 result))
-    Assert.Equal(5, Seq.length(Seq.item 1 result))
+    Assert.True(Seq.fold (fun isLength7 batch -> (Seq.length batch) = 7 || isLength7) false result)
+    Assert.True(Seq.fold (fun isLength7 batch -> (Seq.length batch) = 5 || isLength7) false result)
