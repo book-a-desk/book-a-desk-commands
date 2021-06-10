@@ -28,6 +28,10 @@ module Routes =
                         |> fun h -> h.HandlePostWith
                     )
                 ]
+                GET >=> choose [ 
+                    route "/health"
+                        >=> HealthHttpHandler.handle
+                ]
                 RequestErrors.NOT_FOUND "Not Found"
             ]
 

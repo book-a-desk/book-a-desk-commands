@@ -12,6 +12,7 @@
     <Compile Include="InputParser.fs" />
     <Compile Include="OfficesHttpHandler.fs" />
     <Compile Include="BookingsHttpHandler.fs" />
+    <Compile Include="HealthHttpHandler.fs" />
     <Compile Include="HttpHandlers.fs" />
     <Compile Include="ApiDependencyFactory.fs" />
     <Compile Include="Routes.fs" />
