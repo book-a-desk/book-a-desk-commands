@@ -140,9 +140,9 @@ jobs:
       - aws-ecr/push-image:
           repo: << pipeline.parameters.docker-repo >>
           tag: << pipeline.parameters.docker-img-version >>
-#      - aws-ecs/update-service:
-#          cluster-name: 'Book-A-Desk-Cluster'
-#          container-image-name-updates: 'container=Book-A-Desk-Container,tag=<< pipeline.parameters.docker-img-version >>'
-#          service-name: 'Book-A-Desk'
-#          family: 'Book-A-Desk-Backend'
-#          container-env-var-updates: container=Book-A-Desk-Container,name=AWS_KEYID,value=$AWSKEYID,container=Book-A-Desk-Container,name=AWS_SECRETKEY,value=$AWSSECRETKEY
+      - aws-ecs/update-service:
+          cluster-name: 'Book-A-Desk-Cluster'
+          container-image-name-updates: 'container=Book-A-Desk-Container,tag=<< pipeline.parameters.docker-img-version >>'
+          service-name: 'Book-A-Desk'
+          family: 'Book-A-Desk-Backend'
+          container-env-var-updates: container=Book-A-Desk-Container,name=AWS_KEYID,value=$AWSKEYID,container=Book-A-Desk-Container,name=AWS_SECRETKEY,value=$AWSSECRETKEY
