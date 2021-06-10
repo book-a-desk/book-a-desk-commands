@@ -4,6 +4,7 @@ WORKDIR /app
 COPY Book-A-Desk.Api/*.fsproj ./Book-A-Desk.Api/
 COPY Book-A-Desk.Domain/*.fsproj ./Book-A-Desk.Domain/
 COPY Book-A-Desk.Core/*.fsproj ./Book-A-Desk.Core/
+COPY Book-A-Desk.Infrastructure/*.fsproj ./Book-A-Desk.Infrastructure/
 RUN dotnet restore ./Book-A-Desk.Api/Book-A-Desk.Api.fsproj
 COPY . ./
 RUN dotnet publish \

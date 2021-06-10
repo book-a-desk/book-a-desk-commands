@@ -10,12 +10,14 @@ open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.DependencyInjection
 open Giraffe
+open System.Threading.Tasks
 
 open Book_A_Desk.Api
 open Book_A_Desk.Domain
-open Book_A_Desk.Domain.CommandHandler
 open Book_A_Desk.Domain.Office.Domain
-
+open Book_A_Desk.Infrastructure
+open Book_A_Desk.Infrastructure.DynamoDbEventStore
+open Book_A_Desk.Domain.CommandHandler
  
 let configureCors (ctx : WebHostBuilderContext) (builder : CorsPolicyBuilder) =
     if ctx.HostingEnvironment.IsDevelopment() then
@@ -32,13 +34,13 @@ let configureCors (ctx : WebHostBuilderContext) (builder : CorsPolicyBuilder) =
             |> ignore
 
 let configureApp (ctx : WebHostBuilderContext) (app : IApplicationBuilder) =
-    let eventStore = InMemoryEventStore.provide ()
+    let provideEventStore amazonDynamoDb = DynamoDbEventStore.provide amazonDynamoDb
 
     let getAllOffices = (fun () -> Offices.All)
 
     let reservationCommandsFactory = ReservationCommandsFactory.provide getAllOffices
 
-    let apiDependencyFactory = ApiDependencyFactory.provide eventStore reservationCommandsFactory getAllOffices
+    let apiDependencyFactory = ApiDependencyFactory.provide provideEventStore reservationCommandsFactory getAllOffices
 
     let routes = Routes.provide apiDependencyFactory
     app.UseCors(configureCors ctx)
