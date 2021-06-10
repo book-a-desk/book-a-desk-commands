@@ -9,7 +9,7 @@ open Book_A_Desk.Domain.Reservation
 open Book_A_Desk.Domain.Reservation.Commands
 open Book_A_desk.Domain.Tests
 
-let getOffices () = List.Empty
+let offices = List.Empty
     
 let aReservationAggregate =
     {
@@ -26,7 +26,7 @@ let ``GIVEN A Book-A-Desk Reservation command WITH an empty email address, WHEN 
             OfficeId = OfficeId (Guid.NewGuid())
         } : BookADesk
     
-    let result = BookADeskReservationValidator.validateCommand getOffices commandWithEmptyEmailAddress aReservationAggregate
+    let result = BookADeskReservationValidator.validateCommand offices commandWithEmptyEmailAddress aReservationAggregate
     match result with
     | Ok _ -> failwith "Validation should fail because email is empty"
     | Error _ -> ()
@@ -40,14 +40,13 @@ let ``GIVEN A Book-A-Desk Reservation command WITH a date in the past, WHEN vali
             OfficeId = OfficeId (Guid.NewGuid())
         } : BookADesk
     
-    let result = BookADeskReservationValidator.validateCommand getOffices commandWithPastDate aReservationAggregate
+    let result = BookADeskReservationValidator.validateCommand offices commandWithPastDate aReservationAggregate
     match result with
     | Ok _ -> failwith "Validation should fail because date is in the past"
     | Error _ -> ()
 
 [<Fact>]
 let ``GIVEN A Book-A-Desk Reservation command WITH an invalid office id, WHEN validating, THEN validation should fail`` () =
-    let getOfficesHasAnOffice () = []
     
     let commandWithInvalidOfficeId =
         {
@@ -56,7 +55,7 @@ let ``GIVEN A Book-A-Desk Reservation command WITH an invalid office id, WHEN va
             OfficeId = OfficeId Guid.Empty
         } : BookADesk
     
-    let result = BookADeskReservationValidator.validateCommand getOfficesHasAnOffice commandWithInvalidOfficeId aReservationAggregate
+    let result = BookADeskReservationValidator.validateCommand offices commandWithInvalidOfficeId aReservationAggregate
     match result with
     | Ok _ -> failwith "Validation should fail because the office id is invalid"
     | Error _ -> ()
@@ -64,7 +63,7 @@ let ``GIVEN A Book-A-Desk Reservation command WITH an invalid office id, WHEN va
 [<Fact>]
 let ``GIVEN A Book-A-Desk Reservation command WITH no desks available, WHEN validating, THEN validation should fail`` () =
     let office = { An.office with BookableDesksPerDay = 1 }
-    let getOfficesHasAnOffice () = [office]
+    let offices = [office]
     let command =
         {
             EmailAddress = EmailAddress "anEmailAddress@fake.com"
@@ -78,7 +77,7 @@ let ``GIVEN A Book-A-Desk Reservation command WITH no desks available, WHEN vali
             BookedDesks = [{ A.booking with OfficeId = office.Id}]
         }
     
-    let result = BookADeskReservationValidator.validateCommand getOfficesHasAnOffice command aReservationAggregate
+    let result = BookADeskReservationValidator.validateCommand offices command aReservationAggregate
     match result with
     | Ok _ -> failwith "Validation should fail because all reservations are taken"
     | Error _ -> ()
@@ -86,7 +85,7 @@ let ``GIVEN A Book-A-Desk Reservation command WITH no desks available, WHEN vali
 [<Fact>]
 let ``GIVEN A valid Book-A-Desk Reservation command, WHEN validating the command, THEN validation should pass.`` () =
     let office = An.office
-    let getOfficesHasAnOffice () = [office]
+    let offices = [office]
     let command =
         {
             EmailAddress = EmailAddress "anEmailAddress@fake.com"
@@ -94,7 +93,7 @@ let ``GIVEN A valid Book-A-Desk Reservation command, WHEN validating the command
             OfficeId = office.Id
         } : BookADesk
     
-    let result = BookADeskReservationValidator.validateCommand getOfficesHasAnOffice command aReservationAggregate
+    let result = BookADeskReservationValidator.validateCommand offices command aReservationAggregate
     match result with
     | Error _ -> failwith "Validation should have succeeded"
     | Ok _ -> ()

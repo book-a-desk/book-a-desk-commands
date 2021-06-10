@@ -1,25 +1,29 @@
 ﻿namespace Book_A_Desk.Api
 
+open Amazon.DynamoDBv2
+open Microsoft.AspNetCore.Http
+open Giraffe
+open FsToolkit.ErrorHandling
+open FSharp.Control.Tasks.V2.ContextInsensitive
 open System
 
-open Giraffe
-open FSharp.Control.Tasks.V2.ContextInsensitive
-
-open Book_A_Desk.Domain
-open Book_A_Desk.Domain.Office.Domain
-open Book_A_Desk.Domain.Reservation.Commands
-open Book_A_Desk.Domain.CommandHandler
-
 open Book_A_Desk.Api.Models
+open Book_A_Desk.Domain
+open Book_A_Desk.Domain.CommandHandler
+open Book_A_Desk.Domain.Office.Domain
+open Book_A_Desk.Domain.Reservation
+open Book_A_Desk.Domain.Reservation.Commands
+open Book_A_Desk.Domain.Reservation.Domain
+open Book_A_Desk.Infrastructure.DynamoDbEventStore
+
 type BookingsHttpHandler =
     {
-        HandlePostWith: Booking -> HttpHandler
+        HandlePostWith: Models.Booking -> HttpHandler
     }
 
 module BookingsHttpHandler =
-    let initialize eventStore reservationCommandsFactory =
-
-        let handlePostWith booking = fun next context ->
+    let initialize (provideEventStore : IAmazonDynamoDB -> DynamoDbEventStore) reservationCommandsFactory =
+        let handlePostWith booking = fun next (context : HttpContext) ->
             task {
                 let cmd =
                     {
@@ -27,11 +31,32 @@ module BookingsHttpHandler =
                         Date = booking.Date
                         EmailAddress = EmailAddress booking.User.Email
                     }
-
+ 
+                let eventStore = provideEventStore (context.GetService<IAmazonDynamoDB>())
                 let command = BookADesk cmd
-                let commandHandler = ReservationsCommandHandler.provide eventStore reservationCommandsFactory
+                
+                let handleCommand command = asyncResult {
+                    let (ReservationId aggregateId) = ReservationAggregate.Id
+                    let! events = eventStore.GetEvents aggregateId
+                    
+                    let handler = ReservationsCommandHandler.provide (events |> List.ofSeq) reservationCommandsFactory
+                    let results = handler.Handle command
+                    
+                    match results with
+                    | Ok events ->
+                        let appendEvents eventsToAppend : Async<unit> = 
+                            events
+                            |> Seq.ofList
+                            |> (fun events -> aggregateId, events)
+                            |> List.singleton
+                            |> Map.ofList
+                            |> eventStore.AppendEvents
+                            
+                        return! appendEvents events
+                    | Error _ -> return ()
+                }
 
-                let result = commandHandler.Handle command
+                let! result = handleCommand command
                 match result with
                 | Ok _ ->
                     let output =

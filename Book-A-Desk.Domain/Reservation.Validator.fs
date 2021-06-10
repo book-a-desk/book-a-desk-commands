@@ -50,8 +50,7 @@ module BookADeskReservationValidator =
             return! Error ($"The office is booked out at {date.ToShortDateString()}" )
     }
             
-    let validateCommand (getOffices : unit -> Office list) (cmd : BookADesk) reservationAggregate = result {
-        let offices = getOffices ()
+    let validateCommand (offices: Office list) (cmd : BookADesk) reservationAggregate = result {
         do! validateEmailIsNotEmpty cmd.EmailAddress
         do! validateDateIsInTheFuture cmd.Date
         do! validateOfficeIdIsValid cmd.OfficeId offices

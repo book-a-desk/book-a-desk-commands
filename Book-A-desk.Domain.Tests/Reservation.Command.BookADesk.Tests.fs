@@ -9,7 +9,7 @@ open Book_A_Desk.Domain.Office.Domain
 open Book_A_Desk.Domain.Reservation.Commands
 open Book_A_desk.Domain.Tests
 
-let getAllOffices = fun () ->  Offices.All
+let getAllOffices = Offices.All
 
 [<Fact>]
 let ``GIVEN A Book-A-Desk Reservation command, WHEN executing the command and desks are available, THEN an event should be created`` () =

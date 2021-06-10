@@ -12,7 +12,7 @@ type ReservationCommandsFactory =
 module ReservationCommandsFactory =
     let provide getOffices =
 
-        let createBookADeskCommand () = BookADeskReservationCommand.provide getOffices
+        let createBookADeskCommand () = BookADeskReservationCommand.provide (getOffices ())
 
         {
             CreateBookADeskCommand = createBookADeskCommand

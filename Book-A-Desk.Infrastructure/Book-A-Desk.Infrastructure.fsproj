@@ -8,7 +8,8 @@
     <ItemGroup>
         <Compile Include="ReservationEvent.fs" />
         <Compile Include="DomainMapper.fs" />
-        <Compile Include="Library.fs" />
+        <Compile Include="EventBatcher.fs" />
+        <Compile Include="DynamoDbEventStore.fs" />
     </ItemGroup>
 
     <ItemGroup>
@@ -18,7 +19,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Book-A-Desk.Api\Book-A-Desk.Api.fsproj" />
       <ProjectReference Include="..\Book-A-Desk.Domain\Book-A-Desk.Domain.fsproj" />
     </ItemGroup>
 
