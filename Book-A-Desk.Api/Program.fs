@@ -77,6 +77,19 @@ let configureServices (services : IServiceCollection) =
             .AddAWSService<IAmazonDynamoDB>() |> ignore
     configureDynamoDB serviceProvider
 
+let configureEmailService (sp : ServiceProvider) =
+    let config = sp.GetService<IConfiguration>()
+    let emailServiceConfiguration =
+        {
+            SmtpClientUrl = config.["SMTP:ClientUrl"]
+            SmtpUsername = config.["SMTP:Username"]
+            SmtpPassword = config.["SMTP:Password"]
+            EmailSender = config.["SMTP:EmailSender"]
+            EmailReviewer = config.["SMTP:EmailReviewer"]
+        } 
+    Console.WriteLine(emailServiceConfiguration.SmtpClientUrl)
+    Console.WriteLine(emailServiceConfiguration.SmtpUsername)
+
 [<EntryPoint>]
 let main _ =
     Host.CreateDefaultBuilder()
