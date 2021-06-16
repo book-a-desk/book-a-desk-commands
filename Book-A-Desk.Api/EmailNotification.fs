@@ -11,8 +11,9 @@ type EmailNotification =
     }
 
 module EmailNotification =
-    let initialize getOffices =         
-        let sendEmailNotification (booking: Booking) = 
+    let initialize getEmailServiceConfiguration getOffices =         
+        let sendEmailNotification (booking: Booking) =
+            let config = getEmailServiceConfiguration()        
             let officeName =
                 let result = OfficeQueriesHandler.getAll getOffices
                 match result with
@@ -24,13 +25,15 @@ module EmailNotification =
                         cityName)
                 | Error e ->
                     "Unknown"
-            // To be refactored to extract harcoded variables
-            use smtpClient = new SmtpClient("smtp.local")
+
+            use smtpClient = new SmtpClient(config.SmtpClientUrl)
+            smtpClient.EnableSsl <- true
+            smtpClient.Credentials <- System.Net.NetworkCredential(config.SmtpUsername, config.SmtpPassword)            
             use mailMessage =
                 new MailMessage(
-                    "reception@broadsign.com",
+                    config.EmailSender,
                     booking.User.Email)
-            mailMessage.CC.Add "karol.yuen@broadsign.com"
+            mailMessage.CC.Add config.EmailReviewer
             mailMessage.Subject <- "Book-A-Desk Reservation confirmed"
             mailMessage.Body <- $"You have booked a desk at %s{booking.Date.ToShortDateString()} in the Office %s{officeName}"
 

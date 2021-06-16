@@ -39,7 +39,9 @@ let configureApp (ctx : WebHostBuilderContext) (app : IApplicationBuilder) =
 
     let reservationCommandsFactory = ReservationCommandsFactory.provide getAllOffices
 
-    let emailNotification = EmailNotification.initialize getAllOffices
+    let getEmailServiceConfiguration = (fun () -> app.ApplicationServices.GetService<EmailServiceConfiguration>())
+    
+    let emailNotification = EmailNotification.initialize getEmailServiceConfiguration getAllOffices
     
     let apiDependencyFactory = ApiDependencyFactory.provide eventStore reservationCommandsFactory getAllOffices emailNotification.SendEmailNotification
 
@@ -68,15 +70,6 @@ let configureDynamoDB (sp : ServiceProvider) =
     Console.WriteLine(dynamoDBConfiguration.ReservationTableName)
     Console.WriteLine(dynamoDBConfiguration.OfficeTableName)
 
-let configureServices (services : IServiceCollection) =
-    let serviceProvider = services.BuildServiceProvider()
-    let config = serviceProvider.GetService<IConfiguration>()
-    services.AddGiraffe()
-            .AddCors()
-            .AddDefaultAWSOptions(config.GetAWSOptions())
-            .AddAWSService<IAmazonDynamoDB>() |> ignore
-    configureDynamoDB serviceProvider
-
 let configureEmailService (sp : ServiceProvider) =
     let config = sp.GetService<IConfiguration>()
     let emailServiceConfiguration =
@@ -90,6 +83,17 @@ let configureEmailService (sp : ServiceProvider) =
     Console.WriteLine(emailServiceConfiguration.SmtpClientUrl)
     Console.WriteLine(emailServiceConfiguration.SmtpUsername)
 
+
+let configureServices (services : IServiceCollection) =
+    let serviceProvider = services.BuildServiceProvider()
+    let config = serviceProvider.GetService<IConfiguration>()
+    services.AddGiraffe()
+            .AddCors()
+            .AddDefaultAWSOptions(config.GetAWSOptions())
+            .AddAWSService<IAmazonDynamoDB>() |> ignore
+    configureDynamoDB serviceProvider
+    configureEmailService serviceProvider
+    
 [<EntryPoint>]
 let main _ =
     Host.CreateDefaultBuilder()
