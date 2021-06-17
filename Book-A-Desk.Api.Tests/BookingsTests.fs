@@ -1,21 +1,21 @@
 ﻿module Book_A_Desk.Api.Tests.BookingsTests
 
+open Book_A_Desk.Infrastructure.DynamoDbEventStore
 open Newtonsoft.Json
 open System
 open Xunit
 
 open Book_A_Desk.Api
 open Book_A_Desk.Api.Models
-open Book_A_Desk.Domain
 open Book_A_Desk.Domain.CommandHandler
 open Book_A_Desk.Domain.Reservation.Commands
 open Book_A_Desk.Domain.Office.Domain
 
-let mockEventStore =
+let mockProvideEventStore _ =
     {
-        GetEvents = fun _ -> Result.Ok(List.empty)
-        AppendEvents = fun _ -> ()
-    }
+        GetEvents = fun _ -> Seq.empty |> Ok |> async.Return
+        AppendEvents = fun _ -> () |> async.Return
+    } : DynamoDbEventStore
 
 let mockOfficeId =  Guid.NewGuid ()
 
@@ -26,12 +26,15 @@ let mockOffice =
         BookableDesksPerDay = 32
     }
 
-let mockGetOffices () =
+let offices = 
     mockOffice |> List.singleton
 
+let mockGetOffices () =
+    offices
+    
 let mockReservationCommandFactory : ReservationCommandsFactory =
     {
-        CreateBookADeskCommand = fun () -> BookADeskReservationCommand.provide mockGetOffices
+        CreateBookADeskCommand = fun () -> BookADeskReservationCommand.provide offices
     }
 
 [<Fact>]
@@ -39,8 +42,8 @@ let ``GIVEN A Book-A-Desk server, WHEN booking a desk, THEN a desk is booked`` (
     let mutable emailWasSent = false
     let mockEmailNotification booking =
         emailWasSent <- true
-        ()
-    let mockApiDependencyFactory = ApiDependencyFactory.provide mockEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification
+        ()    
+    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification
     use httpClient = TestServer.createAndRun mockApiDependencyFactory
 
     let booking  =

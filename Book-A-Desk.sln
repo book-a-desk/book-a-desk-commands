@@ -17,6 +17,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Book-A-Desk.Core", "Book-A-
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Book-A-Desk.Infrastructure", "Book-A-Desk.Infrastructure\Book-A-Desk.Infrastructure.fsproj", "{13B28A90-1DF3-4E80-AF69-E53786573D97}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Book-A-Desk.Infrastructure.Tests", "Book-A-Desk.Infrastructure.Tests\Book-A-Desk.Infrastructure.Tests.fsproj", "{AE8F50A3-CF9B-4F7E-BD49-2280F619C74E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,5 +49,9 @@ Global
 		{13B28A90-1DF3-4E80-AF69-E53786573D97}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{13B28A90-1DF3-4E80-AF69-E53786573D97}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{13B28A90-1DF3-4E80-AF69-E53786573D97}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AE8F50A3-CF9B-4F7E-BD49-2280F619C74E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE8F50A3-CF9B-4F7E-BD49-2280F619C74E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AE8F50A3-CF9B-4F7E-BD49-2280F619C74E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AE8F50A3-CF9B-4F7E-BD49-2280F619C74E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

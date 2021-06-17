@@ -11,12 +11,14 @@ open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.DependencyInjection
 open Giraffe
+open System.Threading.Tasks
 
 open Book_A_Desk.Api
 open Book_A_Desk.Domain
-open Book_A_Desk.Domain.CommandHandler
 open Book_A_Desk.Domain.Office.Domain
-
+open Book_A_Desk.Infrastructure
+open Book_A_Desk.Infrastructure.DynamoDbEventStore
+open Book_A_Desk.Domain.CommandHandler
  
 let configureCors (ctx : WebHostBuilderContext) (builder : CorsPolicyBuilder) =
     if ctx.HostingEnvironment.IsDevelopment() then
@@ -33,7 +35,7 @@ let configureCors (ctx : WebHostBuilderContext) (builder : CorsPolicyBuilder) =
             |> ignore
 
 let configureApp (ctx : WebHostBuilderContext) (app : IApplicationBuilder) =
-    let eventStore = InMemoryEventStore.provide ()
+    let provideEventStore amazonDynamoDb = DynamoDbEventStore.provide amazonDynamoDb
 
     let getAllOffices = (fun () -> Offices.All)
 
@@ -43,7 +45,7 @@ let configureApp (ctx : WebHostBuilderContext) (app : IApplicationBuilder) =
     
     let emailNotification = EmailNotification.initialize getEmailServiceConfiguration getAllOffices
     
-    let apiDependencyFactory = ApiDependencyFactory.provide eventStore reservationCommandsFactory getAllOffices emailNotification.SendEmailNotification
+    let apiDependencyFactory = ApiDependencyFactory.provide provideEventStore reservationCommandsFactory getAllOffices emailNotification.SendEmailNotification
 
     let routes = Routes.provide apiDependencyFactory
     app.UseCors(configureCors ctx)
@@ -51,14 +53,13 @@ let configureApp (ctx : WebHostBuilderContext) (app : IApplicationBuilder) =
            
 let configureAppConfiguration (builder : IConfigurationBuilder) =
     let region = Environment.GetEnvironmentVariable("AWS_REGION")
-    let environment = Environment.GetEnvironmentVariable("ENVIRONMENT")
     let awsKeyId = Environment.GetEnvironmentVariable("AWS_KEYID")
     let awsSecretKey = Environment.GetEnvironmentVariable("AWS_SECRETKEY")
     let credentials = BasicAWSCredentials(awsKeyId, awsSecretKey)
     let mutable options = AWSOptions()
     options.Region <- RegionEndpoint.GetBySystemName(region)
     options.Credentials <- credentials
-    builder.AddSystemsManager($"/BookADesk/{environment}", options) |> ignore
+    builder.AddSystemsManager($"/BookADesk/", options) |> ignore
     
 let configureDynamoDB (sp : ServiceProvider) =
     let config = sp.GetService<IConfiguration>()
