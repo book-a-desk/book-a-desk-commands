@@ -2,7 +2,6 @@
 
 open System
 
-open System.Net.Mail
 open Amazon.DynamoDBv2
 open Microsoft.AspNetCore.Http
 open Giraffe
@@ -12,7 +11,6 @@ open FSharp.Control.Tasks.V2.ContextInsensitive
 open Book_A_Desk.Api.Models
 open Book_A_Desk.Domain
 open Book_A_Desk.Domain.CommandHandler
-open Book_A_Desk.Domain.QueriesHandler
 open Book_A_Desk.Domain.Office.Domain
 open Book_A_Desk.Domain.Reservation
 open Book_A_Desk.Domain.Reservation.Commands

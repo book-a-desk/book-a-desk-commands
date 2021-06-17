@@ -3,7 +3,6 @@ open Amazon
 open Amazon.DynamoDBv2
 open Amazon.Extensions.NETCore.Setup
 open Amazon.Runtime
-open Book_A_Desk.Api.Models
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Cors.Infrastructure
 open Microsoft.AspNetCore.Hosting
@@ -11,13 +10,10 @@ open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.DependencyInjection
 open Giraffe
-open System.Threading.Tasks
 
 open Book_A_Desk.Api
-open Book_A_Desk.Domain
 open Book_A_Desk.Domain.Office.Domain
 open Book_A_Desk.Infrastructure
-open Book_A_Desk.Infrastructure.DynamoDbEventStore
 open Book_A_Desk.Domain.CommandHandler
  
 let configureCors (ctx : WebHostBuilderContext) (builder : CorsPolicyBuilder) =

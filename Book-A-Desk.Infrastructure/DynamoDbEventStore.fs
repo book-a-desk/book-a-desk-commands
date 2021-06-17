@@ -4,7 +4,6 @@ open System
 open Amazon.DynamoDBv2
 open FSharp.AWS.DynamoDB
 open FSharp.Control
-open Book_A_Desk.Domain
 open Book_A_Desk.Domain.Events
 
 module rec DynamoDbEventStore =
