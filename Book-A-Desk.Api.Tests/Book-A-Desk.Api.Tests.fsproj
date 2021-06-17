@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <Compile Include="MockAmazonDynamoDB.fs" />
+    <Compile Include="MockEmailService.fs" />
     <Compile Include="TestServer.fs" />
     <Compile Include="HttpRequest.fs" />
     <Compile Include="OfficesTests.fs" />
