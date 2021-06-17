@@ -18,7 +18,7 @@ let private configureApp apiDependencyFactory (app : IApplicationBuilder) =
 
 let private configureServices (services : IServiceCollection) =
     let mockDynamoDb = new MockAmazonDynamoDB()
-    let mockEmailService = MockEmailService()
+    let mockEmailService = MockEmailServiceConfiguration()
     services.AddGiraffe() |> ignore
     services.AddSingleton<IAmazonDynamoDB>(mockDynamoDb) |> ignore
     services.AddSingleton<IConfiguration>(mockEmailService) |> ignore

@@ -25,7 +25,7 @@ module EmailNotification =
                         cityName)
                 | Error e ->
                     "Unknown"
-
+                    
             use smtpClient = new SmtpClient(config.SmtpClientUrl)
             smtpClient.EnableSsl <- true
             smtpClient.Credentials <- System.Net.NetworkCredential(config.SmtpUsername, config.SmtpPassword)            

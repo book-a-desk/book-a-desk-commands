@@ -17,11 +17,11 @@ let mockProvideEventStore _ =
         AppendEvents = fun _ -> () |> async.Return
     } : DynamoDbEventStore
 
-let mockOfficeId =  Guid.NewGuid ()
+let mockOfficeId =  Guid.NewGuid () |> OfficeId
 
 let mockOffice =
     {
-        Id = mockOfficeId |> OfficeId
+        Id = mockOfficeId
         City = CityName "SomeCityName"
         BookableDesksPerDay = 32
     }
@@ -48,7 +48,7 @@ let ``GIVEN A Book-A-Desk server, WHEN booking a desk, THEN a desk is booked`` (
 
     let booking  =
         {
-            Office = { Id = mockOfficeId.ToString() }
+            Office = { Id = mockOfficeId }
             Date = DateTime.MaxValue
             User = { Email = "someEmail" }
         } : InputBooking

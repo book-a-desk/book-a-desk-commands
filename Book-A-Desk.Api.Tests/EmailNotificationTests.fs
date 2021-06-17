@@ -1,0 +1,63 @@
+module Book_A_Desk.Api.Tests.EmailNotificationTests
+
+open System
+open Book_A_Desk.Api
+open Book_A_Desk.Api.Models
+open Book_A_Desk.Domain.Office.Domain
+open Xunit
+
+[<Fact>]
+let ``GIVEN A booking WHEN calling to SendEmailNotification THEN Email must be sent`` () = async {
+    let officeId = Guid.NewGuid () |> OfficeId
+    let totalDesks = 32
+    let mockOffice =
+        {
+            Id = officeId
+            City = CityName "SomeCityName"
+            BookableDesksPerDay = totalDesks
+        }
+    let mockedOfficeReference =
+        {
+            Id = officeId
+        }
+    let offices =
+        mockOffice |> List.singleton
+    let mockGetOffices () = offices
+    
+    let date = DateTime(2021,02,01)
+    
+    let mockedUser =
+        {
+            Email = "booking.user@broadsing.com"    
+        }
+    
+    let mockBooking =
+        {
+            Office = mockedOfficeReference
+            Date = date
+            User = mockedUser
+        }
+        
+    let mockEmailConfig =
+        {
+            SmtpClientUrl = "http://localhost:8080/SMTP"
+            SmtpUsername = "username"
+            SmtpPassword = "password"
+            EmailSender = "from@broadsing.com"
+            EmailReviewer = "reviewer@broadsing.com"
+        }
+        
+    let mockEmailServiceConfiguration () = mockEmailConfig
+            
+    let emailNotification = EmailNotification.initialize mockEmailServiceConfiguration mockGetOffices       
+    
+    // Refactor this code to mock SmtpClient and verify that Send function is called
+    try
+        emailNotification.SendEmailNotification mockBooking
+        Assert.False(true)
+    with
+    | :? System.Net.Mail.SmtpException as ex ->
+        match ex.TargetSite.Name with
+        | "Send" -> printfn "I've sent a mail message! We know that host is not valid."
+        | _ -> Assert.False(true)
+}

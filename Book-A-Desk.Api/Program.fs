@@ -38,8 +38,8 @@ let configureApp (ctx : WebHostBuilderContext) (app : IApplicationBuilder) =
     let reservationCommandsFactory = ReservationCommandsFactory.provide getAllOffices
 
     let getEmailServiceConfiguration = (fun () -> app.ApplicationServices.GetService<EmailServiceConfiguration>())
-    
-    let emailNotification = EmailNotification.initialize getEmailServiceConfiguration getAllOffices
+     
+    let emailNotification = EmailNotification.initialize getEmailServiceConfiguration getAllOffices 
     
     let apiDependencyFactory = ApiDependencyFactory.provide provideEventStore reservationCommandsFactory getAllOffices emailNotification.SendEmailNotification
 

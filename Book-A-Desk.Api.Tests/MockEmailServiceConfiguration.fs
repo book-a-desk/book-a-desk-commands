@@ -4,7 +4,7 @@ open Microsoft.Extensions.Configuration
 
 // This mock is required because we fetch it through the dependency injection system to create the EmailServiceConfiguration
 
-type MockEmailService () =
+type MockEmailServiceConfiguration () =
     interface IConfiguration with
         member this.get_Item(key:string) =
             match key with

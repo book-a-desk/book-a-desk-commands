@@ -1,6 +1,7 @@
 ﻿namespace Book_A_Desk.Api.Models
 
 open System
+open Book_A_Desk.Domain.Office.Domain
 
 type UserReference =
     {
@@ -9,7 +10,7 @@ type UserReference =
 
 type OfficeReference =
     {
-        Id: string
+        Id: OfficeId
     }
 
 type InputBooking =
