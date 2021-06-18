@@ -69,6 +69,7 @@ module rec OfficesHttpHandler =
                         {
                             Id = officeId.ToString()
                             TotalDesks = officeAvailability.TotalDesks
+                            ReservedDesks = officeAvailability.ReservedDesks
                             AvailableDesks = officeAvailability.AvailableDesks
                         } : Book_A_Desk.Api.Models.OfficeAvailability
                     return! json officeAvailability next context
@@ -86,6 +87,7 @@ module rec OfficesHttpHandler =
                 OfficeId = officeId |> OfficeId
                 Date = date
             }
-
-        return! OfficeQueriesHandler.getAvailabilities getOffices getBookingsForDate query
+        
+        let minimumDate = DateTime.UtcNow.Date
+        return! OfficeQueriesHandler.getAvailabilities getOffices getBookingsForDate minimumDate query
     }

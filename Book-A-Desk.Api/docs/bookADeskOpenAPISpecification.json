@@ -250,6 +250,9 @@
           },
           "availableDesks" : {
             "type": "integer"
+          },
+          "reservedDesks" : {
+            "type": "integer"
           }
         }
       }
