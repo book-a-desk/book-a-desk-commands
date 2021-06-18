@@ -39,7 +39,7 @@ module BookingsHttpHandler =
             task {
                 let cmd =
                     {
-                        BookADesk.OfficeId = booking.Office.Id
+                        BookADesk.OfficeId = Guid.Parse(booking.Office.Id) |> OfficeId // Consider TryParse and return 400 if not valid
                         Date = booking.Date
                         EmailAddress = EmailAddress booking.User.Email
                     }

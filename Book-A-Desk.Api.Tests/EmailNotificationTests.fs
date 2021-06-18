@@ -8,17 +8,17 @@ open Xunit
 
 [<Fact>]
 let ``GIVEN A booking WHEN calling to SendEmailNotification THEN Email must be sent`` () = async {
-    let officeId = Guid.NewGuid () |> OfficeId
+    let officeId = Guid.NewGuid ()
     let totalDesks = 32
     let mockOffice =
         {
-            Id = officeId
+            Id = officeId |> OfficeId
             City = CityName "SomeCityName"
             BookableDesksPerDay = totalDesks
         }
     let mockedOfficeReference =
         {
-            Id = officeId
+            Id = officeId.ToString()
         }
     let offices =
         mockOffice |> List.singleton

@@ -1,5 +1,6 @@
 namespace Book_A_Desk.Api
 
+open System
 open System.Net.Mail
 open Book_A_Desk.Api.Models
 open Book_A_Desk.Domain.QueriesHandler
@@ -16,10 +17,11 @@ module EmailNotification =
             let config = getEmailServiceConfiguration()        
             let officeName =
                 let result = OfficeQueriesHandler.getAll getOffices
+                let officeReference = Guid.Parse(booking.Office.Id) |> OfficeId
                 match result with
                 | Ok offices ->
                     offices
-                    |> List.find (fun (o:Office) -> booking.Office.Id.Equals(o.Id))
+                    |> List.find (fun (o:Office) -> officeReference.Equals(o.Id))
                     |> (fun (o:Office) -> 
                         let (CityName cityName) = o.City
                         cityName)
