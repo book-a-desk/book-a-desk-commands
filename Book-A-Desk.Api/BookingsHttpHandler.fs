@@ -23,16 +23,6 @@ type BookingsHttpHandler =
         HandlePostWith: Models.Booking -> HttpHandler
     }
 
-type EmailDetails =
-    {
-        toAddress : string
-        fromAddress : string
-        body : string
-    }
-
-type MessageDetails =
-    | Email of EmailDetails
-
 module BookingsHttpHandler =
     let initialize (provideEventStore : IAmazonDynamoDB -> DynamoDbEventStore) reservationCommandsFactory sendEmailNotification =
         let handlePostWith booking = fun next (context : HttpContext) ->
