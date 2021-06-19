@@ -15,7 +15,7 @@
 version: 2.1
 workflows:
   pull-request:
-    when:
+    unless:
       equal: ["trunk", << pipeline.git.branch >>]
     jobs:
       - build_and_test
@@ -24,7 +24,7 @@ workflows:
             - build_and_test
 
   production:
-    unless:
+    when:
       equal: ["trunk", << pipeline.git.branch >>]
     jobs:
       - build_and_test
@@ -142,4 +142,3 @@ jobs:
           container-image-name-updates: 'container=Book-A-Desk-Container,tag=<< pipeline.parameters.docker-img-version >>'
           service-name: 'Book-A-Desk'
           family: 'Book-A-Desk-Backend'
-          container-env-var-updates: container=Book-A-Desk-Container,name=AWS_KEYID,valueFrom=arn:aws:secretsmanager:ca-central-1:$AWS_ACCOUNT_ID_DEV:secret:IAM-credentials:AWS_ACCESS_KEY_ID,container=Book-A-Desk-Container,name=AWS_SECRETKEY,valueFrom=arn:aws:secretsmanager:ca-central-1:$AWS_ACCOUNT_ID_DEV:secret:IAM-credentials:AWS_SECRET_ACCESS_KEY
