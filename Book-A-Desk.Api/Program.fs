@@ -50,7 +50,6 @@ let configureAppConfiguration (builder : IConfigurationBuilder) =
     let region = Environment.GetEnvironmentVariable("AWS_REGION")
     let awsKeyId = Environment.GetEnvironmentVariable("AWS_KEYID")
     let awsSecretKey = Environment.GetEnvironmentVariable("AWS_SECRETKEY")
-    Console.WriteLine(awsKeyId)
     let credentials = BasicAWSCredentials(awsKeyId, awsSecretKey)
     let mutable options = AWSOptions()
     options.Region <- RegionEndpoint.GetBySystemName(region)
