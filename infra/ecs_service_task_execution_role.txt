@@ -1,4 +1,5 @@
 ecsTaskExecutionRole
+AWS service: ecs-tasks 
 Policies:
 - AmazonECSTaskExecutionRolePolicy 
 - GetCredentialsSecret 
