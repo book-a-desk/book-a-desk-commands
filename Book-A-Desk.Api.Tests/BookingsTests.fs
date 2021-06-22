@@ -36,23 +36,25 @@ let mockReservationCommandFactory : ReservationCommandsFactory =
     {
         CreateBookADeskCommand = fun () -> BookADeskReservationCommand.provide offices
     }
+    
+let mutable emailWasSent = false 
+let mockEmailNotification booking =
+    emailWasSent <- true
+    ()    
+
+let booking  =
+    {
+        Office = { Id = mockOfficeId.ToString() }
+        Date = DateTime.MaxValue
+        User = { Email = "someEmail" }
+    } : InputBooking
 
 [<Fact>]
 let ``GIVEN A Book-A-Desk server, WHEN booking a desk, THEN a desk is booked`` () = async {
-    let mutable emailWasSent = false
-    let mockEmailNotification booking =
-        emailWasSent <- true
-        ()    
+    emailWasSent <- false
     let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification
     use httpClient = TestServer.createAndRun mockApiDependencyFactory
-
-    let booking  =
-        {
-            Office = { Id = mockOfficeId.ToString() }
-            Date = DateTime.MaxValue
-            User = { Email = "someEmail" }
-        } : InputBooking
-
+    
     let serializedBooking = JsonConvert.SerializeObject(booking)
 
     let! result = HttpRequest.postAsync httpClient $"http://localhost:/bookings" serializedBooking
@@ -62,5 +64,17 @@ let ``GIVEN A Book-A-Desk server, WHEN booking a desk, THEN a desk is booked`` (
     Assert.Equal(booking.Office.Id, deserializedResult.Office.Id)
     Assert.Equal(booking.Date, deserializedResult.Date)
     Assert.Equal(booking.User.Email, deserializedResult.User.Email)
+}
+
+[<Fact>]
+let ``GIVEN A Book-A-Desk server, WHEN booking a desk, THEN an email notification must be sent`` () = async {
+    emailWasSent <- false    
+    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification
+    use httpClient = TestServer.createAndRun mockApiDependencyFactory
+    
+    let serializedBooking = JsonConvert.SerializeObject(booking)
+
+    let! result = HttpRequest.postAsync httpClient $"http://localhost:/bookings" serializedBooking
+    
     Assert.True(emailWasSent)
 }
