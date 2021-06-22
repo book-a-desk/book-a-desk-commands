@@ -1,0 +1,20 @@
+ecsTaskExecutionRole
+AWS service: ecs-tasks 
+Policies:
+- AmazonECSTaskExecutionRolePolicy 
+- GetCredentialsSecret 
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "secretsmanager:GetSecretValue"
+            ],
+            "Resource": [
+                "arn:aws:secretsmanager:ca-central-1:<account-id>>:secret:<access-key-secret-name>",
+                "arn:aws:secretsmanager:ca-central-1:<account-id>:secret:<secret-access-key-secret-name>"
+            ]
+        }
+    ]
+}
