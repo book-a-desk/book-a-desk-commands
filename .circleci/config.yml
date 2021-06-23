@@ -35,7 +35,8 @@ workflows:
           name: deploy-to-dev
           ecr-account-url: ${AWS_ECR_ACCOUNT_URL_DEV}
           aws-account-id: ${AWS_ACCOUNT_DEV}
-          authenticate-aws: authenticate-aws-book-a-desk-dev
+          authenticate-aws:
+            - authenticate-aws-book-a-desk-dev
           context:
             - aws-credentials
           requires:
@@ -44,7 +45,8 @@ workflows:
           name: deploy-to-test
           ecr-account-url: ${AWS_ECR_ACCOUNT_URL_TEST}
           aws-account-id: ${AWS_ACCOUNT_TEST}
-          authenticate-aws: authenticate-aws-book-a-desk-test
+          authenticate-aws:
+            - authenticate-aws-book-a-desk-test
           context:
             - aws-credentials
           requires:
