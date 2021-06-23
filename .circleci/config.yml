@@ -46,11 +46,12 @@ workflows:
           context:
             - aws-credentials
           requires:
-            - build_image
+            - deploy-to-dev
 
 orbs:
   aws-ecr: circleci/aws-ecr@6.15.3
   aws-ecs: circleci/aws-ecs@2.0.0
+  aws-cli: circleci/aws-cli@1.3.0
 
 parameters:
   docker-repo:
@@ -161,6 +162,8 @@ jobs:
     steps:
       - attach_workspace:
           at: ./
+      - aws-cli/setup:
+          aws-region: AWS_REGION
       - deploy-to-ecr:
           ecr-account-url: << parameters.ecr-account-url >>
           aws-account-id: << parameters.aws-account-id >>
