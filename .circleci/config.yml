@@ -105,9 +105,13 @@ commands:
       - run:
           name: Docker login
           command: aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin << parameters.aws-account-id >>.dkr.ecr.${AWS_REGION}.amazonaws.com
-      - aws-ecr/push-image:
-          repo: << pipeline.parameters.docker-repo >>
-          tag: << pipeline.parameters.docker-img-version >>
+      - run:
+          name: Push Docker image
+          command: |
+            docker push "<< parameters.ecr-account-url >>/<< pipeline.parameters.docker-repo >>:<< pipeline.parameters.docker-img-version >>"
+#      - aws-ecr/push-image:
+#          repo: << pipeline.parameters.docker-repo >>
+#          tag: << pipeline.parameters.docker-img-version >>
   log-aws-identity:
     parameters:
       profile:
