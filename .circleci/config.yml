@@ -53,7 +53,6 @@ workflows:
             - deploy-to-dev
 
 orbs:
-  aws-ecr: circleci/aws-ecr@6.15.3
   aws-ecs: circleci/aws-ecs@2.0.0
   aws-cli: circleci/aws-cli@1.3.0
 
@@ -109,9 +108,6 @@ commands:
           name: Push Docker image
           command: |
             docker push "<< parameters.ecr-account-url >>/<< pipeline.parameters.docker-repo >>:<< pipeline.parameters.docker-img-version >>"
-#      - aws-ecr/push-image:
-#          repo: << pipeline.parameters.docker-repo >>
-#          tag: << pipeline.parameters.docker-img-version >>
   log-aws-identity:
     parameters:
       profile:
@@ -205,9 +201,6 @@ jobs:
       - deploy-to-ecr:
           ecr-account-url: << parameters.ecr-account-url >>
           aws-account-id: << parameters.aws-account-id >>
-      - aws-ecr/push-image:
-          repo: << pipeline.parameters.docker-repo >>
-          tag: << pipeline.parameters.docker-img-version >>
 #      - aws-ecs/update-service:
 #          cluster-name: 'arn:aws:ecs:${AWS_REGION}:<< parameters.aws-account-id >>:cluster/Book-A-Desk-Cluster'
 
