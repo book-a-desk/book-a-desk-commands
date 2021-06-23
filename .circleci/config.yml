@@ -112,7 +112,7 @@ commands:
     parameters:
       profile:
         type: string
-        default: ""
+        default: ${AWS_PROFILE}
     steps:
       - run:
           name: Log AWS identity <<# parameters.profile >>(profile=<< parameters.profile >>)<</ parameters.profile >>
