@@ -32,6 +32,19 @@ workflows:
           requires:
             - build_and_test
       - deploy:
+          name: deploy-to-dev
+          ecr-account-url: ${AWS_ECR_ACCOUNT_URL_DEV}
+          aws-account-id: ${AWS_ACCOUNT_DEV}
+          context:
+            - aws-credentials
+          requires:
+            - build_image
+      - deploy:
+          name: deploy-to-test
+          ecr-account-url: ${AWS_ECR_ACCOUNT_URL_TEST}
+          aws-account-id: ${AWS_ACCOUNT_TEST}
+          context:
+            - aws-credentials
           requires:
             - build_image
 
@@ -68,6 +81,28 @@ commands:
             trx2junit << parameters.path >>/*.trx
       - store_test_results:
           path: << parameters.path >>
+  deploy-to-ecr:
+    parameters:
+      ecr-account-url:
+        type: string
+      aws-account-id:
+        type: string
+    steps:
+      - run:
+          name: Load Docker image
+          command: docker load -i ./<< pipeline.parameters.docker-tar-filename >>
+      - run:
+          name: Tag Docker image for ECR
+          command: |
+            docker tag \
+              << pipeline.parameters.docker-repo >>:<< pipeline.parameters.docker-img-version >> \
+              "<< parameters.ecr-account-url >>/<< pipeline.parameters.docker-repo >>:<< pipeline.parameters.docker-img-version >>"
+      - run:
+          name: Docker login
+          command: aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin << parameters.aws-account-id >>.dkr.ecr.${AWS_REGION}.amazonaws.com
+      - aws-ecr/push-image:
+          repo: << pipeline.parameters.docker-repo >>
+          tag: << pipeline.parameters.docker-img-version >>
 jobs:
   build_and_test:
     docker:
@@ -117,28 +152,24 @@ jobs:
 
   deploy:
     machine: true
-
+    parameters:
+      - ecr-account-url:
+          type: string
+      - aws-account-id:
+          type: string
+    
     steps:
       - attach_workspace:
           at: ./
-      - run:
-          name: Load Docker image
-          command: docker load -i ./<< pipeline.parameters.docker-tar-filename >>
-      - run:
-          name: Tag Docker image for ECR
-          command: |
-            docker tag \
-              << pipeline.parameters.docker-repo >>:<< pipeline.parameters.docker-img-version >> \
-              "${AWS_ECR_ACCOUNT_URL}/<< pipeline.parameters.docker-repo >>:<< pipeline.parameters.docker-img-version >>"
-      - aws-ecr/ecr-login:
-          aws-access-key-id: AWS_ECR_ACCESS_KEY_ID
-          aws-secret-access-key: AWS_ECR_SECRET_ACCESS_KEY
-          region: AWS_REGION
+      - deploy-to-ecr:
+          ecr-account-url: << parameters.ecr-account-url >>
+          aws-account-id: << parameters.aws-account-id >>
       - aws-ecr/push-image:
           repo: << pipeline.parameters.docker-repo >>
           tag: << pipeline.parameters.docker-img-version >>
-      - aws-ecs/update-service:
-          cluster-name: 'Book-A-Desk-Cluster'
-          container-image-name-updates: 'container=Book-A-Desk-Container,tag=<< pipeline.parameters.docker-img-version >>'
-          service-name: 'Book-A-Desk'
-          family: 'Book-A-Desk-Backend'
+#      - aws-ecs/update-service:
+#          cluster-name: 'arn:aws:ecs:${AWS_REGION}:<< parameters.aws-account-id >>:cluster/Book-A-Desk-Cluster'
+
+#          container-image-name-updates: 'container=Book-A-Desk-Container,tag=<< pipeline.parameters.docker-img-version >>'
+#          service-name: 'Book-A-Desk'
+#          family: 'Book-A-Desk-Backend'
