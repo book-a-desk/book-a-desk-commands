@@ -35,6 +35,7 @@ workflows:
           name: deploy-to-dev
           ecr-account-url: ${AWS_ECR_ACCOUNT_URL_DEV}
           aws-account-id: ${AWS_ACCOUNT_DEV}
+          authenticate-aws: authenticate-aws-book-a-desk-dev
           context:
             - aws-credentials
           requires:
@@ -43,6 +44,7 @@ workflows:
           name: deploy-to-test
           ecr-account-url: ${AWS_ECR_ACCOUNT_URL_TEST}
           aws-account-id: ${AWS_ACCOUNT_TEST}
+          authenticate-aws: authenticate-aws-book-a-desk-test
           context:
             - aws-credentials
           requires:
@@ -104,6 +106,32 @@ commands:
       - aws-ecr/push-image:
           repo: << pipeline.parameters.docker-repo >>
           tag: << pipeline.parameters.docker-img-version >>
+  log-aws-identity:
+    parameters:
+      profile:
+        type: string
+        default: ""
+    steps:
+      - run:
+          name: Log AWS identity <<# parameters.profile >>(profile=<< parameters.profile >>)<</ parameters.profile >>
+          command: aws sts get-caller-identity <<# parameters.profile >> --profile << parameters.profile >> <</ parameters.profile >> --region $AWS_REGION || true
+  authenticate-aws-book-a-desk-dev:
+    description: "Configure AWS credentials for Book A Desk Dev"
+    steps:
+      - run:
+          name: "Initialize BASH_ENV variables"
+          command: |
+            echo "export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID_DEV}" >> $BASH_ENV
+            echo "export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY_DEV}" >> $BASH_ENV
+            echo $AWS_SECRET_ACCESS_KEY_ID
+  authenticate-aws-book-a-desk-test:
+    description: "Configure AWS credentials for Book A Desk Test"
+    steps:
+      - run:
+          name: "Initialize BASH_ENV variables"
+          command: |
+            echo "export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID_TEST}" >> $BASH_ENV
+            echo "export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY_TEST}" >> $BASH_ENV
 jobs:
   build_and_test:
     docker:
@@ -158,10 +186,14 @@ jobs:
         type: string
       aws-account-id:
         type: string
+      authenticate-aws:
+        type: steps
     
     steps:
       - attach_workspace:
           at: ./
+      - steps: << parameters.authenticate-aws >>
+      - log-aws-identity
       - aws-cli/setup:
           aws-region: AWS_REGION
       - deploy-to-ecr:
