@@ -153,10 +153,10 @@ jobs:
   deploy:
     machine: true
     parameters:
-      - ecr-account-url:
-          type: string
-      - aws-account-id:
-          type: string
+      ecr-account-url:
+        type: string
+      aws-account-id:
+        type: string
     
     steps:
       - attach_workspace:
