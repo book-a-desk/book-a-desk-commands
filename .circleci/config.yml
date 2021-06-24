@@ -15,41 +15,16 @@
 version: 2.1
 workflows:
   pull-request:
-    unless:
+    when:
       equal: ["trunk", << pipeline.git.branch >>]
     jobs:
       - build_and_test
       - build_image:
           requires:
             - build_and_test
-      - push-image:
-          name: push-image-to-test
-          ecr-account-url: ${AWS_ECR_ACCOUNT_URL_TEST}
-          aws-account-id: ${AWS_ACCOUNT_TEST}
-          authenticate-aws:
-            - authenticate-aws-book-a-desk-test
-          context:
-            - aws-credentials
-          requires:
-            - build_image
-      - deploy:
-          name: deploy-to-test
-          ecr-account-url: ${AWS_ECR_ACCOUNT_URL_TEST}
-          aws-account-id: ${AWS_ACCOUNT_TEST}
-          authenticate-aws:
-            - authenticate-aws-book-a-desk-test
-          aws-key-id-secret-id: ${AWS_ACCESS_KEY_ID_SECRET_TEST}
-          aws-secret-key-secret-id: ${AWS_SECRET_ACCESS_KEY_SECRET_TEST}
-          certificate-id: ${ACM_CERTIFICATE_ID_TEST}
-          hosted-zone-name: ${HOSTED_ZONE_NAME_TEST}
-          stack-name: ${AWS_STACK_NAME_TEST}
-          context:
-            - aws-credentials
-          requires:
-            - push-image-to-test
 
   production:
-    when:
+    unless:
       equal: ["trunk", << pipeline.git.branch >>]
     jobs:
       - build_and_test
