@@ -33,7 +33,7 @@ workflows:
             - build_and_test
       - push-image:
           name: push-image-to-dev
-          ecr-account-url: ${AWS_ECR_ACCOUNT_URL_DEV}
+          ecr-account-url: << pipeline.parameters.ecr-account-url-dev >>
           aws-account-id: ${AWS_ACCOUNT_DEV}
           authenticate-aws:
             - authenticate-aws-book-a-desk-dev
@@ -68,7 +68,7 @@ workflows:
             - deploy-to-dev
       - deploy:
           name: deploy-to-test
-          ecr-account-url: ${AWS_ECR_ACCOUNT_URL_TEST}
+          ecr-account-url: << pipeline.parameters.ecr-account-url-test >>
           aws-account-id: ${AWS_ACCOUNT_TEST}
           authenticate-aws:
             - authenticate-aws-book-a-desk-test
@@ -98,6 +98,12 @@ parameters:
   docker-tar-filename:
     type: string
     default: "book-a-desk_latest.tar"
+  ecr-account-url-dev:
+    type: string
+    default: ${AWS_ECR_ACCOUNT_URL_DEV}
+  ecr-account-url-test:
+    type: string
+    default: ${AWS_ECR_ACCOUNT_URL_TEST}
 
 commands:
   publish-test-results:
