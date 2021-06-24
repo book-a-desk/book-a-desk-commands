@@ -240,6 +240,7 @@ jobs:
           ecr-account-url: << parameters.ecr-account-url >>
           aws-account-id: << parameters.aws-account-id >>
       - aws-cloudformation-deploy:
+          ecr-account-url: << parameters.ecr-account-url >>
           certificate-id: << parameters.certificate-id >>
           aws-key-id-secret-id: << parameters.aws-key-id-secret-id >>
           aws-secret-key-secret-id: << parameters.aws-secret-key-secret-id >>
