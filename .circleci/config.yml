@@ -52,7 +52,7 @@ workflows:
           certificate-id: ${ACM_CERTIFICATE_ID_DEV}
           hosted-zone-name: ${HOSTED_ZONE_NAME_DEV}
           stack-name: ${AWS_STACK_NAME_DEV}
-          cloudformation-role: << pipeline.parameters.cloudformationstackbackenddev >>
+          cloudformation-role: << pipeline.parameters.cloudformation-role-dev >>
           context:
             - aws-credentials
           requires:
@@ -78,7 +78,7 @@ workflows:
           certificate-id: ${ACM_CERTIFICATE_ID_TEST}
           hosted-zone-name: ${HOSTED_ZONE_NAME_TEST}
           stack-name: ${AWS_STACK_NAME_TEST}
-          cloudformation-role: << pipeline.parameters.cloudformationstackbackendtest >>
+          cloudformation-role: << pipeline.parameters.cloudformation-role-test >>
           context:
             - aws-credentials
           requires:
