@@ -33,7 +33,7 @@ workflows:
             - build_and_test
       - push-image:
           name: push-image-to-dev
-          ecr-account-url: << pipeline.parameters.ecr-account-url-dev >>
+          ecr-account-url: ${AWS_ECR_ACCOUNT_URL_DEV}
           aws-account-id: ${AWS_ACCOUNT_DEV}
           authenticate-aws:
             - authenticate-aws-book-a-desk-dev
@@ -68,7 +68,7 @@ workflows:
             - deploy-to-dev
       - deploy:
           name: deploy-to-test
-          ecr-account-url: << pipeline.parameters.ecr-account-url-test >>
+          ecr-account-url: ${AWS_ECR_ACCOUNT_URL_TEST}
           aws-account-id: ${AWS_ACCOUNT_TEST}
           authenticate-aws:
             - authenticate-aws-book-a-desk-test
@@ -98,12 +98,6 @@ parameters:
   docker-tar-filename:
     type: string
     default: "book-a-desk_latest.tar"
-  ecr-account-url-dev:
-    type: string
-    default: ${AWS_ECR_ACCOUNT_URL_DEV}
-  ecr-account-url-test:
-    type: string
-    default: ${AWS_ECR_ACCOUNT_URL_TEST}
 
 commands:
   publish-test-results:
@@ -189,9 +183,8 @@ commands:
       - run:
           name: Ensure infrastructure is up to date
           command: |
-            echo "ecr-account-url: << parameters.ecr-account-url >>"
             aws cloudformation deploy \
-              --parameter-overrides "AWSKeyIDSecretID=<< parameters.aws-key-id-secret-id >>" "AWSSecretKeySecretID=<< parameters.aws-secret-key-secret-id >>" "CertificateID=<< parameters.certificate-id >>" "HostedZoneName=<< parameters.hosted-zone-name >>" "IMAGE=<< parameters.ecr-account-url >>/<< pipeline.parameters.docker-repo >>:<< pipeline.parameters.docker-img-version >>" \
+              --parameter-overrides "AWSKeyIDSecretID=<< parameters.aws-key-id-secret-id >>" "AWSSecretKeySecretID=<< parameters.aws-secret-key-secret-id >>" "CertificateID=<< parameters.certificate-id >>" "HostedZoneName=<< parameters.hosted-zone-name >>" "Image=<< parameters.ecr-account-url >>/<< pipeline.parameters.docker-repo >>:<< pipeline.parameters.docker-img-version >>" \
               --stack-name << parameters.stack-name >> \
               --template-file ./infra/cf.yaml \
               --capabilities CAPABILITY_NAMED_IAM
