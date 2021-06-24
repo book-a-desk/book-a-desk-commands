@@ -31,12 +31,22 @@ workflows:
       - build_image:
           requires:
             - build_and_test
+      - push-image:
+          name: push-image-to-dev
+          ecr-account-url: ${AWS_ECR_ACCOUNT_URL_DEV}
+          aws-account-id: ${AWS_ACCOUNT_DEV}
+          authenticate-aws:
+            - authenticate-aws-book-a-desk-dev
+          context:
+            - aws-credentials
+          requires:
+            - build_image
       - deploy:
           name: deploy-to-dev
           ecr-account-url: ${AWS_ECR_ACCOUNT_URL_DEV}
           aws-account-id: ${AWS_ACCOUNT_DEV}
           authenticate-aws:
-            - authenticate-aws-book-a-desk-dev
+            - authenticate-aws-book-a-desk-test
           aws-key-id-secret-id: ${AWS_ACCESS_KEY_ID_SECRET_DEV}
           aws-secret-key-secret-id: ${AWS_SECRET_ACCESS_KEY_SECRET_DEV}
           certificate-id: ${ACM_CERTIFICATE_ID_DEV}
@@ -44,7 +54,17 @@ workflows:
           context:
             - aws-credentials
           requires:
-            - build_image
+            - push-image-to-dev
+      - push-image:
+          name: push-image-to-test
+          ecr-account-url: ${AWS_ECR_ACCOUNT_URL_TEST}
+          aws-account-id: ${AWS_ACCOUNT_TEST}
+          authenticate-aws:
+            - authenticate-aws-book-a-desk-test
+          context:
+            - aws-credentials
+          requires:
+            - deploy-to-dev
       - deploy:
           name: deploy-to-test
           ecr-account-url: ${AWS_ECR_ACCOUNT_URL_TEST}
@@ -58,7 +78,7 @@ workflows:
           context:
             - aws-credentials
           requires:
-            - deploy-to-dev
+            - push-image-to-dev
 
 orbs:
   aws-ecs: circleci/aws-ecs@2.0.0
@@ -211,6 +231,26 @@ jobs:
           paths:
             - << pipeline.parameters.docker-tar-filename >>
 
+  push-image:
+    machine: true
+    parameters:
+      ecr-account-url:
+        type: string
+      aws-account-id:
+        type: string
+      authenticate-aws:
+        type: steps
+    steps:
+      - attach_workspace:
+          at: ./
+      - steps: << parameters.authenticate-aws >>
+      - log-aws-identity
+      - aws-cli/setup:
+          aws-region: AWS_REGION
+      - deploy-to-ecr:
+          ecr-account-url: << parameters.ecr-account-url >>
+          aws-account-id: << parameters.aws-account-id >>
+
   deploy:
     machine: true
     parameters:
@@ -228,17 +268,12 @@ jobs:
         type: string
       hosted-zone-name:
         type: string
-    
     steps:
-      - attach_workspace:
-          at: ./
+      - checkout
       - steps: << parameters.authenticate-aws >>
       - log-aws-identity
       - aws-cli/setup:
           aws-region: AWS_REGION
-      - deploy-to-ecr:
-          ecr-account-url: << parameters.ecr-account-url >>
-          aws-account-id: << parameters.aws-account-id >>
       - aws-cloudformation-deploy:
           ecr-account-url: << parameters.ecr-account-url >>
           certificate-id: << parameters.certificate-id >>
@@ -247,7 +282,6 @@ jobs:
           hosted-zone-name: << parameters.hosted-zone-name >>
       - aws-ecs/update-service:
           cluster-name: 'arn:aws:ecs:${AWS_REGION}:<< parameters.aws-account-id >>:cluster/Book-A-Desk-Cluster'
-
           container-image-name-updates: 'container=Book-A-Desk-Container,tag=<< pipeline.parameters.docker-img-version >>'
           service-name: 'Book-A-Desk'
           family: 'Book-A-Desk-Backend'
