@@ -52,6 +52,7 @@ workflows:
           certificate-id: ${ACM_CERTIFICATE_ID_DEV}
           hosted-zone-name: ${HOSTED_ZONE_NAME_DEV}
           stack-name: ${AWS_STACK_NAME_DEV}
+          cloudformation-role: << pipeline.parameters.cloudformationstackbackenddev >>
           context:
             - aws-credentials
           requires:
@@ -77,6 +78,7 @@ workflows:
           certificate-id: ${ACM_CERTIFICATE_ID_TEST}
           hosted-zone-name: ${HOSTED_ZONE_NAME_TEST}
           stack-name: ${AWS_STACK_NAME_TEST}
+          cloudformation-role: << pipeline.parameters.cloudformationstackbackendtest >>
           context:
             - aws-credentials
           requires:
@@ -98,6 +100,12 @@ parameters:
   docker-tar-filename:
     type: string
     default: "book-a-desk_latest.tar"
+  cloudformation-role-dev:
+    type: string
+    default: arn:aws:iam::${AWS_ACCOUNT_DEV}:role/cloudformationstackbackenddev
+  cloudformation-role-test:
+    type: string
+    default: arn:aws:iam::${AWS_ACCOUNT_TEST}:role/cloudformationstackbackendtest
 
 commands:
   publish-test-results:
@@ -179,6 +187,8 @@ commands:
         type: string
       stack-name:
         type: string
+      cloudformation-role:
+        type: string
     steps:
       - run:
           name: Ensure infrastructure is up to date
@@ -187,7 +197,8 @@ commands:
               --parameter-overrides "AWSKeyIDSecretID=<< parameters.aws-key-id-secret-id >>" "AWSSecretKeySecretID=<< parameters.aws-secret-key-secret-id >>" "CertificateID=<< parameters.certificate-id >>" "HostedZoneName=<< parameters.hosted-zone-name >>" "Image=<< parameters.ecr-account-url >>/<< pipeline.parameters.docker-repo >>:<< pipeline.parameters.docker-img-version >>" \
               --stack-name << parameters.stack-name >> \
               --template-file ./infra/cf.yaml \
-              --capabilities CAPABILITY_NAMED_IAM
+              --capabilities CAPABILITY_NAMED_IAM \
+              --role-arn << parameters.cloudformation-role >>
 jobs:
   build_and_test:
     docker:
@@ -274,6 +285,8 @@ jobs:
         type: string
       stack-name:
         type: string
+      cloudformation-role:
+        type: string
     steps:
       - checkout
       - steps: << parameters.authenticate-aws >>
@@ -287,6 +300,7 @@ jobs:
           aws-secret-key-secret-id: << parameters.aws-secret-key-secret-id >>
           hosted-zone-name: << parameters.hosted-zone-name >>
           stack-name: << parameters.stack-name >>
+          cloudformation-role: << parameters.cloudformation-role >>
       - aws-ecs/update-service:
           cluster-name: 'arn:aws:ecs:${AWS_REGION}:<< parameters.aws-account-id >>:cluster/Book-A-Desk-Cluster'
           container-image-name-updates: 'container=Book-A-Desk-Container,tag=<< pipeline.parameters.docker-img-version >>'
