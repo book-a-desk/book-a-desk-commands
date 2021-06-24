@@ -176,7 +176,7 @@ Resources:
             Action: 'sts:AssumeRole'
       ManagedPolicyArns:
         - 'arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy'
-        - 'arn:aws:iam::282127166619:policy/GetCredentialsSecret'
+        - 'arn:aws:iam::${AWS::AccountId}:policy/GetCredentialsSecret'
   TaskRole:
     Type: AWS::IAM::Role
     Properties:
