@@ -31,7 +31,7 @@ workflows:
           context:
             - aws-credentials
           requires:
-            - deploy-to-dev
+            - build_image
       - deploy:
           name: deploy-to-test
           ecr-account-url: ${AWS_ECR_ACCOUNT_URL_TEST}
