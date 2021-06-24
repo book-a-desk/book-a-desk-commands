@@ -160,7 +160,7 @@ commands:
           name: Ensure infrastructure is up to date
           command: |
             aws cloudformation deploy \
-              --parameter-overrides "AWSKeyIDSecretID=<< parameters.aws-key-id-secret-id >>" "AWSSecretKeySecretID=<< parameters.aws-secret-key-secret-id >>" "CertificateID=<< parameters.certificate-id >>" "HostedZoneName=<< parameters.hosted-zone-name >>" "IMAGE="<< parameters.ecr-account-url >>/<< pipeline.parameters.docker-repo >>:<< pipeline.parameters.docker-img-version >>" \
+              --parameter-overrides "AWSKeyIDSecretID=<< parameters.aws-key-id-secret-id >>" "AWSSecretKeySecretID=<< parameters.aws-secret-key-secret-id >>" "CertificateID=<< parameters.certificate-id >>" "HostedZoneName=<< parameters.hosted-zone-name >>" "IMAGE=<< parameters.ecr-account-url >>/<< pipeline.parameters.docker-repo >>:<< pipeline.parameters.docker-img-version >>" \
               --stack-name book-a-desk-backend\
               --template-file ./infra/cf.yaml \
               --capabilities CAPABILITY_NAMED_IAM
@@ -245,13 +245,6 @@ jobs:
           aws-key-id-secret-id: << parameters.aws-key-id-secret-id >>
           aws-secret-key-secret-id: << parameters.aws-secret-key-secret-id >>
           hosted-zone-name: << parameters.hosted-zone-name >>
-          
-  update-service:
-    machine: true
-    parameters:
-      aws-account-id:
-        type: string
-    steps:
       - aws-ecs/update-service:
           cluster-name: 'arn:aws:ecs:${AWS_REGION}:<< parameters.aws-account-id >>:cluster/Book-A-Desk-Cluster'
 
