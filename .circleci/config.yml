@@ -51,7 +51,7 @@ workflows:
           aws-secret-key-secret-id: ${AWS_SECRET_ACCESS_KEY_SECRET_DEV}
           certificate-id: ${ACM_CERTIFICATE_ID_DEV}
           hosted-zone-name: ${HOSTED_ZONE_NAME_DEV}
-          stack-name: ${AWS_STACK_NAME_DEV}
+          stack-name: << pipeline.parameters.stack-name >>
           cloudformation-role: << pipeline.parameters.cloudformation-role-dev >>
           context:
             - aws-credentials
@@ -77,7 +77,7 @@ workflows:
           aws-secret-key-secret-id: ${AWS_SECRET_ACCESS_KEY_SECRET_TEST}
           certificate-id: ${ACM_CERTIFICATE_ID_TEST}
           hosted-zone-name: ${HOSTED_ZONE_NAME_TEST}
-          stack-name: ${AWS_STACK_NAME_TEST}
+          stack-name: << pipeline.parameters.stack-name >>
           cloudformation-role: << pipeline.parameters.cloudformation-role-test >>
           context:
             - aws-credentials
@@ -92,11 +92,9 @@ parameters:
   docker-repo:
     type: string
     default: book-a-desk
-
   docker-img-version:
     type: string
     default: "build-<< pipeline.number >>"
-
   docker-tar-filename:
     type: string
     default: "book-a-desk_latest.tar"
@@ -106,6 +104,9 @@ parameters:
   cloudformation-role-test:
     type: string
     default: arn:aws:iam::${AWS_ACCOUNT_TEST}:role/cloudformationstackbackendtest
+  stack-name:
+    type: string
+    default: book-a-desk-backend
 
 commands:
   publish-test-results:
@@ -123,7 +124,8 @@ commands:
             trx2junit << parameters.path >>/*.trx
       - store_test_results:
           path: << parameters.path >>
-  deploy-to-ecr:
+
+  push-to-ecr:
     parameters:
       ecr-account-url:
         type: string
@@ -146,6 +148,7 @@ commands:
           name: Push Docker image
           command: |
             docker push "<< parameters.ecr-account-url >>/<< pipeline.parameters.docker-repo >>:<< pipeline.parameters.docker-img-version >>"
+
   log-aws-identity:
     parameters:
       profile:
@@ -155,6 +158,7 @@ commands:
       - run:
           name: Log AWS identity <<# parameters.profile >>(profile=<< parameters.profile >>)<</ parameters.profile >>
           command: aws sts get-caller-identity <<# parameters.profile >> --profile << parameters.profile >> <</ parameters.profile >> --region $AWS_REGION || true
+
   authenticate-aws-book-a-desk-dev:
     description: "Configure AWS credentials for Book A Desk Dev"
     steps:
@@ -164,6 +168,7 @@ commands:
             echo "export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID_DEV}" >> $BASH_ENV
             echo "export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY_DEV}" >> $BASH_ENV
             echo $AWS_SECRET_ACCESS_KEY_ID
+
   authenticate-aws-book-a-desk-test:
     description: "Configure AWS credentials for Book A Desk Test"
     steps:
@@ -199,6 +204,7 @@ commands:
               --template-file ./infra/cf.yaml \
               --capabilities CAPABILITY_NAMED_IAM \
               --role-arn << parameters.cloudformation-role >>
+
 jobs:
   build_and_test:
     docker:
@@ -206,7 +212,6 @@ jobs:
         auth:
           username: mydockerhub-user
           password: $DOCKERHUB_PASSWORD
-
     steps:
       - checkout
       - run:
@@ -262,7 +267,7 @@ jobs:
       - log-aws-identity
       - aws-cli/setup:
           aws-region: AWS_REGION
-      - deploy-to-ecr:
+      - push-to-ecr:
           ecr-account-url: << parameters.ecr-account-url >>
           aws-account-id: << parameters.aws-account-id >>
 
@@ -301,8 +306,3 @@ jobs:
           hosted-zone-name: << parameters.hosted-zone-name >>
           stack-name: << parameters.stack-name >>
           cloudformation-role: << parameters.cloudformation-role >>
-      - aws-ecs/update-service:
-          cluster-name: 'arn:aws:ecs:${AWS_REGION}:<< parameters.aws-account-id >>:cluster/Book-A-Desk-Cluster'
-          container-image-name-updates: 'container=Book-A-Desk-Container,tag=<< pipeline.parameters.docker-img-version >>'
-          service-name: 'Book-A-Desk'
-          family: 'Book-A-Desk-Backend'
