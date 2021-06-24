@@ -163,7 +163,7 @@ commands:
               --parameter-overrides "AWSKeyIDSecretID=<< parameters.aws-key-id-secret-id >>" "AWSSecretKeySecretID=<< parameters.aws-secret-key-secret-id >>" "CertificateID=<< parameters.certificate-id >>" "HostedZoneName=<< parameters.hosted-zone-name >>" "IMAGE="<< parameters.ecr-account-url >>/<< pipeline.parameters.docker-repo >>:<< pipeline.parameters.docker-img-version >>" \
               --stack-name book-a-desk-backend\
               --template-file ./infra/cf.yaml \
-              --capabilities CAPABILITY_NAMED_IAM \
+              --capabilities CAPABILITY_NAMED_IAM
 jobs:
   build_and_test:
     docker:
