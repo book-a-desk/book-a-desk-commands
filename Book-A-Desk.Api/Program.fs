@@ -1,4 +1,5 @@
 open System
+open System.Net.Mail
 open Amazon
 open Amazon.DynamoDBv2
 open Amazon.Extensions.NETCore.Setup
@@ -38,8 +39,9 @@ let configureApp (ctx : WebHostBuilderContext) (app : IApplicationBuilder) =
     let reservationCommandsFactory = ReservationCommandsFactory.provide getAllOffices
 
     let getEmailServiceConfiguration = (fun () -> app.ApplicationServices.GetService<EmailServiceConfiguration>())
-     
-    let emailNotification = EmailNotification.initialize getEmailServiceConfiguration getAllOffices 
+         
+    let smptClientManager = SmtpClientManager.provide getEmailServiceConfiguration  
+    let emailNotification = EmailNotification.initialize getEmailServiceConfiguration smptClientManager.SmtpClient getAllOffices
     
     let apiDependencyFactory = ApiDependencyFactory.provide provideEventStore reservationCommandsFactory getAllOffices emailNotification.SendEmailNotification
 
@@ -64,8 +66,8 @@ let configureDynamoDB (sp : ServiceProvider) =
             ReservationTableName = config.["DynamoDB:ReservationTableName"]
             OfficeTableName = config.["DynamoDB:OfficeTableName"]
         }
-    Console.WriteLine(dynamoDBConfiguration.ReservationTableName)
-    Console.WriteLine(dynamoDBConfiguration.OfficeTableName)
+    printfn $"%s{dynamoDBConfiguration.ReservationTableName}"
+    printfn $"%s{dynamoDBConfiguration.OfficeTableName}"
 
 let configureEmailService (sp : ServiceProvider) =
     let config = sp.GetService<IConfiguration>()
@@ -77,9 +79,8 @@ let configureEmailService (sp : ServiceProvider) =
             EmailSender = config.["SMTP:EmailSender"]
             EmailReviewer = config.["SMTP:EmailReviewer"]
         } 
-    Console.WriteLine(emailServiceConfiguration.SmtpClientUrl)
-    Console.WriteLine(emailServiceConfiguration.SmtpUsername)
-
+    printfn $"%s{emailServiceConfiguration.SmtpClientUrl}"
+    printfn $"%s{emailServiceConfiguration.SmtpUsername}"
 
 let configureServices (services : IServiceCollection) =
     let serviceProvider = services.BuildServiceProvider()

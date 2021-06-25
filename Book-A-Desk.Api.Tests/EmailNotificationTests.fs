@@ -1,6 +1,7 @@
 module Book_A_Desk.Api.Tests.EmailNotificationTests
 
 open System
+open System.Net.Mail
 open Book_A_Desk.Api
 open Book_A_Desk.Api.Models
 open Book_A_Desk.Domain.Office.Domain
@@ -48,15 +49,15 @@ let ``GIVEN A booking WHEN calling to SendEmailNotification THEN Email must be s
         }
         
     let mockEmailServiceConfiguration () = mockEmailConfig
-            
-    let emailNotification = EmailNotification.initialize mockEmailServiceConfiguration mockGetOffices       
+    let mockSmtpClient = new SmtpClient(mockEmailConfig.SmtpClientUrl)        
+    let emailNotification = EmailNotification.initialize mockEmailServiceConfiguration mockSmtpClient mockGetOffices       
     
     // Refactor this code to mock SmtpClient and verify that Send function is called
     try
         emailNotification.SendEmailNotification mockBooking
         Assert.False(true)
     with
-    | :? System.Net.Mail.SmtpException as ex ->
+    | :? SmtpException as ex ->
         match ex.TargetSite.Name with
         | "Send" -> printfn "I've sent a mail message! We know that host is not valid."
         | _ -> Assert.False(true)

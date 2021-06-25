@@ -1,5 +1,6 @@
 ﻿namespace Book_A_Desk.Domain.QueriesHandler
 
+open System
 open Book_A_Desk.Core
 open Book_A_Desk.Domain.Office.Domain
 open Book_A_Desk.Domain.Office.Queries
@@ -24,3 +25,16 @@ module rec OfficeQueriesHandler =
                 }
             return officeAvailability
         }
+    
+    let getOfficeName (officeReference: string) getOffices =
+        let result = getAll getOffices
+        let officeReference = Guid.Parse(officeReference) |> OfficeId
+        match result with
+        | Ok offices ->
+            offices
+            |> List.tryFind (fun (o:Office) -> officeReference.Equals(o.Id))
+            |> function
+                | None -> "Unknown"
+                | Some (o:Office) -> o.City.ToString()
+        | Error e ->
+            "Unknown"

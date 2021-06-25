@@ -19,6 +19,7 @@
     <Compile Include="DynamoDB.fs" />
     <Compile Include="EmailServiceConfiguration.fs" />
     <Compile Include="EmailNotification.fs" />
+    <Compile Include="SmtpClientManager.fs" />
     <Compile Include="Program.fs" />
     <Content Include="docs\bookADeskOpenAPISpecification.json" />
     <Content Include="appsettings.Development.json" />
