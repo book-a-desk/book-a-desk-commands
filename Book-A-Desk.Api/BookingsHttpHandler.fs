@@ -67,11 +67,10 @@ module BookingsHttpHandler =
                             Date = booking.Date
                             User = { Email = booking.User.Email }
                         }
-                    task {
-                        notifySuccess booking |> ignore
-                    }
-                    |> ignore
-                    
+                    let! sent = notifySuccess booking
+                    match sent with
+                        | () -> printfn "I've sent a mail message!"
+                        
                     return! json output next context
                 | Error e ->
                     context.SetStatusCode(500)

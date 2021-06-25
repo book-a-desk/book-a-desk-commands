@@ -27,9 +27,8 @@ module BookingNotifier =
                 mailMessage.Body <- $"You have booked a desk at %s{booking.Date.ToShortDateString()} in the Office %s{officeName}"
                 do!
                     sendEmail mailMessage
-                    |> Async.AwaitIAsyncResult
-                    |> Async.Ignore
-                printfn "I've sent a mail message!"
+                        |> Async.AwaitIAsyncResult
+                        |> Async.Ignore
             }
         {            
             NotifySuccess = sendEmailNotification

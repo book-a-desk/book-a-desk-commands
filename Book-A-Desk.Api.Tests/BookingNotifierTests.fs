@@ -51,14 +51,8 @@ let ``GIVEN A booking WHEN calling to SendEmailNotification THEN Email must be s
     let mockEmailServiceConfiguration () = mockEmailConfig
     let mockSmtpClient = new SmtpClient(mockEmailConfig.SmtpClientUrl)        
     let bookingNotifier = BookingNotifier.provide mockEmailServiceConfiguration mockSmtpClient mockGetOffices       
-    
-    // Refactor this code to mock SmtpClient and verify that Send function is called
-    try
-        let result = bookingNotifier.NotifySuccess mockBooking
-        Assert.False(true)
-    with
-    | :? SmtpException as ex ->
-        match ex.TargetSite.Name with
-        | "Send" -> printfn "I've sent a mail message! We know that host is not valid."
-        | _ -> Assert.False(true)
+       
+    let! result = bookingNotifier.NotifySuccess mockBooking
+    // Verify that SendMailAsync has been called
+    Assert.Equal(result, ())
 }

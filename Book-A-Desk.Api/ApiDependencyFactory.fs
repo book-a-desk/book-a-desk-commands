@@ -1,7 +1,5 @@
 namespace Book_A_Desk.Api
 
-open Book_A_Desk.Api.Models
-
 type ApiDependencyFactory =
     {
         CreateBookingsHttpHandler: unit -> BookingsHttpHandler
@@ -13,7 +11,7 @@ module ApiDependencyFactory =
         getEventStore
         reservationCommandsFactory
         getOffices
-        (notifySuccess: Booking->Async<unit>)
+        notifySuccess
         =
 
         let createBookingsHttpHandler bearerToken =
