@@ -1,4 +1,4 @@
-namespace Book_A_Desk.Api
+namespace Book_A_Desk.Infrastructure
 
 open System.Net.Mail
 

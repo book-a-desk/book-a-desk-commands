@@ -24,7 +24,7 @@ type BookingsHttpHandler =
     }
 
 module BookingsHttpHandler =
-    let initialize (provideEventStore : IAmazonDynamoDB -> DynamoDbEventStore) reservationCommandsFactory sendEmailNotification =
+    let initialize (provideEventStore : IAmazonDynamoDB -> DynamoDbEventStore) reservationCommandsFactory (notifySuccess: Booking-> Async<unit>) =
         let handlePostWith booking = fun next (context : HttpContext) ->
             task {
                 let cmd =
@@ -67,7 +67,9 @@ module BookingsHttpHandler =
                             Date = booking.Date
                             User = { Email = booking.User.Email }
                         }
-                    sendEmailNotification booking
+                    task {
+                        notifySuccess booking
+                    }
                     |> ignore
                     
                     return! json output next context

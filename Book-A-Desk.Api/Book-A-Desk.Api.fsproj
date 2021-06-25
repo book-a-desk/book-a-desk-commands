@@ -18,7 +18,7 @@
     <Compile Include="Routes.fs" />
     <Compile Include="DynamoDB.fs" />
     <Compile Include="EmailServiceConfiguration.fs" />
-    <Compile Include="EmailNotification.fs" />
+    <Compile Include="BookingNotifier.fs" />
     <Compile Include="SmtpClientManager.fs" />
     <Compile Include="Program.fs" />
     <Content Include="docs\bookADeskOpenAPISpecification.json" />

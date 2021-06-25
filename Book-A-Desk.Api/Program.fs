@@ -1,5 +1,4 @@
 open System
-open System.Net.Mail
 open Amazon
 open Amazon.DynamoDBv2
 open Amazon.Extensions.NETCore.Setup
@@ -41,9 +40,9 @@ let configureApp (ctx : WebHostBuilderContext) (app : IApplicationBuilder) =
     let getEmailServiceConfiguration = (fun () -> app.ApplicationServices.GetService<EmailServiceConfiguration>())
          
     let smptClientManager = SmtpClientManager.provide getEmailServiceConfiguration  
-    let emailNotification = EmailNotification.initialize getEmailServiceConfiguration smptClientManager.SmtpClient getAllOffices
+    let bookingNotifier = BookingNotifier.provide getEmailServiceConfiguration smptClientManager.SmtpClient getAllOffices
     
-    let apiDependencyFactory = ApiDependencyFactory.provide provideEventStore reservationCommandsFactory getAllOffices emailNotification.SendEmailNotification
+    let apiDependencyFactory = ApiDependencyFactory.provide provideEventStore reservationCommandsFactory getAllOffices bookingNotifier.NotifySuccess
 
     let routes = Routes.provide apiDependencyFactory
     app.UseCors(configureCors ctx)
