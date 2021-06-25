@@ -39,7 +39,7 @@ let ``GIVEN A Book-A-Desk server, WHEN getting the offices endpoint, THEN office
             GetEvents = fun _ -> failwith "should not be called"
             AppendEvents = fun _ -> failwith "should not be called"
         } : DynamoDbEventStore.DynamoDbEventStore
-    let mockEmailNotification booking = ()
+    let mockEmailNotification booking = async {()}
     let mockGetOffices () = offices
     
     let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification
@@ -75,7 +75,7 @@ let ``GIVEN A Book-A-Desk server, WHEN getting the office availability by date, 
             AppendEvents = fun _ -> failwith "should not be called"
         } : DynamoDbEventStore.DynamoDbEventStore
         
-    let mockEmailNotification booking = ()    
+    let mockEmailNotification booking = async {()}    
     let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification
     use httpClient = TestServer.createAndRun mockApiDependencyFactory
 

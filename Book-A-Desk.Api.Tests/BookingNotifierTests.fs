@@ -50,11 +50,11 @@ let ``GIVEN A booking WHEN calling to SendEmailNotification THEN Email must be s
         
     let mockEmailServiceConfiguration () = mockEmailConfig
     let mockSmtpClient = new SmtpClient(mockEmailConfig.SmtpClientUrl)        
-    let emailNotification = BookingNotifier.provide mockEmailServiceConfiguration mockSmtpClient mockGetOffices       
+    let bookingNotifier = BookingNotifier.provide mockEmailServiceConfiguration mockSmtpClient mockGetOffices       
     
     // Refactor this code to mock SmtpClient and verify that Send function is called
     try
-        let result = emailNotification.SendEmailNotification mockBooking
+        let result = bookingNotifier.NotifySuccess mockBooking
         Assert.False(true)
     with
     | :? SmtpException as ex ->

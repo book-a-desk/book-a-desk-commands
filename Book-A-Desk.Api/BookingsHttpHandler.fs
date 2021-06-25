@@ -24,7 +24,7 @@ type BookingsHttpHandler =
     }
 
 module BookingsHttpHandler =
-    let initialize (provideEventStore : IAmazonDynamoDB -> DynamoDbEventStore) reservationCommandsFactory (notifySuccess: Booking-> Async<unit>) =
+    let initialize (provideEventStore : IAmazonDynamoDB -> DynamoDbEventStore) reservationCommandsFactory (notifySuccess: Models.Booking-> Async<unit>) =
         let handlePostWith booking = fun next (context : HttpContext) ->
             task {
                 let cmd =
@@ -68,7 +68,7 @@ module BookingsHttpHandler =
                             User = { Email = booking.User.Email }
                         }
                     task {
-                        notifySuccess booking
+                        notifySuccess booking |> ignore
                     }
                     |> ignore
                     

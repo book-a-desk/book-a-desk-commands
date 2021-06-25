@@ -40,7 +40,7 @@ let mockReservationCommandFactory : ReservationCommandsFactory =
 let mutable emailWasSent = false 
 let mockEmailNotification booking =
     emailWasSent <- true
-    ()    
+    async {()}    
 
 let booking  =
     {
