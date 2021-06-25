@@ -5,17 +5,19 @@
 # (see https://circleci.com/orbs/registry/orb/circleci/aws-cli)
 # - AWS_REGION
 
-## AWS ECR (Platform)
-# (see https://circleci.com/orbs/registry/orb/circleci/aws-ecr)
-# Note: These are provided by the platform-aws-ecr context
-# - AWS_ECR_ACCESS_KEY_ID
-# - AWS_ECR_SECRET_ACCESS_KEY
-# - AWS_ECR_ACCOUNT_URL
+## AWS Credentials (Platform)
+# Note: These are provided by the aws-credentials context
+# - AWS_ACCESS_KEY_ID
+# - AWS_ACCESS_KEY_ID_SECRET
+# - AWS_SECRET_ACCESS_KEY
+# - AWS_SECRET_ACCESS_KEY_SECRET
+# - AWS_ACCOUNT
+# - AWS_REGION
 
 version: 2.1
 workflows:
   pull-request:
-    when:
+    unless:
       equal: ["trunk", << pipeline.git.branch >>]
     jobs:
       - build_and_test
@@ -24,7 +26,7 @@ workflows:
             - build_and_test
 
   production:
-    unless:
+    when:
       equal: ["trunk", << pipeline.git.branch >>]
     jobs:
       - build_and_test
