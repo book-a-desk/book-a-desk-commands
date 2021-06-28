@@ -1,5 +1,6 @@
 ﻿namespace Book_A_Desk.Infrastructure
 
+open System
 open Book_A_Desk.Domain
 open Book_A_Desk.Domain.Events
 open Book_A_Desk.Domain.Office.Domain
@@ -13,7 +14,7 @@ module rec DomainMapper =
     let toDomainSingle (infraEvent : Book_A_Desk.Infrastructure.DeskBooked) =
         {                    
             ReservationId = ReservationId infraEvent.AggregateId
-            Date = infraEvent.Date
+            Date = infraEvent.Date.Date
             EmailAddress = EmailAddress infraEvent.EmailAddress
             OfficeId = OfficeId infraEvent.OfficeId            
         }
@@ -33,7 +34,7 @@ module rec DomainMapper =
                 let (OfficeId officeId) = deskBooked.OfficeId
                 {                    
                     AggregateId = reservationId
-                    Date = deskBooked.Date
+                    Date = DateTimeOffset(deskBooked.Date)
                     EmailAddress = email
                     OfficeId = officeId
                 }
