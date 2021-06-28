@@ -20,7 +20,7 @@ module rec DynamoDbEventStore =
             TableContext
                 .Create<DeskBooked>(
                     dynamoDbClient,
-                    tableName = "ReservationEvent",
+                    tableName = "ReservationEvents",
                     createIfNotExists = false)
         
         {
