@@ -59,7 +59,7 @@ let ``GIVEN A Book-A-Desk server, WHEN getting the offices endpoint, THEN office
 
 [<Fact>]
 let ``GIVEN A Book-A-Desk server, WHEN getting the office availability by date, THEN office availability is returned`` () = async {
-    let date = DateTime(2021,02,01)
+    let date = DateTime(2100,02,01)
     let aBooking =
         {
             ReservationId = ReservationAggregate.Id
