@@ -18,9 +18,9 @@ module rec DynamoDbEventStore =
     let provide (dynamoDbClient : IAmazonDynamoDB) =
         let table =
             TableContext
-                .Create<DeskBooked>(
+                .Create<ReservationEvent>(
                     dynamoDbClient,
-                    tableName = "ReservationEvent",
+                    tableName = "ReservationEvents",
                     createIfNotExists = false)
         
         {
@@ -29,7 +29,7 @@ module rec DynamoDbEventStore =
         }
         
     let private getEvent table aggregateId = async {
-        let! results = table.QueryAsync(keyCondition = <@ fun (r : DeskBooked) -> r.AggregateId = aggregateId @>)
+        let! results = table.QueryAsync(keyCondition = <@ fun (r : ReservationEvent) -> r.AggregateId = aggregateId @>)
         
         let domainResults = DomainMapper.toDomain results
         

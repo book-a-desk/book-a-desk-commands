@@ -1,0 +1,23 @@
+Create ECS cluster
+- use same name than in circleci config file
+- includes network stack with vpc and subnets (availability zones)
+
+Create DNS hosted zone
+Create certificate linked to desired url
+Create ecsTaskExecutionRole role
+Create Credentials secrets
+Create task definition
+- use same name than in circleci config file
+- set environment variables referring secrets
+Create target group
+- use same vpc and subnets as cluster
+- set health check
+Create application load balancer
+- use certificate to handle https listener
+- use same vpc and subnets as cluster
+Create ECS service
+- use same name than in circleci config file
+- Fargate
+- choose task definition
+- choose application load balancer
+- choose container
