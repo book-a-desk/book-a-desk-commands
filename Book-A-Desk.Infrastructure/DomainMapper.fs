@@ -9,20 +9,21 @@ open Book_A_Desk.Domain.Reservation.Domain
 open Book_A_Desk.Domain.Reservation.Events
 
 module rec DomainMapper =
-    // Todo: add support for other events
     let toDomain (infraEvents: Book_A_Desk.Infrastructure.ReservationEvent seq) =
         Seq.map toDomainSingle infraEvents
         
     let toDomainSingle (infraEvent : Book_A_Desk.Infrastructure.ReservationEvent) =
-        let deskBooked = JsonSerializer.Deserialize<Book_A_Desk.Infrastructure.DeskBooked> infraEvent.Event
-        {                    
-            ReservationId = ReservationId infraEvent.AggregateId
-            Date = deskBooked.Date.Date
-            EmailAddress = EmailAddress deskBooked.EmailAddress
-            OfficeId = OfficeId deskBooked.OfficeId          
-        }
-        |> DeskBooked
-        |> ReservationEvent
+        match infraEvent.ReservationType with
+        | ReservationType.DeskBooked ->
+            let deskBooked = JsonSerializer.Deserialize<Book_A_Desk.Infrastructure.DeskBooked> infraEvent.Event
+            {                    
+                ReservationId = ReservationId infraEvent.AggregateId
+                Date = deskBooked.Date.Date
+                EmailAddress = EmailAddress deskBooked.EmailAddress
+                OfficeId = OfficeId deskBooked.OfficeId          
+            }
+            |> DeskBooked
+            |> ReservationEvent
     
     let toInfra (domainEvents: DomainEvent seq) =
         Seq.map toInfraSingle domainEvents
