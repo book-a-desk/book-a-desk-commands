@@ -8,17 +8,15 @@ type ReservationType =
 
 type ReservationEvent =
     {
+        [<HashKey>]
         AggregateId : Guid
         ReservationType : ReservationType
+        Event: string
     }
     
 type DeskBooked =
     {
-        [<HashKey>]
-        AggregateId : Guid
-        [<RangeKey>]
-        EventId : Guid
-        Date: DateTimeOffset
+        Date: DateTime
         EmailAddress: string
         OfficeId: Guid
     }
