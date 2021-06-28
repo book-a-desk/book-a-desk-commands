@@ -32,8 +32,9 @@ module rec DomainMapper =
                 let (ReservationId reservationId) = deskBooked.ReservationId
                 let (EmailAddress email) = deskBooked.EmailAddress
                 let (OfficeId officeId) = deskBooked.OfficeId
-                {                    
+                {
                     AggregateId = reservationId
+                    EventId = Guid.NewGuid()
                     Date = DateTimeOffset(deskBooked.Date)
                     EmailAddress = email
                     OfficeId = officeId
