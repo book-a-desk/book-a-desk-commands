@@ -16,6 +16,7 @@ type OfficeAvailability =
     {        
         Id : OfficeId
         TotalDesks : int
+        ReservedDesks: int
         AvailableDesks : int
     }
     

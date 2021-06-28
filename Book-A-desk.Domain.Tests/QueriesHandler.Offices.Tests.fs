@@ -36,7 +36,7 @@ let ``GIVEN A OfficeQueriesHandler WITH an invalid office id, WHEN getting the a
                 Date = DateTime.MaxValue
             } : GetOfficeAvailabilitiesByDate
     
-    let result = OfficeQueriesHandler.getAvailabilities getOffices getBookingsCountPerDate query
+    let result = OfficeQueriesHandler.getAvailabilities getOffices getBookingsCountPerDate DateTime.MinValue query
     
     match result with
     | Ok _ -> failwith "there should have been an error"
@@ -45,11 +45,12 @@ let ``GIVEN A OfficeQueriesHandler WITH an invalid office id, WHEN getting the a
 [<Fact>]
 let ``GIVEN A OfficeQueriesHandler, WHEN getting the availabilities, THEN availabilities are returned`` () =
     let officeId = OfficeId (Guid.NewGuid())
-    let availableDesks = 2
+    let bookableDesksPerDay = 2
+    let reservedDesks = 1
     let anOffice = {
         Id = officeId
         City = CityName "A City"
-        BookableDesksPerDay = availableDesks
+        BookableDesksPerDay = bookableDesksPerDay
     }
     let getOffices () = [anOffice]
     
@@ -68,11 +69,50 @@ let ``GIVEN A OfficeQueriesHandler, WHEN getting the availabilities, THEN availa
                 Date = DateTime.MaxValue
             } : GetOfficeAvailabilitiesByDate
     
-    let result = OfficeQueriesHandler.getAvailabilities getOffices getBookingsCountPerDate query
+    let result = OfficeQueriesHandler.getAvailabilities getOffices getBookingsCountPerDate DateTime.MinValue query
     
     match result with
     | Error _ -> failwith "something should have been returned"
     | Ok avail ->
         Assert.Equal(officeId, avail.Id)
-        Assert.Equal(availableDesks, avail.TotalDesks)
-        Assert.Equal(availableDesks - 1, avail.AvailableDesks)
+        Assert.Equal(bookableDesksPerDay, avail.TotalDesks)
+        Assert.Equal(bookableDesksPerDay - reservedDesks, avail.AvailableDesks)
+        Assert.Equal(reservedDesks, avail.ReservedDesks)
+        
+[<Fact>]
+let ``GIVEN A OfficeQueriesHandler WITH query in the past, WHEN getting the availabilities, THEN no desks can be booked`` () =
+    let officeId = OfficeId (Guid.NewGuid())
+    let bookableDesksPerDay = 2
+    let availableDesks = 0
+    let reservedDesks = 1
+    let anOffice = {
+        Id = officeId
+        City = CityName "A City"
+        BookableDesksPerDay = bookableDesksPerDay
+    }
+    let getOffices () = [anOffice]
+    
+    let aBooking =
+        {
+            OfficeId = officeId
+            EmailAddress = EmailAddress "anEmail"
+            Date = DateTime.MaxValue
+        } : Booking
+    
+    let getBookingsCountPerDate _ = Ok [aBooking]    
+    
+    let query =
+            {
+                OfficeId = officeId
+                Date = DateTime.MinValue
+            } : GetOfficeAvailabilitiesByDate
+    
+    let result = OfficeQueriesHandler.getAvailabilities getOffices getBookingsCountPerDate DateTime.MaxValue query
+    
+    match result with
+    | Error _ -> failwith "something should have been returned"
+    | Ok avail ->
+        Assert.Equal(officeId, avail.Id)
+        Assert.Equal(bookableDesksPerDay, avail.TotalDesks)
+        Assert.Equal(availableDesks, avail.AvailableDesks)
+        Assert.Equal(reservedDesks, avail.ReservedDesks)
