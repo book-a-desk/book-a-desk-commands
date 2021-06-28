@@ -188,6 +188,8 @@ Resources:
             Principal:
               Service: ecs-tasks.amazonaws.com
             Action: 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess
   ContainerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
