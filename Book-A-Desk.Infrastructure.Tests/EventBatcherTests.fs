@@ -8,10 +8,8 @@ let generateDeskBooked () =
     Seq.initInfinite (fun i ->
         {
             AggregateId = Guid.NewGuid()
-            EventId = Guid.NewGuid()
-            Date = DateTimeOffset.MaxValue
-            EmailAddress = $"test_{i}@test.com"
-            OfficeId = Guid.NewGuid()
+            ReservationType = DeskBooked
+            Event = $"SomeEvent{i}"
         })
     
 [<Fact>]
