@@ -14,7 +14,7 @@ type ReservationEvent =
 type DeskBooked =
     {
         AggregateId : Guid
-        Date: DateTime
+        Date: DateTimeOffset
         EmailAddress: string
         OfficeId: Guid
     }

@@ -8,7 +8,7 @@ let generateDeskBooked () =
     Seq.initInfinite (fun i ->
         {
             AggregateId = Guid.NewGuid()
-            Date = DateTime.MaxValue
+            Date = DateTimeOffset.MaxValue
             EmailAddress = $"test_{i}@test.com"
             OfficeId = Guid.NewGuid()
         })
