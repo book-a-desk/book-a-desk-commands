@@ -36,6 +36,7 @@ type OfficeAvailability =
     {
         Id: string
         TotalDesks: int
+        ReservedDesks: int
         AvailableDesks: int
     }
 

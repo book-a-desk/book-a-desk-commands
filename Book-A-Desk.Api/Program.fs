@@ -17,18 +17,18 @@ open Book_A_Desk.Infrastructure
 open Book_A_Desk.Domain.CommandHandler
  
 let configureCors (ctx : WebHostBuilderContext) (builder : CorsPolicyBuilder) =
-    if ctx.HostingEnvironment.IsDevelopment() then
+//    if ctx.HostingEnvironment.IsDevelopment() then
         builder
            .AllowAnyOrigin()
            .AllowAnyMethod()
            .AllowAnyHeader()
            |> ignore
-    else
-        builder
-            .WithOrigins(ctx.Configuration.["Book-A-Desk-Frontend:Url"])
-            .AllowAnyMethod()
-            .AllowAnyHeader()
-            |> ignore
+//    else
+//        builder
+//            .WithOrigins(ctx.Configuration.["Book-A-Desk-Frontend:Url"])
+//            .AllowAnyMethod()
+//            .AllowAnyHeader()
+//            |> ignore
 
 let configureApp (ctx : WebHostBuilderContext) (app : IApplicationBuilder) =
     let provideEventStore amazonDynamoDb = DynamoDbEventStore.provide amazonDynamoDb
