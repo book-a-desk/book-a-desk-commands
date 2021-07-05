@@ -6,6 +6,7 @@ open Amazon.Runtime
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Cors.Infrastructure
 open Microsoft.AspNetCore.Hosting
+open Microsoft.AspNetCore.Hosting
 open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.DependencyInjection
@@ -17,18 +18,18 @@ open Book_A_Desk.Infrastructure
 open Book_A_Desk.Domain.CommandHandler
  
 let configureCors (ctx : WebHostBuilderContext) (builder : CorsPolicyBuilder) =
-//    if ctx.HostingEnvironment.IsDevelopment() then
+    if ctx.HostingEnvironment.IsDevelopment() then
         builder
            .AllowAnyOrigin()
            .AllowAnyMethod()
            .AllowAnyHeader()
            |> ignore
-//    else
-//        builder
-//            .WithOrigins(ctx.Configuration.["Book-A-Desk-Frontend:Url"])
-//            .AllowAnyMethod()
-//            .AllowAnyHeader()
-//            |> ignore
+    else
+        builder
+            .WithOrigins(ctx.Configuration.["Book-A-Desk-Frontend:Url"])
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            |> ignore
 
 let configureApp (ctx : WebHostBuilderContext) (app : IApplicationBuilder) =
     let provideEventStore amazonDynamoDb = DynamoDbEventStore.provide amazonDynamoDb
@@ -38,8 +39,7 @@ let configureApp (ctx : WebHostBuilderContext) (app : IApplicationBuilder) =
     let reservationCommandsFactory = ReservationCommandsFactory.provide getAllOffices
 
     let getEmailServiceConfiguration = (fun () -> app.ApplicationServices.GetService<EmailServiceConfiguration>())
-         
-    let smptClientManager = SmtpClientManager.provide getEmailServiceConfiguration  
+    let smptClientManager = SmtpClientManager.provide getEmailServiceConfiguration
     let bookingNotifier = BookingNotifier.provide getEmailServiceConfiguration smptClientManager.SmtpClient getAllOffices
     
     let apiDependencyFactory = ApiDependencyFactory.provide provideEventStore reservationCommandsFactory getAllOffices bookingNotifier.NotifySuccess
@@ -70,16 +70,13 @@ let configureDynamoDB (sp : ServiceProvider) =
 
 let configureEmailService (sp : ServiceProvider) =
     let config = sp.GetService<IConfiguration>()
-    let emailServiceConfiguration =
-        {
-            SmtpClientUrl = config.["SMTP:ClientUrl"]
-            SmtpUsername = config.["SMTP:Username"]
-            SmtpPassword = config.["SMTP:Password"]
-            EmailSender = config.["SMTP:EmailSender"]
-            EmailReviewer = config.["SMTP:EmailReviewer"]
-        } 
-    printfn $"%s{emailServiceConfiguration.SmtpClientUrl}"
-    printfn $"%s{emailServiceConfiguration.SmtpUsername}"
+    {
+        SmtpClientUrl = config.["SMTP:ClientUrl"]
+        SmtpUsername = config.["SMTP:Username"]
+        SmtpPassword = config.["SMTP:Password"]
+        EmailSender = config.["SMTP:EmailSender"]
+        EmailReviewer = config.["SMTP:EmailReviewer"]
+    }
 
 let configureServices (services : IServiceCollection) =
     let serviceProvider = services.BuildServiceProvider()
@@ -87,9 +84,9 @@ let configureServices (services : IServiceCollection) =
     services.AddGiraffe()
             .AddCors()
             .AddDefaultAWSOptions(config.GetAWSOptions())
+            .AddSingleton<EmailServiceConfiguration>(configureEmailService serviceProvider)
             .AddAWSService<IAmazonDynamoDB>() |> ignore
-    configureDynamoDB serviceProvider
-    configureEmailService serviceProvider
+    configureDynamoDB serviceProvider    
     
 [<EntryPoint>]
 let main _ =
