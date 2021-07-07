@@ -10,8 +10,8 @@ services:
       - "./docker/dynamodb:/home/dynamodblocal/data"
     working_dir: /home/dynamodblocal
   app-node:
-    image: book-a-desk:latest
-    container_name: app-node
+    image: book-a-desk:local
+    container_name: book-a-desk
     ports:
       - "5000:80"
     depends_on:
