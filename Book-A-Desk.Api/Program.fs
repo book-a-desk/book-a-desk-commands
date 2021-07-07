@@ -19,8 +19,10 @@ open Book_A_Desk.Infrastructure
 open Book_A_Desk.Infrastructure.DynamoDbEventStore
 open Book_A_Desk.Domain.CommandHandler
  
+let useDevelopmentStorage = Environment.GetEnvironmentVariable("AWS_DEVELOPMENTSTORAGE") |> bool.Parse
+
 let configureCors (ctx : WebHostBuilderContext) (builder : CorsPolicyBuilder) =
-    if ctx.HostingEnvironment.IsDevelopment() then
+    if ctx.HostingEnvironment.IsDevelopment() || useDevelopmentStorage then
         builder
            .AllowAnyOrigin()
            .AllowAnyMethod()
@@ -47,14 +49,17 @@ let configureApp (ctx : WebHostBuilderContext) (app : IApplicationBuilder) =
        .UseGiraffe routes.HttpHandlers
            
 let configureAppConfiguration (builder : IConfigurationBuilder) =
-    let region = Environment.GetEnvironmentVariable("AWS_REGION")
-    let awsKeyId = Environment.GetEnvironmentVariable("AWS_KEYID")
-    let awsSecretKey = Environment.GetEnvironmentVariable("AWS_SECRETKEY")
-    let credentials = BasicAWSCredentials(awsKeyId, awsSecretKey)
-    let mutable options = AWSOptions()
-    options.Region <- RegionEndpoint.GetBySystemName(region)
-    options.Credentials <- credentials
-    builder.AddSystemsManager($"/BookADesk/", options) |> ignore
+    match useDevelopmentStorage with
+    | false ->
+        let region = Environment.GetEnvironmentVariable("AWS_REGION")
+        let awsKeyId = Environment.GetEnvironmentVariable("AWS_KEYID")
+        let awsSecretKey = Environment.GetEnvironmentVariable("AWS_SECRETKEY")
+        let credentials = BasicAWSCredentials(awsKeyId, awsSecretKey)
+        let options = AWSOptions()
+        options.Region <- RegionEndpoint.GetBySystemName(region)
+        options.Credentials <- credentials
+        builder.AddSystemsManager($"/BookADesk/", options) |> ignore
+    | true -> ()
     
 let configureDynamoDB (sp : ServiceProvider) =
     let config = sp.GetService<IConfiguration>()
@@ -63,16 +68,28 @@ let configureDynamoDB (sp : ServiceProvider) =
             ReservationTableName = config.["DynamoDB:ReservationTableName"]
             OfficeTableName = config.["DynamoDB:OfficeTableName"]
         }
-    Console.WriteLine(dynamoDBConfiguration.ReservationTableName)
-    Console.WriteLine(dynamoDBConfiguration.OfficeTableName)
+    printfn $"ReservationTableName: {dynamoDBConfiguration.ReservationTableName}"
+    printfn $"OfficeTableName: {dynamoDBConfiguration.OfficeTableName}"
 
 let configureServices (services : IServiceCollection) =
     let serviceProvider = services.BuildServiceProvider()
     let config = serviceProvider.GetService<IConfiguration>()
+    
     services.AddGiraffe()
-            .AddCors()
+            .AddCors() |> ignore
+            
+    match useDevelopmentStorage with
+    | false ->
+        services
             .AddDefaultAWSOptions(config.GetAWSOptions())
             .AddAWSService<IAmazonDynamoDB>() |> ignore
+    | true ->
+        services.AddSingleton<IAmazonDynamoDB>(fun _ ->
+            let localAmazonDynamoDB = Environment.GetEnvironmentVariable("AWS_DEVELOPMENTURL")
+            let clientConfig = AmazonDynamoDBConfig()
+            clientConfig.ServiceURL <- localAmazonDynamoDB
+            new AmazonDynamoDBClient(clientConfig) :> IAmazonDynamoDB
+        ) |> ignore
     configureDynamoDB serviceProvider
 
 [<EntryPoint>]

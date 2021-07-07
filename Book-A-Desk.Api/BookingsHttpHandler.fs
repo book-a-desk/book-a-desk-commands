@@ -45,7 +45,7 @@ module BookingsHttpHandler =
                     match results with
                     | Ok events ->
                         let appendEvents eventsToAppend : Async<unit> = 
-                            events
+                            eventsToAppend
                             |> Seq.ofList
                             |> (fun events -> aggregateId, events)
                             |> List.singleton
