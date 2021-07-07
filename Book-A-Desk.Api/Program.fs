@@ -22,11 +22,18 @@ open Book_A_Desk.Domain.CommandHandler
 let useDevelopmentStorage = Environment.GetEnvironmentVariable("AWS_DEVELOPMENTSTORAGE") |> bool.Parse
 
 let configureCors (ctx : WebHostBuilderContext) (builder : CorsPolicyBuilder) =
+    if ctx.HostingEnvironment.IsDevelopment() || useDevelopmentStorage then
         builder
            .AllowAnyOrigin()
            .AllowAnyMethod()
            .AllowAnyHeader()
            |> ignore
+    else
+        builder
+            .WithOrigins(ctx.Configuration.["Book-A-Desk-Frontend:Url"])
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            |> ignore
 
 let configureApp (ctx : WebHostBuilderContext) (app : IApplicationBuilder) =
     let provideEventStore amazonDynamoDb = DynamoDbEventStore.provide amazonDynamoDb
@@ -81,16 +88,7 @@ let configureServices (services : IServiceCollection) =
             let localAmazonDynamoDB = Environment.GetEnvironmentVariable("AWS_DEVELOPMENTURL")
             let clientConfig = AmazonDynamoDBConfig()
             clientConfig.ServiceURL <- localAmazonDynamoDB
-            printfn $"Will use {localAmazonDynamoDB}"
-            let client = new AmazonDynamoDBClient(clientConfig)
-
-            printfn "Listing table"
-            client.ListTablesAsync()
-                |> Async.AwaitTask
-                |> Async.Ignore
-                |> Async.RunSynchronously
-            printfn "Listed table"
-            client :> IAmazonDynamoDB
+            new AmazonDynamoDBClient(clientConfig) :> IAmazonDynamoDB
         ) |> ignore
     configureDynamoDB serviceProvider
 
