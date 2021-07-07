@@ -1,10 +1,10 @@
 module Book_A_Desk.Api.Tests.BookingNotifierTests
 
 open System
-open System.Net.Mail
 open Book_A_Desk.Api
 open Book_A_Desk.Api.Models
 open Book_A_Desk.Domain.Office.Domain
+open MailKit.Net.Smtp
 open Xunit
 
 [<Fact>]
@@ -42,14 +42,16 @@ let ``GIVEN A booking WHEN calling to SendEmailNotification THEN Email must be s
     let mockEmailConfig =
         {
             SmtpClientUrl = "http://localhost:8080/SMTP"
+            SmtpClientPort = 587
             SmtpUsername = "username"
             SmtpPassword = "password"
             EmailSender = "from@broadsing.com"
             EmailReviewer = "reviewer@broadsing.com"
         }
         
-    let mockEmailServiceConfiguration () = mockEmailConfig
-    let mockSmtpClient = new SmtpClient(mockEmailConfig.SmtpClientUrl)        
+    let mockEmailServiceConfiguration () = mockEmailConfig   
+    // TODO Refactor test
+    let mockSmtpClient = new SmtpClient()
     let bookingNotifier = BookingNotifier.provide mockEmailServiceConfiguration mockSmtpClient mockGetOffices       
        
     let! result = bookingNotifier.NotifySuccess mockBooking

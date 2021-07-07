@@ -1,8 +1,10 @@
 namespace Book_A_Desk.Api
 
-open System.Net.Mail
 open Book_A_Desk.Api.Models
 open Book_A_Desk.Domain.QueriesHandler
+open MailKit.Net.Smtp
+open MailKit.Security
+open MimeKit
 
 type BookingNotifier =
     {
@@ -11,25 +13,35 @@ type BookingNotifier =
 
 module BookingNotifier =
     let provide getEmailServiceConfiguration (smtpClient: SmtpClient) getOffices =         
-        let sendEmail mailMessage =
-            smtpClient.SendMailAsync(mailMessage)      
+        let sendEmail config mailMessage =
+            smtpClient.Connect(config.SmtpClientUrl, 587, SecureSocketOptions.StartTlsWhenAvailable)
+            smtpClient.Authenticate(config.SmtpUsername, config.SmtpPassword)                            
+            smtpClient.Send mailMessage
+            smtpClient.Disconnect(true);
                         
         let sendEmailNotification (booking: Booking) =
-            async {
+            async {            
                 let config = getEmailServiceConfiguration()
                 let officeName = OfficeQueriesHandler.getOfficeName booking.Office.Id getOffices
-                use mailMessage =
-                    new MailMessage(
-                        config.EmailSender,
-                        booking.User.Email)
-                mailMessage.CC.Add config.EmailReviewer
+                
+                let mailMessage = MimeMessage()            
+                MailboxAddress.Parse(config.EmailSender)
+                |> mailMessage.From.Add            
+                MailboxAddress.Parse(booking.User.Email)
+                |> mailMessage.To.Add
+                MailboxAddress.Parse(config.EmailReviewer)
+                |> mailMessage.Cc.Add
+                
                 mailMessage.Subject <- "Book-A-Desk Reservation confirmed"
-                mailMessage.Body <- $"You have booked a desk at %s{booking.Date.ToShortDateString()} in the Office %s{officeName}"
+                let bodyPart = TextPart("plain")
+                bodyPart.Text <- $"You have booked a desk at %s{booking.Date.ToShortDateString()} in the Office %s{officeName}"
+                mailMessage.Body <- bodyPart
+                
                 do!
-                    sendEmail mailMessage
-                        |> Async.AwaitIAsyncResult
-                        |> Async.Ignore
-            }
+                    sendEmail config mailMessage
+                            |> Async.AwaitIAsyncResult
+                            |> Async.Ignore
+            }                                
         {            
             NotifySuccess = sendEmailNotification
         }

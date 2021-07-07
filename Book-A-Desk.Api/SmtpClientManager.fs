@@ -1,6 +1,6 @@
 namespace Book_A_Desk.Api
 
-open System.Net.Mail
+open MailKit.Net.Smtp
 
 type SmtpClientManager =
     {
@@ -8,12 +8,10 @@ type SmtpClientManager =
     }
 
 module SmtpClientManager =
-    let provide getEmailServiceConfiguration =         
+    let provide =         
         let getSmtpClient =
-            let config = getEmailServiceConfiguration()
-            use smtpClient = new SmtpClient(config.SmtpClientUrl)
-            smtpClient.EnableSsl <- true
-            smtpClient.Credentials <- System.Net.NetworkCredential(config.SmtpUsername, config.SmtpPassword)
+            let smtpClient = new SmtpClient()
+            smtpClient.ServerCertificateValidationCallback <- fun _ _ _ _ -> true
             smtpClient
         {
             SmtpClient = getSmtpClient
