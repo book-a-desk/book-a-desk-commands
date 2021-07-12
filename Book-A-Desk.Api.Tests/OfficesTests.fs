@@ -3,6 +3,7 @@
 open System
 open System.Text.Json
 
+open Book_A_Desk.Domain.QueriesHandler
 open Xunit
 
 open Book_A_Desk.Api
@@ -89,3 +90,20 @@ let ``GIVEN A Book-A-Desk server, WHEN getting the office availability by date, 
     Assert.Equal(totalDesks, officeAvailability.TotalDesks)
     Assert.Equal(totalDesks - 1, officeAvailability.AvailableDesks)
 }
+
+[<Fact>]
+let ``GIVEN an existing Office with OfficeId WHEN getting the office name by OfficeId THEN City Name is SomeCityName`` () =
+    let expectedOfficeName = mockOffice.City    
+    let mockGetOffices () = offices
+    
+    let result = OfficeQueriesHandler.getOfficeNameById mockOffice.Id mockGetOffices
+    Assert.Equal(expectedOfficeName, result)
+
+[<Fact>]
+let ``GIVEN an invalid OfficeId WHEN getting the office name by OfficeId THEN City Name is Unknown`` () =
+    let expectedOfficeName = "Unknown" |> CityName
+    let invalidOfficeId = Guid.NewGuid () |> OfficeId
+    let mockGetOffices () = offices
+        
+    let result = OfficeQueriesHandler.getOfficeNameById invalidOfficeId mockGetOffices
+    Assert.Equal(expectedOfficeName, result)

@@ -1,5 +1,6 @@
 namespace Book_A_Desk.Api
 
+open System
 open Book_A_Desk.Api.Models
 open Book_A_Desk.Domain.Office.Domain
 open Book_A_Desk.Domain.QueriesHandler
@@ -27,7 +28,13 @@ module BookingNotifier =
                                 
         let sendEmailNotification (booking: Booking) =            
                 let config = getEmailServiceConfiguration()
-                let (CityName officeName) = OfficeQueriesHandler.getOfficeName booking.Office.Id getOffices
+                
+                let officeId =                    
+                    match InputParser.parseOfficeId booking.Office.Id with
+                        | Ok officeId -> officeId
+                        | Error e -> failwithf $"Invalid Office Id: %s{booking.Office.Id}"
+                
+                let (CityName officeName) = OfficeQueriesHandler.getOfficeNameById officeId getOffices
                 
                 let mailMessage = MimeMessage()            
                 MailboxAddress.Parse(config.EmailSender)
