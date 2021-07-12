@@ -24,7 +24,7 @@ type BookingsHttpHandler =
     }
 
 module BookingsHttpHandler =
-    let initialize (provideEventStore : IAmazonDynamoDB -> DynamoDbEventStore) reservationCommandsFactory (notifySuccess: Models.Booking-> Async<unit>) =
+    let initialize (provideEventStore : IAmazonDynamoDB -> DynamoDbEventStore) reservationCommandsFactory (notifySuccess: Models.Booking-> Async<bool>) =
         let handlePostWith booking = fun next (context : HttpContext) ->
             task {
                 let cmd =
@@ -69,7 +69,8 @@ module BookingsHttpHandler =
                         }
                     let! sent = notifySuccess booking
                     match sent with
-                        | () -> printfn $"Notification message for %s{booking.Date.ToShortDateString()} sent for %s{booking.User.Email}"
+                        | true -> printfn $"Notification message sent for %s{booking.User.Email} at %s{booking.Date.ToShortDateString()}"
+                        | false -> failwithf $"Error sending notification error for %s{booking.User.Email} at %s{booking.Date.ToShortDateString()}"
                         
                     return! json output next context
                 | Error e ->

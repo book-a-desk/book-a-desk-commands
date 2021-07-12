@@ -56,5 +56,5 @@ let ``GIVEN A booking WHEN calling to SendEmailNotification THEN Send method of 
        
     let! result = bookingNotifier.NotifySuccess mockBooking
     // Verify that SendMailAsync has been called
-    Assert.Equal(result, ())
+    Assert.True(result)
 }

@@ -10,7 +10,7 @@ open MimeKit
 
 type BookingNotifier =
     {
-        NotifySuccess: Booking -> Async<unit>
+        NotifySuccess: Booking -> Async<bool>
     }
 
 module BookingNotifier =
@@ -18,12 +18,10 @@ module BookingNotifier =
         let sendEmail config mailMessage =
             async {
                 smtpClient.Connect(config.SmtpClientUrl, config.SmtpClientPort, SecureSocketOptions.StartTlsWhenAvailable)
-                smtpClient.Authenticate(config.SmtpUsername, config.SmtpPassword)                            
-                do!
-                    smtpClient.SendAsync mailMessage
-                        |> Async.AwaitIAsyncResult
-                        |> Async.Ignore
+                smtpClient.Authenticate(config.SmtpUsername, config.SmtpPassword)                                            
+                let! response = smtpClient.SendAsync mailMessage |> Async.AwaitIAsyncResult        
                 smtpClient.Disconnect(true)
+                return response   
             }          
                                 
         let sendEmailNotification (booking: Booking) =            
