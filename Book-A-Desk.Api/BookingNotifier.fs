@@ -1,6 +1,7 @@
 namespace Book_A_Desk.Api
 
 open Book_A_Desk.Api.Models
+open Book_A_Desk.Domain.Office.Domain
 open Book_A_Desk.Domain.QueriesHandler
 open MailKit.Net.Smtp
 open MailKit.Security
@@ -14,15 +15,19 @@ type BookingNotifier =
 module BookingNotifier =
     let provide getEmailServiceConfiguration (smtpClient: SmtpClient) getOffices =         
         let sendEmail config mailMessage =
-            smtpClient.Connect(config.SmtpClientUrl, 587, SecureSocketOptions.StartTlsWhenAvailable)
-            smtpClient.Authenticate(config.SmtpUsername, config.SmtpPassword)                            
-            smtpClient.Send mailMessage
-            smtpClient.Disconnect(true);
-                        
-        let sendEmailNotification (booking: Booking) =
-            async {            
+            async {
+                smtpClient.Connect(config.SmtpClientUrl, config.SmtpClientPort, SecureSocketOptions.StartTlsWhenAvailable)
+                smtpClient.Authenticate(config.SmtpUsername, config.SmtpPassword)                            
+                do!
+                    smtpClient.SendAsync mailMessage
+                        |> Async.AwaitIAsyncResult
+                        |> Async.Ignore
+                smtpClient.Disconnect(true)
+            }          
+                                
+        let sendEmailNotification (booking: Booking) =            
                 let config = getEmailServiceConfiguration()
-                let officeName = OfficeQueriesHandler.getOfficeName booking.Office.Id getOffices
+                let (CityName officeName) = OfficeQueriesHandler.getOfficeName booking.Office.Id getOffices
                 
                 let mailMessage = MimeMessage()            
                 MailboxAddress.Parse(config.EmailSender)
@@ -37,11 +42,7 @@ module BookingNotifier =
                 bodyPart.Text <- $"You have booked a desk at %s{booking.Date.ToShortDateString()} in the Office %s{officeName}"
                 mailMessage.Body <- bodyPart
                 
-                do!
-                    sendEmail config mailMessage
-                            |> Async.AwaitIAsyncResult
-                            |> Async.Ignore
-            }                                
+                sendEmail config mailMessage
         {            
             NotifySuccess = sendEmailNotification
         }

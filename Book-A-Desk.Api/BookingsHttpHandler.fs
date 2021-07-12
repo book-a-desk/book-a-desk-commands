@@ -33,7 +33,7 @@ module BookingsHttpHandler =
                         Date = booking.Date
                         EmailAddress = EmailAddress booking.User.Email
                     }
- 
+
                 let eventStore = provideEventStore (context.GetService<IAmazonDynamoDB>())
                 let command = BookADesk cmd
                 
@@ -69,7 +69,7 @@ module BookingsHttpHandler =
                         }
                     let! sent = notifySuccess booking
                     match sent with
-                        | () -> printfn "I've sent a mail message!"
+                        | () -> printfn $"Notification message for %s{booking.Date.ToShortDateString()} sent for %s{booking.User.Email}"
                         
                     return! json output next context
                 | Error e ->

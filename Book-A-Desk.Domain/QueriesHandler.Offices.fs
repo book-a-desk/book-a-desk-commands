@@ -50,7 +50,7 @@ module rec OfficeQueriesHandler =
             offices
             |> List.tryFind (fun (o:Office) -> officeReference.Equals(o.Id))
             |> function
-                | None -> "Unknown"
-                | Some (o:Office) -> o.City.ToString()
+                | None -> "Unknown" |> CityName
+                | Some (o:Office) -> o.City
         | Error e ->
-            "Unknown"
+            "Unknown" |> CityName
