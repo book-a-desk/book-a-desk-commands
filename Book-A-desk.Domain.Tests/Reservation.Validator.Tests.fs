@@ -1,6 +1,7 @@
 ﻿module Book_A_Desk.Domain.Reservation.Tests
 
 open System
+open Book_A_Desk.Core
 open Xunit
 
 open Book_A_Desk.Domain
@@ -9,7 +10,8 @@ open Book_A_Desk.Domain.Reservation
 open Book_A_Desk.Domain.Reservation.Commands
 open Book_A_desk.Domain.Tests
 
-let offices = List.Empty
+let office = An.office
+let offices = [office]
     
 let aReservationAggregate =
     {
@@ -23,7 +25,7 @@ let ``GIVEN A Book-A-Desk Reservation command WITH an empty email address, WHEN 
         {
             EmailAddress = EmailAddress ""
             Date = DateTime.MaxValue
-            OfficeId = OfficeId (Guid.NewGuid())
+            OfficeId = office.Id
         } : BookADesk
     
     let result = BookADeskReservationValidator.validateCommand offices commandWithEmptyEmailAddress aReservationAggregate
@@ -31,23 +33,50 @@ let ``GIVEN A Book-A-Desk Reservation command WITH an empty email address, WHEN 
     | Ok _ -> failwith "Validation should fail because email is empty"
     | Error _ -> ()
 
-[<Fact>]
-let ``GIVEN A Book-A-Desk Reservation command WITH a date in the past, WHEN validating, THEN validation should fail`` () =
+type ForbiddenDatesForPastAndToday() as this =
+    inherit TheoryData<DateTime>()
+    do  this.Add(DateTime.MinValue)
+    do  this.Add(DateTime.Today.AddSeconds(-1.))
+    do  this.Add(DateTime.Now.AddMinutes(-1.))
+    do  this.Add(DateTime.Today.AddHours(00.).AddMinutes(00.).AddSeconds(00.))
+    do  this.Add(DateTime.Today.AddHours(00.).AddMinutes(00.).AddSeconds(01.))
+    do  this.Add(DateTime.Today.AddHours(23.).AddMinutes(59.).AddSeconds(59.))
+
+[<Theory; ClassData(typeof<ForbiddenDatesForPastAndToday>)>]
+let ``GIVEN A Book-A-Desk Reservation command WITH a past or today date, WHEN validating, THEN validation should fail`` (bookedDate:DateTime) =
     let commandWithPastDate =
         {
             EmailAddress = EmailAddress "anEmailAddress@fake.com"
-            Date = DateTime.MinValue
-            OfficeId = OfficeId (Guid.NewGuid())
+            Date = bookedDate
+            OfficeId = office.Id
         } : BookADesk
     
     let result = BookADeskReservationValidator.validateCommand offices commandWithPastDate aReservationAggregate
     match result with
     | Ok _ -> failwith "Validation should fail because date is in the past"
     | Error _ -> ()
+    
+type AllowedFutureDates() as this =
+    inherit TheoryData<DateTime>()
+    do  this.Add(DateTime.Today.AddDays(1.))
+    do  this.Add(DateTime.MaxValue)
+
+[<Theory; ClassData(typeof<AllowedFutureDates>)>]
+let ``GIVEN A Book-A-Desk Reservation command WITH a date greater than today, WHEN validating, THEN validation should pass`` (requestedDate:DateTime) =
+    let commandWithPastDate =
+        {
+            EmailAddress = EmailAddress "anEmailAddress@fake.com"
+            Date = requestedDate
+            OfficeId = office.Id
+        } : BookADesk
+    
+    let result = BookADeskReservationValidator.validateCommand offices commandWithPastDate aReservationAggregate
+    match result with
+    | Error _ -> failwith "Validation should have succeeded"
+    | Ok _ -> ()
 
 [<Fact>]
 let ``GIVEN A Book-A-Desk Reservation command WITH an invalid office id, WHEN validating, THEN validation should fail`` () =
-    
     let commandWithInvalidOfficeId =
         {
             EmailAddress = EmailAddress "anEmailAddress@fake.com"
@@ -84,8 +113,6 @@ let ``GIVEN A Book-A-Desk Reservation command WITH no desks available, WHEN vali
     
 [<Fact>]
 let ``GIVEN A valid Book-A-Desk Reservation command, WHEN validating the command, THEN validation should pass.`` () =
-    let office = An.office
-    let offices = [office]
     let command =
         {
             EmailAddress = EmailAddress "anEmailAddress@fake.com"

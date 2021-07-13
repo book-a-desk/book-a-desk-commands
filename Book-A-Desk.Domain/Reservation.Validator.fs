@@ -16,8 +16,9 @@ module BookADeskReservationValidator =
         | _ ->
             Ok ()
             
-    let private validateDateIsInTheFuture date =
-        if date < DateTime.Now then
+    let private validateDateIsGreaterThanToday requestedDate =
+        let allowedDate = DateTime.Today.AddDays(1.)
+        if requestedDate < allowedDate then
             Error "Date must be greater than today."
         else
             Ok ()
@@ -51,7 +52,7 @@ module BookADeskReservationValidator =
             
     let validateCommand (offices: Office list) (cmd : BookADesk) reservationAggregate = result {
         do! validateEmailIsNotEmpty cmd.EmailAddress
-        do! validateDateIsInTheFuture cmd.Date
+        do! validateDateIsGreaterThanToday cmd.Date
         do! validateOfficeIdIsValid cmd.OfficeId offices
         do! validateOfficeIsAvailable reservationAggregate cmd.OfficeId offices cmd.Date
         
