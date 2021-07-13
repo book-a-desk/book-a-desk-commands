@@ -19,7 +19,7 @@ open Book_A_Desk.Domain.CommandHandler
 let useDevelopmentStorage = Environment.GetEnvironmentVariable("AWS_DEVELOPMENTSTORAGE") |> bool.Parse
 
 let configureCors (ctx : WebHostBuilderContext) (builder : CorsPolicyBuilder) =
-    if ctx.HostingEnvironment.IsDevelopment() then
+    if ctx.HostingEnvironment.IsDevelopment() || useDevelopmentStorage then
         builder
            .AllowAnyOrigin()
            .AllowAnyMethod()
