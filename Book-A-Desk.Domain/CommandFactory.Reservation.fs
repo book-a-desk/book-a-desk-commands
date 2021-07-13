@@ -1,6 +1,5 @@
 namespace Book_A_Desk.Domain.CommandHandler
 
-open Book_A_Desk.Domain.Reservation
 open Book_A_Desk.Domain.Reservation.Commands
 
 type ReservationCommandsFactory =

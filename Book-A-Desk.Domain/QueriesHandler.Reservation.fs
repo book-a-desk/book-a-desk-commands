@@ -2,10 +2,8 @@
 
 open System
 open Book_A_Desk.Core
-open Book_A_Desk.Domain
 open Book_A_Desk.Domain.Events
 open Book_A_Desk.Domain.Reservation
-open Book_A_Desk.Domain.Reservation.Domain
 
 module rec ReservationsQueriesHandler =
     let get (bookingEvents : seq<DomainEvent>) (date : DateTime) : Result<Booking list, string> = result {

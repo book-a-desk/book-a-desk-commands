@@ -11,12 +11,14 @@ module ApiDependencyFactory =
         getEventStore
         reservationCommandsFactory
         getOffices
+        notifySuccess
         =
 
         let createBookingsHttpHandler bearerToken =
             BookingsHttpHandler.initialize
                 getEventStore
                 reservationCommandsFactory
+                notifySuccess
 
         let createOfficesHttpHandler bearerToken =
             OfficesHttpHandler.initialize
