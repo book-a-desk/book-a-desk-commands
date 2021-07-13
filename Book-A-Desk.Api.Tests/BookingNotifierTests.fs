@@ -11,7 +11,7 @@ open MailKit.Net.Smtp
 open Xunit
 
 [<Fact>]
-let ``GIVEN A booking WHEN calling to SendEmailNotification THEN Send method of SMTP Client must be called `` () = async {
+let ``GIVEN A booking WHEN calling to SendEmailNotification THEN SendAsync method of SMTP Client must be called `` () = async {
     let officeId = Guid.NewGuid ()
     let totalDesks = 32
     let mockOffice =
