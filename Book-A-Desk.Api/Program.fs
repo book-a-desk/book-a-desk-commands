@@ -94,6 +94,7 @@ let configureServices (services : IServiceCollection) =
     | false ->
         services
             .AddDefaultAWSOptions(config.GetAWSOptions())
+            .AddSingleton<EmailServiceConfiguration>(configureEmailService serviceProvider)
             .AddAWSService<IAmazonDynamoDB>() |> ignore
     | true ->
         services.AddSingleton<IAmazonDynamoDB>(fun _ ->
@@ -103,7 +104,6 @@ let configureServices (services : IServiceCollection) =
             new AmazonDynamoDBClient(clientConfig) :> IAmazonDynamoDB
         ) |> ignore
         
-    services.AddSingleton<EmailServiceConfiguration>(configureEmailService serviceProvider) |> ignore    
     configureDynamoDB serviceProvider
 
 [<EntryPoint>]
