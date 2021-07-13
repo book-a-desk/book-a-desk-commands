@@ -4,6 +4,9 @@ open System
 open Book_A_Desk.Api
 open Book_A_Desk.Api.Models
 open Book_A_Desk.Domain.Office.Domain
+open FSharp.Control.Tasks
+open Foq
+open FsToolkit.ErrorHandling
 open MailKit.Net.Smtp
 open Xunit
 
@@ -49,12 +52,20 @@ let ``GIVEN A booking WHEN calling to SendEmailNotification THEN Send method of 
             EmailReviewer = "reviewer@broadsing.com"
         }
         
-    let mockEmailServiceConfiguration () = mockEmailConfig   
-    // TODO Refactor test
-    let mockSmtpClient = new SmtpClient()
+    let mockEmailServiceConfiguration () = mockEmailConfig
+    
+    // Mock SmtpClient using Foq
+    let mutable sendWasCalled = false
+    let mockSmtpClient = Mock<SmtpClient>()
+                             .Setup(fun x -> <@ x.Connect(any(), any()) @>).Returns(())
+                             .Setup(fun x -> <@ x.Disconnect(any(), any()) @>).Returns(())
+                             .Setup(fun x -> <@ x.Authenticate(mockEmailConfig.SmtpUsername, mockEmailConfig.SmtpPassword) @>).Returns(())
+                             .Setup(fun x -> <@ x.SendAsync(any()) @>).Returns(task {sendWasCalled <- true})
+                             .Create()
+                             
     let bookingNotifier = BookingNotifier.provide mockEmailServiceConfiguration mockSmtpClient mockGetOffices       
        
     let! result = bookingNotifier.NotifySuccess mockBooking
-    // Verify that SendMailAsync has been called
     Assert.True(result)
+    Assert.True(sendWasCalled)
 }
