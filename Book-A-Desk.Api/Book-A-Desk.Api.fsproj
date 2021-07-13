@@ -22,8 +22,12 @@
     <Compile Include="SmtpClientManager.fs" />
     <Compile Include="Program.fs" />
     <Content Include="docs\bookADeskOpenAPISpecification.json" />
-    <Content Include="appsettings.Development.json" />
-    <Content Include="appsettings.json" />
+    <Content Include="..\Dockerfile">
+        <Link>Docker\Dockerfile</Link>
+     </Content>
+    <Content Include="..\docker-compose.yml">
+        <Link>Docker\docker-compose.yml</Link>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
