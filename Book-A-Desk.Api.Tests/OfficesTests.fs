@@ -3,6 +3,7 @@
 open System
 open System.Text.Json
 
+open Book_A_Desk.Domain.QueriesHandler
 open Xunit
 
 open Book_A_Desk.Api
@@ -39,10 +40,10 @@ let ``GIVEN A Book-A-Desk server, WHEN getting the offices endpoint, THEN office
             GetEvents = fun _ -> failwith "should not be called"
             AppendEvents = fun _ -> failwith "should not be called"
         } : DynamoDbEventStore.DynamoDbEventStore
-
+    let mockEmailNotification booking = async { return true }
     let mockGetOffices () = offices
     
-    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices
+    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification
     use httpClient = TestServer.createAndRun mockApiDependencyFactory
     let! result = HttpRequest.getAsync httpClient "http://localhost/offices"
 
@@ -74,7 +75,9 @@ let ``GIVEN A Book-A-Desk server, WHEN getting the office availability by date, 
             GetEvents = fun _ -> [aBooking] |> Seq.ofList |> Ok |> async.Return
             AppendEvents = fun _ -> failwith "should not be called"
         } : DynamoDbEventStore.DynamoDbEventStore
-    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices
+        
+    let mockEmailNotification booking = async { return true }    
+    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification
     use httpClient = TestServer.createAndRun mockApiDependencyFactory
 
     let! result = HttpRequest.getAsync httpClient $"http://localhost/offices/{officeId.ToString()}/availabilities?date={date.ToString()}"
@@ -87,3 +90,20 @@ let ``GIVEN A Book-A-Desk server, WHEN getting the office availability by date, 
     Assert.Equal(totalDesks, officeAvailability.TotalDesks)
     Assert.Equal(totalDesks - 1, officeAvailability.AvailableDesks)
 }
+
+[<Fact>]
+let ``GIVEN an existing Office with OfficeId WHEN getting the office name by OfficeId THEN City Name is SomeCityName`` () =
+    let expectedOfficeName = mockOffice.City    
+    let mockGetOffices () = offices
+    
+    let result = OfficeQueriesHandler.getOfficeNameById mockOffice.Id mockGetOffices
+    Assert.Equal(expectedOfficeName, result)
+
+[<Fact>]
+let ``GIVEN an invalid OfficeId WHEN getting the office name by OfficeId THEN City Name is Unknown`` () =
+    let expectedOfficeName = "Unknown" |> CityName
+    let invalidOfficeId = Guid.NewGuid () |> OfficeId
+    let mockGetOffices () = offices
+        
+    let result = OfficeQueriesHandler.getOfficeNameById invalidOfficeId mockGetOffices
+    Assert.Equal(expectedOfficeName, result)

@@ -10,13 +10,10 @@ open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.DependencyInjection
 open Giraffe
-open System.Threading.Tasks
 
 open Book_A_Desk.Api
-open Book_A_Desk.Domain
 open Book_A_Desk.Domain.Office.Domain
 open Book_A_Desk.Infrastructure
-open Book_A_Desk.Infrastructure.DynamoDbEventStore
 open Book_A_Desk.Domain.CommandHandler
  
 let useDevelopmentStorage = Environment.GetEnvironmentVariable("AWS_DEVELOPMENTSTORAGE") |> bool.Parse
@@ -41,8 +38,12 @@ let configureApp (ctx : WebHostBuilderContext) (app : IApplicationBuilder) =
     let getAllOffices = (fun () -> Offices.All)
 
     let reservationCommandsFactory = ReservationCommandsFactory.provide getAllOffices
-
-    let apiDependencyFactory = ApiDependencyFactory.provide provideEventStore reservationCommandsFactory getAllOffices
+    
+    let smptClientManager = SmtpClientManager.provide
+    let getEmailServiceConfiguration = (fun () -> app.ApplicationServices.GetService<EmailServiceConfiguration>())
+    let bookingNotifier = BookingNotifier.provide getEmailServiceConfiguration smptClientManager.SmtpClient getAllOffices
+    
+    let apiDependencyFactory = ApiDependencyFactory.provide provideEventStore reservationCommandsFactory getAllOffices bookingNotifier.NotifySuccess
 
     let routes = Routes.provide apiDependencyFactory
     app.UseCors(configureCors ctx)
@@ -71,6 +72,17 @@ let configureDynamoDB (sp : ServiceProvider) =
     printfn $"ReservationTableName: {dynamoDBConfiguration.ReservationTableName}"
     printfn $"OfficeTableName: {dynamoDBConfiguration.OfficeTableName}"
 
+let configureEmailService (sp : ServiceProvider) =
+    let config = sp.GetService<IConfiguration>()
+    {
+        SmtpClientUrl = config.["SMTP:ClientUrl"]
+        SmtpClientPort = config.["SMTP:ClientPort"] |> int
+        SmtpUsername = config.["SMTP:Username"]
+        SmtpPassword = config.["SMTP:Password"]
+        EmailSender = config.["SMTP:EmailSender"]
+        EmailReviewer = config.["SMTP:EmailReviewer"]
+    }
+
 let configureServices (services : IServiceCollection) =
     let serviceProvider = services.BuildServiceProvider()
     let config = serviceProvider.GetService<IConfiguration>()
@@ -82,6 +94,7 @@ let configureServices (services : IServiceCollection) =
     | false ->
         services
             .AddDefaultAWSOptions(config.GetAWSOptions())
+            .AddSingleton<EmailServiceConfiguration>(configureEmailService serviceProvider)
             .AddAWSService<IAmazonDynamoDB>() |> ignore
     | true ->
         services.AddSingleton<IAmazonDynamoDB>(fun _ ->
@@ -90,6 +103,7 @@ let configureServices (services : IServiceCollection) =
             clientConfig.ServiceURL <- localAmazonDynamoDB
             new AmazonDynamoDBClient(clientConfig) :> IAmazonDynamoDB
         ) |> ignore
+        
     configureDynamoDB serviceProvider
 
 [<EntryPoint>]

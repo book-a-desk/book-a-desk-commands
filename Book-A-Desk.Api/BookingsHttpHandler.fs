@@ -1,11 +1,12 @@
 ﻿namespace Book_A_Desk.Api
 
+open System
+
 open Amazon.DynamoDBv2
 open Microsoft.AspNetCore.Http
 open Giraffe
 open FsToolkit.ErrorHandling
 open FSharp.Control.Tasks.V2.ContextInsensitive
-open System
 
 open Book_A_Desk.Api.Models
 open Book_A_Desk.Domain
@@ -14,6 +15,7 @@ open Book_A_Desk.Domain.Office.Domain
 open Book_A_Desk.Domain.Reservation
 open Book_A_Desk.Domain.Reservation.Commands
 open Book_A_Desk.Domain.Reservation.Domain
+
 open Book_A_Desk.Infrastructure.DynamoDbEventStore
 
 type BookingsHttpHandler =
@@ -22,7 +24,7 @@ type BookingsHttpHandler =
     }
 
 module BookingsHttpHandler =
-    let initialize (provideEventStore : IAmazonDynamoDB -> DynamoDbEventStore) reservationCommandsFactory =
+    let initialize (provideEventStore : IAmazonDynamoDB -> DynamoDbEventStore) reservationCommandsFactory (notifySuccess: Models.Booking-> Async<bool>) =
         let handlePostWith booking = fun next (context : HttpContext) ->
             task {
                 let cmd =
@@ -31,7 +33,7 @@ module BookingsHttpHandler =
                         Date = booking.Date
                         EmailAddress = EmailAddress booking.User.Email
                     }
- 
+
                 let eventStore = provideEventStore (context.GetService<IAmazonDynamoDB>())
                 let command = BookADesk cmd
                 
@@ -65,6 +67,11 @@ module BookingsHttpHandler =
                             Date = booking.Date
                             User = { Email = booking.User.Email }
                         }
+                    let! sent = notifySuccess booking
+                    match sent with
+                        | true -> printfn $"Notification message sent for %s{booking.User.Email} at %s{booking.Date.ToShortDateString()}"
+                        | false -> failwithf $"Error sending notification error for %s{booking.User.Email} at %s{booking.Date.ToShortDateString()}"
+                        
                     return! json output next context
                 | Error e ->
                     context.SetStatusCode(500)
