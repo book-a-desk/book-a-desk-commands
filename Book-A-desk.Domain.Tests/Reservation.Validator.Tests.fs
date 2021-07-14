@@ -18,21 +18,53 @@ let aReservationAggregate =
         Id = ReservationAggregate.Id
         BookedDesks = []
     }
+    
+type InvalidEmails() as this =
+    inherit TheoryData<string>()
+    do  this.Add("")
+    do  this.Add(null)
+    do  this.Add(String.Empty)
+    do  this.Add("john.smith@domain.com")
+    do  this.Add("JOHN.SMITH@DOMAIN.COM")
+    do  this.Add("jsmith@domain.com")
+    do  this.Add("JSMITH@DOMAIN.COM")
+    do  this.Add("jsmith")
+    do  this.Add("jsmith@")
+    do  this.Add("@domain.com")
 
-[<Fact>]
-let ``GIVEN A Book-A-Desk Reservation command WITH an empty email address, WHEN validating, THEN validation should fail`` () =
+[<Theory; ClassData(typeof<InvalidEmails>)>]
+let ``GIVEN A Book-A-Desk Reservation command WITH an invalid corporate email address, WHEN validating, THEN validation should fail`` (email:string) =
     let commandWithEmptyEmailAddress =
         {
-            EmailAddress = EmailAddress ""
+            EmailAddress = EmailAddress email
             Date = DateTime.MaxValue
             OfficeId = office.Id
         } : BookADesk
     
     let result = BookADeskReservationValidator.validateCommand offices commandWithEmptyEmailAddress aReservationAggregate
     match result with
-    | Ok _ -> failwith "Validation should fail because email is empty"
+    | Ok _ -> failwith "Validation should fail because email is not valid"
     | Error _ -> ()
 
+type ValidEmails() as this =
+    inherit TheoryData<string>()
+    do  this.Add("john.smith@broadsign.com")
+    do  this.Add("JOHN.SMITH@BROADSIGN.COM")
+    do  this.Add("jsmith@broadsign.com")
+    do  this.Add("JSMITH@BROADSIGN.COM")
+[<Theory; ClassData(typeof<ValidEmails>)>]
+let ``GIVEN A Book-A-Desk Reservation command WITH a valid corporate email address, WHEN validating, THEN validation should pass`` (email:string) =
+    let commandWithEmptyEmailAddress =
+        {
+            EmailAddress = EmailAddress email
+            Date = DateTime.MaxValue
+            OfficeId = office.Id
+        } : BookADesk
+    
+    let result = BookADeskReservationValidator.validateCommand offices commandWithEmptyEmailAddress aReservationAggregate
+    match result with
+    | Ok _ -> ()
+    | Error _ -> failwith "Validation should pass because email is valid"
 type ForbiddenDatesForPastAndToday() as this =
     inherit TheoryData<DateTime>()
     do  this.Add(DateTime.MinValue)
@@ -65,7 +97,7 @@ type AllowedFutureDates() as this =
 let ``GIVEN A Book-A-Desk Reservation command WITH a date greater than today, WHEN validating, THEN validation should pass`` (requestedDate:DateTime) =
     let commandWithPastDate =
         {
-            EmailAddress = EmailAddress "anEmailAddress@fake.com"
+            EmailAddress = EmailAddress "email@broadsign.com"
             Date = requestedDate
             OfficeId = office.Id
         } : BookADesk
@@ -79,7 +111,7 @@ let ``GIVEN A Book-A-Desk Reservation command WITH a date greater than today, WH
 let ``GIVEN A Book-A-Desk Reservation command WITH an invalid office id, WHEN validating, THEN validation should fail`` () =
     let commandWithInvalidOfficeId =
         {
-            EmailAddress = EmailAddress "anEmailAddress@fake.com"
+            EmailAddress = EmailAddress "email@broadsign.com"
             Date = DateTime.MaxValue
             OfficeId = OfficeId Guid.Empty
         } : BookADesk
@@ -95,7 +127,7 @@ let ``GIVEN A Book-A-Desk Reservation command WITH no desks available, WHEN vali
     let offices = [office]
     let command =
         {
-            EmailAddress = EmailAddress "anEmailAddress@fake.com"
+            EmailAddress = EmailAddress "email@broadsign.com"
             Date = DateTime.MaxValue
             OfficeId = office.Id
         } : BookADesk
@@ -115,7 +147,7 @@ let ``GIVEN A Book-A-Desk Reservation command WITH no desks available, WHEN vali
 let ``GIVEN A valid Book-A-Desk Reservation command, WHEN validating the command, THEN validation should pass.`` () =
     let command =
         {
-            EmailAddress = EmailAddress "anEmailAddress@fake.com"
+            EmailAddress = EmailAddress "email@broadsign.com"
             Date = DateTime.MaxValue
             OfficeId = office.Id
         } : BookADesk

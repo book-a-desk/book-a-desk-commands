@@ -17,7 +17,7 @@ let ``GIVEN A Book-A-Desk Reservation command, WHEN executing the command and de
 
     let office = Offices.All.[0]
     let bookADesk = {
-        BookADesk.EmailAddress = EmailAddress "something@something.com"
+        BookADesk.EmailAddress = EmailAddress "email@broadsign.com"
         BookADesk.Date = DateTime.Now.AddDays(1.)
         BookADesk.OfficeId = office.Id
     }
@@ -35,7 +35,7 @@ let ``GIVEN A Book-A-Desk Reservation command, WHEN executing the command and de
 
     let office = Offices.All.[0]
     let bookADesk = {
-        BookADesk.EmailAddress = EmailAddress "something@something.com"
+        BookADesk.EmailAddress = EmailAddress "email@broadsign.com"
         BookADesk.Date = DateTime.Now.AddDays(1.)
         BookADesk.OfficeId = office.Id
     }

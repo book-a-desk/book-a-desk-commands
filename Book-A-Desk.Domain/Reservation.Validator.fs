@@ -2,19 +2,23 @@
 
 open System
 
+open System.ComponentModel.DataAnnotations
+open System.Text.RegularExpressions
 open Book_A_Desk.Core
-open Book_A_Desk.Domain
 open Book_A_Desk.Domain.Office.Domain
 open Book_A_Desk.Domain.Reservation.Commands
 
 module BookADeskReservationValidator =
     
-    let private validateEmailIsNotEmpty email =
-        match email with
-        | EmailAddress "" ->
-            Error "The e-mail address must not be empty."
-        | _ ->
-            Ok ()
+    let private validateCorporateEmail email =
+        let emailToValidate = email.ToString().ToLower()
+        let emailValidator = EmailAddressAttribute()
+        let isValidEmail = emailValidator.IsValid(emailToValidate)
+        let hasCorporateDomain = Regex.Match(emailToValidate, "@broadsign.com")
+        if isValidEmail && hasCorporateDomain.Success then
+            Ok()
+        else
+            Error "The e-mail address must be valid."
             
     let private validateDateIsGreaterThanToday requestedDate =
         let allowedDate = DateTime.Today.AddDays(1.)
@@ -51,7 +55,7 @@ module BookADeskReservationValidator =
     }
             
     let validateCommand (offices: Office list) (cmd : BookADesk) reservationAggregate = result {
-        do! validateEmailIsNotEmpty cmd.EmailAddress
+        do! validateCorporateEmail cmd.EmailAddress
         do! validateDateIsGreaterThanToday cmd.Date
         do! validateOfficeIdIsValid cmd.OfficeId offices
         do! validateOfficeIsAvailable reservationAggregate cmd.OfficeId offices cmd.Date
