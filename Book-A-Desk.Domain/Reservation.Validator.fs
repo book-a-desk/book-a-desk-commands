@@ -5,16 +5,17 @@ open System
 open System.ComponentModel.DataAnnotations
 open System.Text.RegularExpressions
 open Book_A_Desk.Core
+open Book_A_Desk.Domain
 open Book_A_Desk.Domain.Office.Domain
 open Book_A_Desk.Domain.Reservation.Commands
 
 module BookADeskReservationValidator =
     
     let private validateCorporateEmail email =
-        let emailToValidate = email.ToString().ToLower()
+        let (EmailAddress emailToValidate) = email
         let emailValidator = EmailAddressAttribute()
         let isValidEmail = emailValidator.IsValid(emailToValidate)
-        let hasCorporateDomain = Regex.Match(emailToValidate, "@broadsign.com")
+        let hasCorporateDomain = Regex.Match(emailToValidate.ToLower(), "@broadsign.com")
         if isValidEmail && hasCorporateDomain.Success then
             Ok()
         else

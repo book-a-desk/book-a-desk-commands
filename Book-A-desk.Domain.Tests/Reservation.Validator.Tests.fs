@@ -22,7 +22,6 @@ let aReservationAggregate =
 type InvalidEmails() as this =
     inherit TheoryData<string>()
     do  this.Add("")
-    do  this.Add(null)
     do  this.Add(String.Empty)
     do  this.Add("john.smith@domain.com")
     do  this.Add("JOHN.SMITH@DOMAIN.COM")
