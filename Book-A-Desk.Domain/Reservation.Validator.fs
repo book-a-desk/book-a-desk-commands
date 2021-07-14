@@ -19,7 +19,7 @@ module BookADeskReservationValidator =
         if isValidEmail && hasCorporateDomain.Success then
             Ok()
         else
-            Error "The e-mail address must be valid."
+            Error "The e-mail address is invalid."
             
     let private validateDateIsGreaterThanToday requestedDate =
         let allowedDate = DateTime.Today.AddDays(1.)
