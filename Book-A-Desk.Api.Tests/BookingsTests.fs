@@ -32,9 +32,11 @@ let offices =
 let mockGetOffices () =
     offices
     
+let domainName = "domain.com"
+    
 let mockReservationCommandFactory : ReservationCommandsFactory =
     {
-        CreateBookADeskCommand = fun () -> BookADeskReservationCommand.provide offices
+        CreateBookADeskCommand = fun () -> BookADeskReservationCommand.provide offices domainName
     }
     
 let mutable emailWasSent = false 

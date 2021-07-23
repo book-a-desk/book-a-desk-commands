@@ -10,14 +10,15 @@ open Book_A_Desk.Domain.Reservation.Commands
 open Book_A_desk.Domain.Tests
 
 let getAllOffices = Offices.All
+let domainName = "domain.com"
 
 [<Fact>]
 let ``GIVEN A Book-A-Desk Reservation command, WHEN executing the command and desks are available, THEN an event should be created`` () =
-    let command = BookADeskReservationCommand.provide getAllOffices
+    let command = BookADeskReservationCommand.provide getAllOffices domainName
 
     let office = Offices.All.[0]
     let bookADesk = {
-        BookADesk.EmailAddress = EmailAddress "email@broadsign.com"
+        BookADesk.EmailAddress = EmailAddress $"email@{domainName}"
         BookADesk.Date = DateTime.Now.AddDays(1.)
         BookADesk.OfficeId = office.Id
     }
@@ -31,11 +32,11 @@ let ``GIVEN A Book-A-Desk Reservation command, WHEN executing the command and de
 
 [<Fact>]
 let ``GIVEN A Book-A-Desk Reservation command, WHEN executing the command and desks are available, THEN the correct event is created`` () =
-    let command = BookADeskReservationCommand.provide getAllOffices
+    let command = BookADeskReservationCommand.provide getAllOffices domainName
 
     let office = Offices.All.[0]
     let bookADesk = {
-        BookADesk.EmailAddress = EmailAddress "email@broadsign.com"
+        BookADesk.EmailAddress = EmailAddress $"email@{domainName}"
         BookADesk.Date = DateTime.Now.AddDays(1.)
         BookADesk.OfficeId = office.Id
     }

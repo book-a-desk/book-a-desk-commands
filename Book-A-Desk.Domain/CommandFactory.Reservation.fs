@@ -9,9 +9,9 @@ type ReservationCommandsFactory =
     }
 
 module ReservationCommandsFactory =
-    let provide getOffices =
+    let provide getOffices domainName =
 
-        let createBookADeskCommand () = BookADeskReservationCommand.provide (getOffices ())
+        let createBookADeskCommand () = BookADeskReservationCommand.provide (getOffices ()) domainName
 
         {
             CreateBookADeskCommand = createBookADeskCommand

@@ -9,9 +9,9 @@ type BookADeskReservationCommand =
     }
 
 module BookADeskReservationCommand =
-    let provide offices =
+    let provide offices domainName =
         let validate (command:BookADesk) reservationAggregate  =
-             BookADeskReservationValidator.validateCommand offices command reservationAggregate
+             BookADeskReservationValidator.validateCommand offices command reservationAggregate domainName
 
         let execute (command:BookADesk) reservationAggregate =
             {

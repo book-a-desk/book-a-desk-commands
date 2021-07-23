@@ -11,11 +11,12 @@ open Book_A_Desk.Domain.Reservation.Commands
 
 module BookADeskReservationValidator =
     
-    let private validateCorporateEmail email =
+    let private validateCorporateEmail email validDomainName =
         let (EmailAddress emailToValidate) = email
         let emailValidator = EmailAddressAttribute()
         let isValidEmail = emailValidator.IsValid(emailToValidate)
-        let hasCorporateDomain = Regex.Match(emailToValidate.ToLower(), "@broadsign.com")
+        let domainName = "@" + validDomainName
+        let hasCorporateDomain = Regex.Match(emailToValidate.ToLower(), domainName)
         if isValidEmail && hasCorporateDomain.Success then
             Ok()
         else
@@ -55,8 +56,8 @@ module BookADeskReservationValidator =
             return! Error ($"The office is booked out at {date.ToShortDateString()}" )
     }
             
-    let validateCommand (offices: Office list) (cmd : BookADesk) reservationAggregate = result {
-        do! validateCorporateEmail cmd.EmailAddress
+    let validateCommand (offices: Office list) (cmd : BookADesk) reservationAggregate domainName = result {
+        do! validateCorporateEmail cmd.EmailAddress domainName
         do! validateDateIsGreaterThanToday cmd.Date
         do! validateOfficeIdIsValid cmd.OfficeId offices
         do! validateOfficeIsAvailable reservationAggregate cmd.OfficeId offices cmd.Date
