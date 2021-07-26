@@ -163,12 +163,12 @@ let ``GIVEN A valid Book-A-Desk Reservation command, WHEN validating the command
 let ``GIVEN A Book-A-Desk Reservation command with the user not already booked, WHEN validating the command, THEN validation should pass.`` () =
     let command =
         {
-            EmailAddress = EmailAddress "anEmailAddress@fake.com"
+            EmailAddress = EmailAddress $"email@{domainName}"
             Date = DateTime.MaxValue
             OfficeId = office.Id
         } : BookADesk
     
-    let result = BookADeskReservationValidator.validateCommand offices command aReservationAggregate
+    let result = BookADeskReservationValidator.validateCommand offices command aReservationAggregate domainName
     match result with
     | Error _ -> failwith "Validation should have succeeded"
     | Ok _ -> ()
@@ -177,7 +177,7 @@ let ``GIVEN A Book-A-Desk Reservation command with the user not already booked, 
 let ``GIVEN A Book-A-Desk Reservation command with the user already booked, WHEN validating the command, THEN validation should fail.`` () =
     let command =
         {
-            EmailAddress = EmailAddress "anEmailAddress@fake.com"
+            EmailAddress = EmailAddress $"email@{domainName}"
             Date = DateTime.MaxValue
             OfficeId = office.Id
         } : BookADesk
@@ -188,12 +188,12 @@ let ``GIVEN A Book-A-Desk Reservation command with the user already booked, WHEN
             BookedDesks = [
                                 { A.booking with
                                     OfficeId = office.Id
-                                    EmailAddress = "anEmailAddress@fake.com" |> EmailAddress
+                                    EmailAddress = $"email@{domainName}" |> EmailAddress
                                 }
                             ]
         }
     
-    let result = BookADeskReservationValidator.validateCommand offices command aReservationAggregate
+    let result = BookADeskReservationValidator.validateCommand offices command aReservationAggregate domainName
     match result with
     | Ok _ -> failwith "Validation should fail because user already booked on that day"
     | Error _ -> ()
