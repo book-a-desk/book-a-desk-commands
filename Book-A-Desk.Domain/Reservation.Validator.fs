@@ -55,12 +55,24 @@ module BookADeskReservationValidator =
         else
             return! Error ($"The office is booked out at {date.ToShortDateString()}" )
     }
+    
+    let private validateUserHasNotBookedYet reservationAggregate emailAddress officeId (date : DateTime) = result {
+        let alreadyBooked =
+            reservationAggregate.BookedDesks
+            |> List.filter(fun b -> b.Date.Date = date.Date && b.OfficeId = officeId && b.EmailAddress = emailAddress)
+        match alreadyBooked with
+        | [] ->
+            return ()
+        | _ ->
+            return! Error ($"The office is already booked out at {date.ToShortDateString()} for user {emailAddress}")
+    }
             
     let validateCommand (offices: Office list) (cmd : BookADesk) reservationAggregate domainName = result {
         do! validateCorporateEmail cmd.EmailAddress domainName
         do! validateDateIsGreaterThanToday cmd.Date
         do! validateOfficeIdIsValid cmd.OfficeId offices
         do! validateOfficeIsAvailable reservationAggregate cmd.OfficeId offices cmd.Date
+        do! validateUserHasNotBookedYet reservationAggregate cmd.EmailAddress cmd.OfficeId cmd.Date
         
         return ()        
     }

@@ -158,3 +158,42 @@ let ``GIVEN A valid Book-A-Desk Reservation command, WHEN validating the command
     match result with
     | Error _ -> failwith "Validation should have succeeded"
     | Ok _ -> ()
+    
+[<Fact>]
+let ``GIVEN A Book-A-Desk Reservation command with the user not already booked, WHEN validating the command, THEN validation should pass.`` () =
+    let command =
+        {
+            EmailAddress = EmailAddress "anEmailAddress@fake.com"
+            Date = DateTime.MaxValue
+            OfficeId = office.Id
+        } : BookADesk
+    
+    let result = BookADeskReservationValidator.validateCommand offices command aReservationAggregate
+    match result with
+    | Error _ -> failwith "Validation should have succeeded"
+    | Ok _ -> ()
+    
+[<Fact>]
+let ``GIVEN A Book-A-Desk Reservation command with the user already booked, WHEN validating the command, THEN validation should fail.`` () =
+    let command =
+        {
+            EmailAddress = EmailAddress "anEmailAddress@fake.com"
+            Date = DateTime.MaxValue
+            OfficeId = office.Id
+        } : BookADesk
+    
+    let aReservationAggregate =
+        {
+            Id = ReservationAggregate.Id
+            BookedDesks = [
+                                { A.booking with
+                                    OfficeId = office.Id
+                                    EmailAddress = "anEmailAddress@fake.com" |> EmailAddress
+                                }
+                            ]
+        }
+    
+    let result = BookADeskReservationValidator.validateCommand offices command aReservationAggregate
+    match result with
+    | Ok _ -> failwith "Validation should fail because user already booked on that day"
+    | Error _ -> ()
