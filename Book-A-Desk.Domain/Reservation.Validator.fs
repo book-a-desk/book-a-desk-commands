@@ -57,10 +57,10 @@ module BookADeskReservationValidator =
     }
     
     let private validateUserHasNotBookedYet reservationAggregate emailAddress officeId (date : DateTime) = result {
-        let alreadyBooked =
+        let alreadyBookedDesks =
             reservationAggregate.BookedDesks
-            |> List.filter(fun b -> b.Date.Date = date.Date && b.OfficeId = officeId && b.EmailAddress = emailAddress)
-        match alreadyBooked with
+            |> List.filter(fun bookedDesk -> bookedDesk.Date.Date = date.Date && bookedDesk.OfficeId = officeId && bookedDesk.EmailAddress = emailAddress)
+        match alreadyBookedDesks with
         | [] ->
             return ()
         | _ ->

@@ -36,3 +36,9 @@
                 City = CityName "Montreal"
                 BookableDesksPerDay = 32
             }
+        let newOffice =
+            {
+                Id = Guid.NewGuid() |> OfficeId
+                City = CityName "Berlin"
+                BookableDesksPerDay = 14
+            }

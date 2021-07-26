@@ -174,11 +174,14 @@ let ``GIVEN A Book-A-Desk Reservation command with the user not already booked, 
     | Ok _ -> ()
     
 [<Fact>]
-let ``GIVEN A Book-A-Desk Reservation command with the user already booked, WHEN validating the command, THEN validation should fail.`` () =
+let ``GIVEN A Book-A-Desk Reservation command with the user booked on a different date, WHEN validating the command, THEN validation should pass.`` () =
+    let emailAddress = $"email@{domainName}"
+    let bookedDate = DateTime.MaxValue.AddDays(-1.0)
+    let newDate = DateTime.MaxValue
     let command =
         {
-            EmailAddress = EmailAddress $"email@{domainName}"
-            Date = DateTime.MaxValue
+            EmailAddress = EmailAddress emailAddress
+            Date = bookedDate
             OfficeId = office.Id
         } : BookADesk
     
@@ -188,7 +191,65 @@ let ``GIVEN A Book-A-Desk Reservation command with the user already booked, WHEN
             BookedDesks = [
                                 { A.booking with
                                     OfficeId = office.Id
-                                    EmailAddress = $"email@{domainName}" |> EmailAddress
+                                    EmailAddress = emailAddress |> EmailAddress
+                                    Date = newDate
+                                }
+                            ]
+        }
+    
+    let result = BookADeskReservationValidator.validateCommand offices command aReservationAggregate domainName
+    match result with
+    | Error _ -> failwith "Validation should have succeeded"
+    | Ok _ -> ()
+    
+[<Fact>]
+let ``GIVEN A Book-A-Desk Reservation command with the user booked in a different office, WHEN validating the command, THEN validation should pass.`` () =
+    let emailAddress = $"email@{domainName}"
+    let bookedDate = DateTime.MaxValue
+    let newOffice = An.newOffice
+    let command =
+        {
+            EmailAddress = EmailAddress emailAddress
+            Date = bookedDate
+            OfficeId = office.Id
+        } : BookADesk
+    
+    let aReservationAggregate =
+        {
+            Id = ReservationAggregate.Id
+            BookedDesks = [
+                                { A.booking with
+                                    OfficeId = newOffice.Id
+                                    EmailAddress = emailAddress |> EmailAddress
+                                    Date = bookedDate
+                                }
+                            ]
+        }
+    
+    let result = BookADeskReservationValidator.validateCommand offices command aReservationAggregate domainName
+    match result with
+    | Error _ -> failwith "Validation should have succeeded"
+    | Ok _ -> ()
+    
+[<Fact>]
+let ``GIVEN A Book-A-Desk Reservation command with the user already booked, WHEN validating the command, THEN validation should fail.`` () =
+    let emailAddress = $"email@{domainName}"
+    let bookedDate = DateTime.MaxValue
+    let command =
+        {
+            EmailAddress = EmailAddress emailAddress
+            Date = bookedDate
+            OfficeId = office.Id
+        } : BookADesk
+    
+    let aReservationAggregate =
+        {
+            Id = ReservationAggregate.Id
+            BookedDesks = [
+                                { A.booking with
+                                    OfficeId = office.Id
+                                    EmailAddress = emailAddress |> EmailAddress
+                                    Date = bookedDate
                                 }
                             ]
         }
