@@ -18,6 +18,7 @@ open Book_A_Desk.Infrastructure
 
 let officeId = Guid.NewGuid ()
 let totalDesks = 32
+let domainName = "domain.com"
 let mockOffice =
     {
         Id = officeId |> OfficeId
@@ -30,7 +31,7 @@ let offices =
 
 let mockReservationCommandFactory : ReservationCommandsFactory =
     {
-        CreateBookADeskCommand = fun () -> BookADeskReservationCommand.provide offices
+        CreateBookADeskCommand = fun () -> BookADeskReservationCommand.provide offices domainName
     }
 
 [<Fact>]
@@ -76,7 +77,7 @@ let ``GIVEN A Book-A-Desk server, WHEN getting the office availability by date, 
             AppendEvents = fun _ -> failwith "should not be called"
         } : DynamoDbEventStore.DynamoDbEventStore
         
-    let mockEmailNotification booking = async { return true }    
+    let mockEmailNotification _ = async { return true }    
     let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification
     use httpClient = TestServer.createAndRun mockApiDependencyFactory
 

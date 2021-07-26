@@ -32,7 +32,7 @@ let ``GIVEN A booking WHEN calling to SendEmailNotification THEN SendAsync metho
     
     let mockedUser =
         {
-            Email = "booking.user@broadsing.com"    
+            Email = "booking.user@domain.com"    
         }
     
     let mockBooking =
@@ -48,8 +48,8 @@ let ``GIVEN A booking WHEN calling to SendEmailNotification THEN SendAsync metho
             SmtpClientPort = 587
             SmtpUsername = "username"
             SmtpPassword = "password"
-            EmailSender = "from@broadsing.com"
-            EmailReviewer = "reviewer@broadsing.com"
+            EmailSender = "from@domain.com"
+            EmailReviewer = "reviewer@domain.com"
         }
         
     let mockEmailServiceConfiguration () = mockEmailConfig

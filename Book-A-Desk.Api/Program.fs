@@ -37,11 +37,12 @@ let configureApp (ctx : WebHostBuilderContext) (app : IApplicationBuilder) =
 
     let getAllOffices = (fun () -> Offices.All)
 
-    let reservationCommandsFactory = ReservationCommandsFactory.provide getAllOffices
+    let validDomainName = ctx.Configuration.["DomainName"]
+    let reservationCommandsFactory = ReservationCommandsFactory.provide getAllOffices validDomainName
     
-    let smptClientManager = SmtpClientManager.provide
+    let smtpClientManager = SmtpClientManager.provide
     let getEmailServiceConfiguration = (fun () -> app.ApplicationServices.GetService<EmailServiceConfiguration>())
-    let bookingNotifier = BookingNotifier.provide getEmailServiceConfiguration smptClientManager.SmtpClient getAllOffices
+    let bookingNotifier = BookingNotifier.provide getEmailServiceConfiguration smtpClientManager.SmtpClient getAllOffices
     
     let apiDependencyFactory = ApiDependencyFactory.provide provideEventStore reservationCommandsFactory getAllOffices bookingNotifier.NotifySuccess
 

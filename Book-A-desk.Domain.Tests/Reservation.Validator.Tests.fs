@@ -12,27 +12,61 @@ open Book_A_desk.Domain.Tests
 
 let office = An.office
 let offices = [office]
+let domainName = "domain.com"
     
 let aReservationAggregate =
     {
         Id = ReservationAggregate.Id
         BookedDesks = []
     }
+    
+type InvalidEmails() as this =
+    inherit TheoryData<string>()
+    do  this.Add("")
+    do  this.Add(String.Empty)
+    do  this.Add("john.smith@forbidden.com")
+    do  this.Add("JOHN.SMITH@FORBIDDEN.COM")
+    do  this.Add("jsmith@forbidden.com")
+    do  this.Add("JSMITH@FORBIDDEN.COM")
+    do  this.Add("jsmith")
+    do  this.Add("jsmith@")
+    do  this.Add("@forbidden.com")
 
-[<Fact>]
-let ``GIVEN A Book-A-Desk Reservation command WITH an empty email address, WHEN validating, THEN validation should fail`` () =
+[<Theory; ClassData(typeof<InvalidEmails>)>]
+let ``GIVEN A Book-A-Desk Reservation command WITH an invalid corporate email address, WHEN validating, THEN validation should fail`` (email:string) =
     let commandWithEmptyEmailAddress =
         {
-            EmailAddress = EmailAddress ""
+            EmailAddress = EmailAddress email
             Date = DateTime.MaxValue
             OfficeId = office.Id
         } : BookADesk
     
-    let result = BookADeskReservationValidator.validateCommand offices commandWithEmptyEmailAddress aReservationAggregate
+    let validDomainName = "domain.com"
+    let result = BookADeskReservationValidator.validateCommand offices commandWithEmptyEmailAddress aReservationAggregate validDomainName
     match result with
-    | Ok _ -> failwith "Validation should fail because email is empty"
+    | Ok _ -> failwith "Validation should fail because email is not valid"
     | Error _ -> ()
 
+type ValidEmails() as this =
+    inherit TheoryData<string>()
+    do  this.Add("john.smith@allowed.com")
+    do  this.Add("JOHN.SMITH@ALLOWED.COM")
+    do  this.Add("jsmith@allowed.com")
+    do  this.Add("JSMITH@ALLOWED.COM")
+[<Theory; ClassData(typeof<ValidEmails>)>]
+let ``GIVEN A Book-A-Desk Reservation command WITH a valid corporate email address, WHEN validating, THEN validation should pass`` (email:string) =
+    let commandWithEmptyEmailAddress =
+        {
+            EmailAddress = EmailAddress email
+            Date = DateTime.MaxValue
+            OfficeId = office.Id
+        } : BookADesk
+    
+    let validDomainName = "allowed.com"
+    let result = BookADeskReservationValidator.validateCommand offices commandWithEmptyEmailAddress aReservationAggregate validDomainName
+    match result with
+    | Ok _ -> ()
+    | Error _ -> failwith "Validation should pass because email is valid"
 type ForbiddenDatesForPastAndToday() as this =
     inherit TheoryData<DateTime>()
     do  this.Add(DateTime.MinValue)
@@ -46,12 +80,12 @@ type ForbiddenDatesForPastAndToday() as this =
 let ``GIVEN A Book-A-Desk Reservation command WITH a past or today date, WHEN validating, THEN validation should fail`` (bookedDate:DateTime) =
     let commandWithPastDate =
         {
-            EmailAddress = EmailAddress "anEmailAddress@fake.com"
+            EmailAddress = EmailAddress $"email@{domainName}"
             Date = bookedDate
             OfficeId = office.Id
         } : BookADesk
     
-    let result = BookADeskReservationValidator.validateCommand offices commandWithPastDate aReservationAggregate
+    let result = BookADeskReservationValidator.validateCommand offices commandWithPastDate aReservationAggregate domainName
     match result with
     | Ok _ -> failwith "Validation should fail because date is in the past"
     | Error _ -> ()
@@ -65,12 +99,12 @@ type AllowedFutureDates() as this =
 let ``GIVEN A Book-A-Desk Reservation command WITH a date greater than today, WHEN validating, THEN validation should pass`` (requestedDate:DateTime) =
     let commandWithPastDate =
         {
-            EmailAddress = EmailAddress "anEmailAddress@fake.com"
+            EmailAddress = EmailAddress $"email@{domainName}"
             Date = requestedDate
             OfficeId = office.Id
         } : BookADesk
     
-    let result = BookADeskReservationValidator.validateCommand offices commandWithPastDate aReservationAggregate
+    let result = BookADeskReservationValidator.validateCommand offices commandWithPastDate aReservationAggregate domainName
     match result with
     | Error _ -> failwith "Validation should have succeeded"
     | Ok _ -> ()
@@ -79,12 +113,12 @@ let ``GIVEN A Book-A-Desk Reservation command WITH a date greater than today, WH
 let ``GIVEN A Book-A-Desk Reservation command WITH an invalid office id, WHEN validating, THEN validation should fail`` () =
     let commandWithInvalidOfficeId =
         {
-            EmailAddress = EmailAddress "anEmailAddress@fake.com"
+            EmailAddress = EmailAddress $"email@{domainName}"
             Date = DateTime.MaxValue
             OfficeId = OfficeId Guid.Empty
         } : BookADesk
     
-    let result = BookADeskReservationValidator.validateCommand offices commandWithInvalidOfficeId aReservationAggregate
+    let result = BookADeskReservationValidator.validateCommand offices commandWithInvalidOfficeId aReservationAggregate domainName
     match result with
     | Ok _ -> failwith "Validation should fail because the office id is invalid"
     | Error _ -> ()
@@ -95,7 +129,7 @@ let ``GIVEN A Book-A-Desk Reservation command WITH no desks available, WHEN vali
     let offices = [office]
     let command =
         {
-            EmailAddress = EmailAddress "anEmailAddress@fake.com"
+            EmailAddress = EmailAddress $"email@{domainName}"
             Date = DateTime.MaxValue
             OfficeId = office.Id
         } : BookADesk
@@ -106,7 +140,7 @@ let ``GIVEN A Book-A-Desk Reservation command WITH no desks available, WHEN vali
             BookedDesks = [{ A.booking with OfficeId = office.Id}]
         }
     
-    let result = BookADeskReservationValidator.validateCommand offices command aReservationAggregate
+    let result = BookADeskReservationValidator.validateCommand offices command aReservationAggregate domainName
     match result with
     | Ok _ -> failwith "Validation should fail because all reservations are taken"
     | Error _ -> ()
@@ -115,12 +149,12 @@ let ``GIVEN A Book-A-Desk Reservation command WITH no desks available, WHEN vali
 let ``GIVEN A valid Book-A-Desk Reservation command, WHEN validating the command, THEN validation should pass.`` () =
     let command =
         {
-            EmailAddress = EmailAddress "anEmailAddress@fake.com"
+            EmailAddress = EmailAddress $"email@{domainName}"
             Date = DateTime.MaxValue
             OfficeId = office.Id
         } : BookADesk
     
-    let result = BookADeskReservationValidator.validateCommand offices command aReservationAggregate
+    let result = BookADeskReservationValidator.validateCommand offices command aReservationAggregate domainName
     match result with
     | Error _ -> failwith "Validation should have succeeded"
     | Ok _ -> ()
@@ -129,12 +163,12 @@ let ``GIVEN A valid Book-A-Desk Reservation command, WHEN validating the command
 let ``GIVEN A Book-A-Desk Reservation command with the user not already booked, WHEN validating the command, THEN validation should pass.`` () =
     let command =
         {
-            EmailAddress = EmailAddress "anEmailAddress@fake.com"
+            EmailAddress = EmailAddress $"email@{domainName}"
             Date = DateTime.MaxValue
             OfficeId = office.Id
         } : BookADesk
     
-    let result = BookADeskReservationValidator.validateCommand offices command aReservationAggregate
+    let result = BookADeskReservationValidator.validateCommand offices command aReservationAggregate domainName
     match result with
     | Error _ -> failwith "Validation should have succeeded"
     | Ok _ -> ()
@@ -143,7 +177,7 @@ let ``GIVEN A Book-A-Desk Reservation command with the user not already booked, 
 let ``GIVEN A Book-A-Desk Reservation command with the user already booked, WHEN validating the command, THEN validation should fail.`` () =
     let command =
         {
-            EmailAddress = EmailAddress "anEmailAddress@fake.com"
+            EmailAddress = EmailAddress $"email@{domainName}"
             Date = DateTime.MaxValue
             OfficeId = office.Id
         } : BookADesk
@@ -154,12 +188,12 @@ let ``GIVEN A Book-A-Desk Reservation command with the user already booked, WHEN
             BookedDesks = [
                                 { A.booking with
                                     OfficeId = office.Id
-                                    EmailAddress = "anEmailAddress@fake.com" |> EmailAddress
+                                    EmailAddress = $"email@{domainName}" |> EmailAddress
                                 }
                             ]
         }
     
-    let result = BookADeskReservationValidator.validateCommand offices command aReservationAggregate
+    let result = BookADeskReservationValidator.validateCommand offices command aReservationAggregate domainName
     match result with
     | Ok _ -> failwith "Validation should fail because user already booked on that day"
     | Error _ -> ()
