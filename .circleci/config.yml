@@ -85,6 +85,32 @@ workflows:
             - aws-credentials
           requires:
             - push-image-to-test
+      - push-image:
+          name: push-image-to-prod
+          ecr-account-url: ${AWS_ECR_ACCOUNT_URL_PROD}
+          aws-account-id: ${AWS_ACCOUNT_PROD}
+          authenticate-aws:
+            - authenticate-aws-book-a-desk-prod
+          context:
+            - aws-credentials
+          requires:
+            - deploy-to-test
+      - deploy:
+          name: deploy-to-prod
+          ecr-account-url: ${AWS_ECR_ACCOUNT_URL_PROD}
+          aws-account-id: ${AWS_ACCOUNT_PROD}
+          authenticate-aws:
+            - authenticate-aws-book-a-desk-prod
+          aws-key-id-secret-id: ${AWS_ACCESS_KEY_ID_SECRET_PROD}
+          aws-secret-key-secret-id: ${AWS_SECRET_ACCESS_KEY_SECRET_PROD}
+          certificate-id: ${ACM_CERTIFICATE_ID_PROD}
+          hosted-zone-name: ${HOSTED_ZONE_NAME_PROD}
+          stack-name: << pipeline.parameters.stack-name >>
+          cloudformation-role: << pipeline.parameters.cloudformation-role-prod >>
+          context:
+            - aws-credentials
+          requires:
+            - push-image-to-prod
 
 orbs:
   aws-ecs: circleci/aws-ecs@2.0.0
@@ -106,6 +132,9 @@ parameters:
   cloudformation-role-test:
     type: string
     default: arn:aws:iam::${AWS_ACCOUNT_TEST}:role/cloudformationstackbackendtest
+  cloudformation-role-prod:
+    type: string
+    default: arn:aws:iam::${AWS_ACCOUNT_TEST}:role/cloudformationstackbackendprod
   stack-name:
     type: string
     default: book-a-desk-backend
@@ -179,6 +208,15 @@ commands:
           command: |
             echo "export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID_TEST}" >> $BASH_ENV
             echo "export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY_TEST}" >> $BASH_ENV
+
+  authenticate-aws-book-a-desk-prod:
+    description: "Configure AWS credentials for Book A Desk Prod"
+    steps:
+      - run:
+          name: "Initialize BASH_ENV variables"
+          command: |
+            echo "export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID_PROD}" >> $BASH_ENV
+            echo "export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY_PROD}" >> $BASH_ENV
 
   aws-cloudformation-deploy:
     parameters:
