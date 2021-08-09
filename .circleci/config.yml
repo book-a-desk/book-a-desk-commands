@@ -7,9 +7,9 @@
 
 ## AWS Credentials (Platform)
 # Note: These are provided by the aws-credentials context
-# - AWS_ACCESS_KEY_ID
+# - AWS_ACCESS_KEY_ID_BACKEND
 # - AWS_ACCESS_KEY_ID_SECRET
-# - AWS_SECRET_ACCESS_KEY
+# - AWS_SECRET_ACCESS_KEY_BACKEND
 # - AWS_SECRET_ACCESS_KEY_SECRET
 # - AWS_ACCOUNT
 # - AWS_REGION
@@ -196,7 +196,7 @@ commands:
       - run:
           name: "Initialize BASH_ENV variables"
           command: |
-            echo "export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID_BACkEND_DEV}" >> $BASH_ENV
+            echo "export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID_BACKEND_DEV}" >> $BASH_ENV
             echo "export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY_BACKEND_DEV}" >> $BASH_ENV
             echo $AWS_SECRET_ACCESS_KEY_ID
 
