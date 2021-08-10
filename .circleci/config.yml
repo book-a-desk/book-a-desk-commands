@@ -97,7 +97,7 @@ workflows:
           context:
             - aws-credentials
           requires:
-            - deploy-to-test
+            - production-gate
       - deploy:
           name: deploy-to-prod
           ecr-account-url: ${AWS_ECR_ACCOUNT_URL_PROD}
