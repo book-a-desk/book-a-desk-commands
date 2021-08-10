@@ -88,6 +88,8 @@ workflows:
       - production-gate:
           type:
             approval
+          requires:
+            - deploy-to-test
       - push-image:
           name: push-image-to-prod
           ecr-account-url: ${AWS_ECR_ACCOUNT_URL_PROD}
