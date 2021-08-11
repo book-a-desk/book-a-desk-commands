@@ -85,6 +85,11 @@ workflows:
             - aws-credentials
           requires:
             - push-image-to-test
+      - production-gate:
+          type:
+            approval
+          requires:
+            - deploy-to-test
       - push-image:
           name: push-image-to-prod
           ecr-account-url: ${AWS_ECR_ACCOUNT_URL_PROD}
@@ -94,7 +99,7 @@ workflows:
           context:
             - aws-credentials
           requires:
-            - deploy-to-test
+            - production-gate
       - deploy:
           name: deploy-to-prod
           ecr-account-url: ${AWS_ECR_ACCOUNT_URL_PROD}
