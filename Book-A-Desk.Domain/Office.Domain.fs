@@ -26,7 +26,7 @@ module Offices =
             {
                 Id = Guid.Parse("4B774D13-645B-4378-A925-1DA565A35FD7") |> OfficeId
                 City = CityName "Montreal"
-                BookableDesksPerDay = 32
+                BookableDesksPerDay = 34
             }
             {
                 Id = Guid.Parse("16C3D468-C115-4452-8502-58B821D6640B") |> OfficeId
