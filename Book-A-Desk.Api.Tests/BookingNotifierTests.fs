@@ -19,6 +19,7 @@ let ``GIVEN A booking WHEN calling to SendEmailNotification THEN SendAsync metho
             Id = officeId |> OfficeId
             City = CityName "SomeCityName"
             BookableDesksPerDay = totalDesks
+            OpeningHoursText = None
         }
     let mockedOfficeReference =
         {
@@ -66,6 +67,7 @@ let ``GIVEN A booking WHEN calling to SendEmailNotification THEN SendAsync metho
     let bookingNotifier = BookingNotifier.provide mockEmailServiceConfiguration mockSmtpClient mockGetOffices       
        
     let! result = bookingNotifier.NotifySuccess mockBooking
-    Assert.True(result)
+    let isOk = match result with | Ok _ -> true | _ -> false
+    Assert.True(isOk)
     Assert.True(sendWasCalled)
 }

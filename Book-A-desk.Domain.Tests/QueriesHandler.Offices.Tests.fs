@@ -3,6 +3,7 @@
 open System
 open Book_A_Desk.Domain
 open Book_A_Desk.Domain.Reservation
+open Book_A_desk.Domain.Tests
 open Xunit
 
 open Book_A_Desk.Domain.Office.Domain
@@ -11,11 +12,7 @@ open Book_A_Desk.Domain.QueriesHandler
 
 [<Fact>]
 let ``GIVEN A OfficeQueriesHandler, WHEN getting the offices, THEN offices are returned`` () =
-    let anOffice = {
-        Id = OfficeId (Guid.NewGuid())
-        City = CityName "A City"
-        BookableDesksPerDay = 2
-    }
+    let anOffice = An.office
     let getOffices () = [anOffice]   
     
     let result = OfficeQueriesHandler.getAll getOffices
@@ -47,11 +44,7 @@ let ``GIVEN A OfficeQueriesHandler, WHEN getting the availabilities, THEN availa
     let officeId = OfficeId (Guid.NewGuid())
     let bookableDesksPerDay = 2
     let reservedDesks = 1
-    let anOffice = {
-        Id = officeId
-        City = CityName "A City"
-        BookableDesksPerDay = bookableDesksPerDay
-    }
+    let anOffice = { An.office with Id = officeId; BookableDesksPerDay = bookableDesksPerDay }
     let getOffices () = [anOffice]
     
     let aBooking =
@@ -85,11 +78,7 @@ let ``GIVEN A OfficeQueriesHandler WITH query in the past, WHEN getting the avai
     let bookableDesksPerDay = 2
     let availableDesks = 0
     let reservedDesks = 1
-    let anOffice = {
-        Id = officeId
-        City = CityName "A City"
-        BookableDesksPerDay = bookableDesksPerDay
-    }
+    let anOffice = { An.office with Id = officeId; BookableDesksPerDay = bookableDesksPerDay }
     let getOffices () = [anOffice]
     
     let aBooking =
@@ -116,3 +105,22 @@ let ``GIVEN A OfficeQueriesHandler WITH query in the past, WHEN getting the avai
         Assert.Equal(bookableDesksPerDay, avail.TotalDesks)
         Assert.Equal(availableDesks, avail.AvailableDesks)
         Assert.Equal(reservedDesks, avail.ReservedDesks)
+        
+
+
+[<Fact>]
+let ``GIVEN an existing Office with OfficeId WHEN getting the office by OfficeId THEN Office is returned`` () =
+    let anOffice = An.office
+    let mockGetOffices () = [anOffice]
+    
+    let result = OfficeQueriesHandler.getOfficeById anOffice.Id mockGetOffices
+    Assert.Equal(anOffice |> Some |> Ok, result)
+
+[<Fact>]
+let ``GIVEN offices WITH Id not matching WHEN getting the office by OfficeId THEN Office is not returned`` () =
+    let idNotMatching = Guid.NewGuid() |> OfficeId
+    let anOffice = An.office
+    let mockGetOffices () = [anOffice]
+    
+    let result = OfficeQueriesHandler.getOfficeById idNotMatching mockGetOffices
+    Assert.Equal(None |> Ok, result)

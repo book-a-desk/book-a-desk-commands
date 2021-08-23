@@ -10,6 +10,7 @@ type Office =
         Id : OfficeId
         City : CityName
         BookableDesksPerDay : int
+        OpeningHoursText: string option
     }
     
 type OfficeAvailability =
@@ -27,10 +28,12 @@ module Offices =
                 Id = Guid.Parse("4B774D13-645B-4378-A925-1DA565A35FD7") |> OfficeId
                 City = CityName "Montreal"
                 BookableDesksPerDay = 34
+                OpeningHoursText = "7:30am to 6:30pm from Tuesday to Thursday" |> Some
             }
             {
                 Id = Guid.Parse("16C3D468-C115-4452-8502-58B821D6640B") |> OfficeId
                 City = CityName "Berlin"
                 BookableDesksPerDay = 14
+                OpeningHoursText = None
             }
         ]
