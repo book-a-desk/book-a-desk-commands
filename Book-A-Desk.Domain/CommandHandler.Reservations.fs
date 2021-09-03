@@ -7,7 +7,7 @@ open Book_A_Desk.Domain.Reservation.Commands
 
 type ReservationsCommandHandler =
     {
-        Handle: ReservationCommand -> Result<DomainEvent list,string>
+        Handle: ReservationCommand -> Result<DomainEvent list,ReservationError>
     }
     
 module ReservationsCommandHandler =  
