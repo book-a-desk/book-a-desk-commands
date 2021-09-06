@@ -2,6 +2,7 @@
 
 open System
 open Book_A_Desk.Core
+open Book_A_desk.Domain.Helpers.Tests
 open Xunit
 
 open Book_A_Desk.Domain
@@ -42,10 +43,8 @@ let ``GIVEN A Book-A-Desk Reservation command WITH an invalid corporate email ad
         } : BookADesk
     
     let validDomainName = "domain.com"
-    let result = BookADeskReservationValidator.validateCommand offices commandWithEmptyEmailAddress aReservationAggregate validDomainName
-    match result with
-    | Ok _ -> failwith "Validation should fail because email is not valid"
-    | Error _ -> ()
+    let result = BookADeskReservationValidator.validateCommand offices commandWithEmptyEmailAddress aReservationAggregate validDomainName    
+    result |> Helpers.shouldBeErrorAndEqualTo (ReservationError.InvalidEmailAddress |> Error)
 
 type ValidEmails() as this =
     inherit TheoryData<string>()
@@ -63,10 +62,9 @@ let ``GIVEN A Book-A-Desk Reservation command WITH a valid corporate email addre
         } : BookADesk
     
     let validDomainName = "allowed.com"
-    let result = BookADeskReservationValidator.validateCommand offices commandWithEmptyEmailAddress aReservationAggregate validDomainName
-    match result with
-    | Ok _ -> ()
-    | Error _ -> failwith "Validation should pass because email is valid"
+    let result = BookADeskReservationValidator.validateCommand offices commandWithEmptyEmailAddress aReservationAggregate validDomainName    
+    result |> Helpers.shouldBeOkAndEqualTo (() |> Ok)
+    
 type ForbiddenDatesForPastAndToday() as this =
     inherit TheoryData<DateTime>()
     do  this.Add(DateTime.MinValue)
@@ -85,10 +83,8 @@ let ``GIVEN A Book-A-Desk Reservation command WITH a past or today date, WHEN va
             OfficeId = office.Id
         } : BookADesk
     
-    let result = BookADeskReservationValidator.validateCommand offices commandWithPastDate aReservationAggregate domainName
-    match result with
-    | Ok _ -> failwith "Validation should fail because date is in the past"
-    | Error _ -> ()
+    let result = BookADeskReservationValidator.validateCommand offices commandWithPastDate aReservationAggregate domainName    
+    result |> Helpers.shouldBeErrorAndEqualTo (ReservationError.DateLowerThanToday |> Error)
     
 type AllowedFutureDates() as this =
     inherit TheoryData<DateTime>()
@@ -104,10 +100,8 @@ let ``GIVEN A Book-A-Desk Reservation command WITH a date greater than today, WH
             OfficeId = office.Id
         } : BookADesk
     
-    let result = BookADeskReservationValidator.validateCommand offices commandWithPastDate aReservationAggregate domainName
-    match result with
-    | Error _ -> failwith "Validation should have succeeded"
-    | Ok _ -> ()
+    let result = BookADeskReservationValidator.validateCommand offices commandWithPastDate aReservationAggregate domainName    
+    result |> Helpers.shouldBeOkAndEqualTo (() |> Ok)
 
 [<Fact>]
 let ``GIVEN A Book-A-Desk Reservation command WITH an invalid office id, WHEN validating, THEN validation should fail`` () =
@@ -119,18 +113,17 @@ let ``GIVEN A Book-A-Desk Reservation command WITH an invalid office id, WHEN va
         } : BookADesk
     
     let result = BookADeskReservationValidator.validateCommand offices commandWithInvalidOfficeId aReservationAggregate domainName
-    match result with
-    | Ok _ -> failwith "Validation should fail because the office id is invalid"
-    | Error _ -> ()
+    result |> Helpers.shouldBeErrorAndEqualTo (ReservationError.InvalidOfficeId |> Error)
 
 [<Fact>]
 let ``GIVEN A Book-A-Desk Reservation command WITH no desks available, WHEN validating, THEN validation should fail`` () =
     let office = { An.office with BookableDesksPerDay = 1 }
     let offices = [office]
+    let bookedDate = DateTime.MaxValue    
     let command =
         {
             EmailAddress = EmailAddress $"email@{domainName}"
-            Date = DateTime.MaxValue
+            Date = bookedDate
             OfficeId = office.Id
         } : BookADesk
     
@@ -141,9 +134,7 @@ let ``GIVEN A Book-A-Desk Reservation command WITH no desks available, WHEN vali
         }
     
     let result = BookADeskReservationValidator.validateCommand offices command aReservationAggregate domainName
-    match result with
-    | Ok _ -> failwith "Validation should fail because all reservations are taken"
-    | Error _ -> ()
+    result |> Helpers.shouldBeErrorAndEqualTo (ReservationError.OfficeHasNoAvailability bookedDate |> Error)
     
 [<Fact>]
 let ``GIVEN A valid Book-A-Desk Reservation command, WHEN validating the command, THEN validation should pass.`` () =
@@ -155,9 +146,7 @@ let ``GIVEN A valid Book-A-Desk Reservation command, WHEN validating the command
         } : BookADesk
     
     let result = BookADeskReservationValidator.validateCommand offices command aReservationAggregate domainName
-    match result with
-    | Error _ -> failwith "Validation should have succeeded"
-    | Ok _ -> ()
+    result |> Helpers.shouldBeOkAndEqualTo (() |> Ok)
     
 [<Fact>]
 let ``GIVEN A Book-A-Desk Reservation command with the user not already booked, WHEN validating the command, THEN validation should pass.`` () =
@@ -169,9 +158,7 @@ let ``GIVEN A Book-A-Desk Reservation command with the user not already booked, 
         } : BookADesk
     
     let result = BookADeskReservationValidator.validateCommand offices command aReservationAggregate domainName
-    match result with
-    | Error _ -> failwith "Validation should have succeeded"
-    | Ok _ -> ()
+    result |> Helpers.shouldBeOkAndEqualTo (() |> Ok)
     
 [<Fact>]
 let ``GIVEN A Book-A-Desk Reservation command with the user booked on a different date, WHEN validating the command, THEN validation should pass.`` () =
@@ -198,9 +185,7 @@ let ``GIVEN A Book-A-Desk Reservation command with the user booked on a differen
         }
     
     let result = BookADeskReservationValidator.validateCommand offices command aReservationAggregate domainName
-    match result with
-    | Error _ -> failwith "Validation should have succeeded"
-    | Ok _ -> ()
+    result |> Helpers.shouldBeOkAndEqualTo (() |> Ok)
     
 [<Fact>]
 let ``GIVEN A Book-A-Desk Reservation command with the user booked in a different office, WHEN validating the command, THEN validation should pass.`` () =
@@ -227,9 +212,7 @@ let ``GIVEN A Book-A-Desk Reservation command with the user booked in a differen
         }
     
     let result = BookADeskReservationValidator.validateCommand offices command aReservationAggregate domainName
-    match result with
-    | Error _ -> failwith "Validation should have succeeded"
-    | Ok _ -> ()
+    result |> Helpers.shouldBeOkAndEqualTo (() |> Ok)
     
 [<Fact>]
 let ``GIVEN A Book-A-Desk Reservation command with the user already booked, WHEN validating the command, THEN validation should fail.`` () =
@@ -253,8 +236,12 @@ let ``GIVEN A Book-A-Desk Reservation command with the user already booked, WHEN
                                 }
                             ]
         }
+
+    let userHadBookedBeforeParam =
+        {
+            Date = bookedDate
+            EmailAddress = EmailAddress emailAddress
+        }    
     
     let result = BookADeskReservationValidator.validateCommand offices command aReservationAggregate domainName
-    match result with
-    | Ok _ -> failwith "Validation should fail because user already booked on that day"
-    | Error _ -> ()
+    result |> Helpers.shouldBeErrorAndEqualTo (ReservationError.UserHadBookedBefore userHadBookedBeforeParam |> Error)

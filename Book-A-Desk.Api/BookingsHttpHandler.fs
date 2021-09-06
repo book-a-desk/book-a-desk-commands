@@ -3,6 +3,7 @@
 open System
 
 open Amazon.DynamoDBv2
+open FsToolkit.ErrorHandling.Operator.Result
 open Microsoft.AspNetCore.Http
 open Giraffe
 open FsToolkit.ErrorHandling
@@ -24,7 +25,11 @@ type BookingsHttpHandler =
     }
 
 module BookingsHttpHandler =
-    let initialize (provideEventStore : IAmazonDynamoDB -> DynamoDbEventStore) reservationCommandsFactory (notifySuccess: Models.Booking-> Async<bool>) =
+    let initialize
+        (provideEventStore : IAmazonDynamoDB -> DynamoDbEventStore)
+        reservationCommandsFactory
+        (notifySuccess: Models.Booking-> Async<bool>)
+        (errorHandler: BookADeskErrorHandler) =
         let handlePostWith booking = fun next (context : HttpContext) ->
             task {
                 let cmd =
@@ -43,6 +48,7 @@ module BookingsHttpHandler =
                     
                     let handler = ReservationsCommandHandler.provide (events |> List.ofSeq) reservationCommandsFactory
                     let results = handler.Handle command
+                                    |> Result.mapError errorHandler.MapReservationErrorToAssignBookADeskError                                    
                     
                     match results with
                     | Ok events ->
@@ -55,7 +61,12 @@ module BookingsHttpHandler =
                             |> eventStore.AppendEvents
                             
                         return! appendEvents events
-                    | Error _ -> return ()
+                    | Error _ -> ()                                
+// TODO : assign a proper type to manage the error
+//                        error |> errorHandler.ConvertErrorToResponse
+//                        return! Task<'a>.Factory.StartNew( new Func<'a>(f) ) |> Async.AwaitTask                     
+//                        return! error
+//                                |> async { errorHandler.ConvertErrorToResponse |> string }                        
                 }
 
                 let! result = handleCommand command
@@ -73,9 +84,8 @@ module BookingsHttpHandler =
                         | false -> failwithf $"Error sending notification error for %s{booking.User.Email} at %s{booking.Date.ToShortDateString()}"
                         
                     return! json output next context
-                | Error e ->
-                    context.SetStatusCode(500)
-                    return! text ("Internal Error: " + e) next context
+                | Error response ->
+                    return! jsonProblem response next context
             }
 
         {

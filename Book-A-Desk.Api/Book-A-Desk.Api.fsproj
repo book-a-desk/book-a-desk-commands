@@ -12,10 +12,10 @@
     <Compile Include="JsonSerialization.fs" />
     <Compile Include="InputParser.fs" />
     <Compile Include="OfficesHttpHandler.fs" />
+    <Compile Include="HttpHandlers.Reservation.BookADeskErrorHandler.fs" />
     <Compile Include="BookingsHttpHandler.fs" />
     <Compile Include="HealthHttpHandler.fs" />
     <Compile Include="HttpHandlers.fs" />
-    <Compile Include="HttpHandlers.Reservation.BookADeskErrorHandler.fs" />
     <Compile Include="ApiDependencyFactory.fs" />
     <Compile Include="Routes.fs" />
     <Compile Include="DynamoDB.fs" />

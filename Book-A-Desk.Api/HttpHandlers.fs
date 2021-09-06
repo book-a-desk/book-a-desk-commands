@@ -7,8 +7,8 @@ type HttpHandlers =
     }
 
 module HttpHandlers =
-    let initialize eventStore reservationCommandsFactory getOffices sendEmailNotification =
+    let initialize eventStore reservationCommandsFactory getOffices sendEmailNotification errorHandler =
         {
-            Bookings = BookingsHttpHandler.initialize eventStore reservationCommandsFactory sendEmailNotification
+            Bookings = BookingsHttpHandler.initialize eventStore reservationCommandsFactory sendEmailNotification errorHandler
             Offices = OfficesHttpHandler.initialize eventStore getOffices
         }

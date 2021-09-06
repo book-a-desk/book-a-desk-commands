@@ -6,9 +6,7 @@ open Microsoft.AspNetCore.Http
 open Giraffe
 open GiraffeExtensions
 
-open Book_A_Desk.Domain.Domain
 open Book_A_Desk.Domain.Reservation
-open Microsoft.Extensions.Logging
 
 type BookADeskError =
     | InvalidEmailAddress
@@ -19,8 +17,8 @@ type BookADeskError =
 
 type BookADeskErrorHandler =
     {
-        MapDomainErrorToAssignBookADeskError: DomainError -> BookADeskError
-        ConvertErrorToResponse: ILogger -> BookADeskError -> HttpHandler       
+        MapReservationErrorToAssignBookADeskError: ReservationError -> BookADeskError
+        ConvertErrorToResponse: BookADeskError -> HttpHandler       
     }
 
 module BookADeskErrorHandler =
@@ -33,15 +31,7 @@ module BookADeskErrorHandler =
             | ReservationError.OfficeHasNoAvailability date -> date |> OfficeHasNoAvailability
             | ReservationError.UserHadBookedBefore userHadBookedBeforeParam -> userHadBookedBeforeParam |> UserHadBookedBefore
 
-        let mapDomainErrorToHandlerError = function
-            | ReservationError campError -> mapReservationErrorToHandlerError campError
-            | _ -> failwith " This error type doesn't handle here "
-
-        let convertErrorToResponse (logger:ILogger) (error:BookADeskError) =
-            error
-            |> string
-            |> logger.LogWarning
-
+        let convertErrorToResponse (error:BookADeskError) =
             match error with
             | InvalidEmailAddress ->
                 setStatusCode StatusCodes.Status400BadRequest
@@ -80,7 +70,7 @@ module BookADeskErrorHandler =
                     }
 
         {
-            MapDomainErrorToAssignBookADeskError = mapDomainErrorToHandlerError
+            MapReservationErrorToAssignBookADeskError = mapReservationErrorToHandlerError
             ConvertErrorToResponse = convertErrorToResponse
         }
 

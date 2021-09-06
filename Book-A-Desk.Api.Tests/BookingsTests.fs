@@ -70,7 +70,7 @@ let ``GIVEN A Book-A-Desk server, WHEN booking a desk, THEN a desk is booked`` (
 
 [<Fact>]
 let ``GIVEN A Book-A-Desk server, WHEN booking a desk, THEN an email notification must be sent`` () = async {
-    emailWasSent <- false    
+    emailWasSent <- false
     let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification
     use httpClient = TestServer.createAndRun mockApiDependencyFactory
     
@@ -78,5 +78,44 @@ let ``GIVEN A Book-A-Desk server, WHEN booking a desk, THEN an email notificatio
 
     let! result = HttpRequest.postAsync httpClient $"http://localhost:/bookings" serializedBooking
     
+    Assert.True(emailWasSent)
+}
+
+[<Fact>]
+let ``GIVEN an invalid email address WHEN booking a desk THEN it returns 400 and Invalid Email Address error`` () = async {
+    emailWasSent <- false
+    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification
+    use httpClient = TestServer.createAndRun mockApiDependencyFactory
+    
+    let bookingInvalidEmail  =
+        {
+            booking with User = { Email = "invalidEmail" }
+        } : InputBooking
+    
+    let serializedBooking = JsonConvert.SerializeObject(bookingInvalidEmail)
+
+    let! response = HttpRequest.postAsync httpClient $"http://localhost:/bookings" serializedBooking
+
+// TODO : Complete test when Error is managed at API level
+//    
+//    response.StatusCode |> shouldEqual HttpStatusCode.BadRequest
+//    
+//
+//    |> fun responseTask ->
+//        let response = receiveResponse responseTask
+//        let statusCode = extractStatusCodeFromHttpResponse response
+//        let contentTypeHeader = extractContentTypeFromHttpResponse response
+//        let responseBody = extractBodyFromHttpResponse<ProblemDetailsDto> response
+//
+//        statusCode |> shouldEqual StatusCodes.Status400BadRequest
+//        contentTypeHeader |> shouldEqual "application/problem+json"
+//        responseBody
+//        |> shouldEqual
+//            (
+//                {
+//                    ProblemDetailsDto.Title = "Start date is greater than end date"
+//                    Detail = "The start date is greater than end date"
+//                }
+//            )    
     Assert.True(emailWasSent)
 }
