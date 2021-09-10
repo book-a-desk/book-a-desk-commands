@@ -46,7 +46,6 @@ module BookADeskErrorHandler =
 
         let convertErrorToResponseError (error:BookADeskError) =
             match error with
-//          GenericErrors must be mapped to StatusCode = StatusCodes.Status500InternalServerError
             | InvalidEmailAddress ->
                     {
                         StatusCode = StatusCodes.Status400BadRequest
@@ -98,7 +97,6 @@ module BookADeskErrorHandler =
         {
             MapReservationErrorToAssignBookADeskError = mapReservationErrorToHandlerError
             MapStringToAssignBookADeskError = mapStringToAssignBookADeskError
-//            MapGenericErrorToAssignBookADeskError = mapGenericErrorToHandlerError
             ConvertErrorToResponseError = convertErrorToResponseError
         }
 
