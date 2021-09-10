@@ -132,7 +132,7 @@ let ``GIVEN an reservation WHEN notifying success fails THEN it returns 500 And 
     let serializedBooking = JsonConvert.SerializeObject(booking)
 
     let expectedTitle = "Generic Error"
-    let expectedDetails = "Error sending notification error for someEmail@broadsign.com at 31/12/9999"
+    let expectedDetails = $"Error sending notification error for %s{booking.User.Email} at %s{booking.Date.ToShortDateString()}"
 
     let postRequest = new HttpRequestMessage(HttpMethod.Post, url)
     let content = new StringContent(serializedBooking, Encoding.UTF8, "application/json")
