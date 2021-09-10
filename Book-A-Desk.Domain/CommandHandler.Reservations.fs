@@ -19,7 +19,6 @@ module ReservationsCommandHandler =
                 |> ReservationAggregate.getCurrentStateFrom
                 |> executeCommandWith cmd
                 |> Result.map (List.map (function event -> ReservationEvent event))
-                    
 
             match command with
             | BookADesk command ->
