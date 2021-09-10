@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <Compile Include="Api.Models.fs" />
-    <Compile Include="GiraffeExtensions.fs" />
     <Compile Include="JsonSerialization.fs" />
     <Compile Include="InputParser.fs" />
     <Compile Include="OfficesHttpHandler.fs" />

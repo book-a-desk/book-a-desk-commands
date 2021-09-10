@@ -42,31 +42,35 @@ module BookingsHttpHandler =
                 let eventStore = provideEventStore (context.GetService<IAmazonDynamoDB>())
                 let command = BookADesk cmd
                 
-                let handleCommand command = asyncResult {
+                let handleCommand command = async {
                     let (ReservationId aggregateId) = ReservationAggregate.Id
-                    let! events = eventStore.GetEvents aggregateId
-                    
-                    let handler = ReservationsCommandHandler.provide (events |> List.ofSeq) reservationCommandsFactory
-                    let results = handler.Handle command
-                                    |> Result.mapError errorHandler.MapReservationErrorToAssignBookADeskError                                    
-                    
-                    match results with
+
+                    match! eventStore.GetEvents aggregateId with
                     | Ok events ->
-                        let appendEvents eventsToAppend : Async<unit> = 
-                            eventsToAppend
-                            |> Seq.ofList
-                            |> (fun events -> aggregateId, events)
-                            |> List.singleton
-                            |> Map.ofList
-                            |> eventStore.AppendEvents
-                            
-                        return! appendEvents events
-                    | Error _ -> ()                                
-// TODO : assign a proper type to manage the error
-//                        error |> errorHandler.ConvertErrorToResponse
-//                        return! Task<'a>.Factory.StartNew( new Func<'a>(f) ) |> Async.AwaitTask                     
-//                        return! error
-//                                |> async { errorHandler.ConvertErrorToResponse |> string }                        
+                        let handler = ReservationsCommandHandler.provide (events |> List.ofSeq) reservationCommandsFactory
+                        let results = handler.Handle command
+                                        |> Result.mapError errorHandler.MapReservationErrorToAssignBookADeskError
+
+                        match results with
+                        | Ok events ->
+                            let appendEvents eventsToAppend : Result<Async<unit>,ResponseError> =
+                                eventsToAppend
+                                |> Seq.ofList
+                                |> (fun events -> aggregateId, events)
+                                |> List.singleton
+                                |> Map.ofList
+                                |> eventStore.AppendEvents
+                                |> Ok
+
+                            return appendEvents events
+                        | Error error ->
+                            return error
+                                    |> errorHandler.ConvertErrorToResponseError
+                                    |> Error
+                    | Error error ->
+                        return (errorHandler.MapStringToAssignBookADeskError error)
+                                |> errorHandler.ConvertErrorToResponseError
+                                |> Error
                 }
 
                 let! result = handleCommand command
@@ -84,8 +88,9 @@ module BookingsHttpHandler =
                         | false -> failwithf $"Error sending notification error for %s{booking.User.Email} at %s{booking.Date.ToShortDateString()}"
                         
                     return! json output next context
-                | Error response ->
-                    return! jsonProblem response next context
+                | Error (response: ResponseError) ->
+                    context.SetStatusCode(response.StatusCode)
+                    return! json response.Error next context
             }
 
         {

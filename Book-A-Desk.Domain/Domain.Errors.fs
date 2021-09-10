@@ -1,7 +1,5 @@
-namespace Book_A_Desk.Domain.Domain
+namespace Book_A_Desk.Domain.Errors
 
-open Book_A_Desk.Domain.Reservation
 
-type DomainError =
-    | ReservationError of ReservationError
-    | AggregatedError of DomainError list
+type GenericError =
+    | GetEventsException of string

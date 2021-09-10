@@ -1,5 +1,7 @@
 ﻿module Book_A_Desk.Api.Tests.BookingsTests
 
+open System.Net
+open System.Net.Http
 open Book_A_Desk.Infrastructure.DynamoDbEventStore
 open Newtonsoft.Json
 open System
@@ -82,7 +84,7 @@ let ``GIVEN A Book-A-Desk server, WHEN booking a desk, THEN an email notificatio
 }
 
 [<Fact>]
-let ``GIVEN an invalid email address WHEN booking a desk THEN it returns 400 and Invalid Email Address error`` () = async {
+let ``GIVEN an invalid reservation details WHEN booking a desk THEN it returns 400 and Reservation Error Title and Details`` () = async {
     emailWasSent <- false
     let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification
     use httpClient = TestServer.createAndRun mockApiDependencyFactory
@@ -94,28 +96,40 @@ let ``GIVEN an invalid email address WHEN booking a desk THEN it returns 400 and
     
     let serializedBooking = JsonConvert.SerializeObject(bookingInvalidEmail)
 
-    let! response = HttpRequest.postAsync httpClient $"http://localhost:/bookings" serializedBooking
+    let url = sprintf "http://localhost:/bookings"
 
-// TODO : Complete test when Error is managed at API level
-//    
+    let postRequest = new HttpRequestMessage(HttpMethod.Post, url)
+
+    httpClient.SendAsync postRequest |> Async.AwaitTask |> Async.RunSynchronously
+     |> (fun response ->
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode)
+        let responseObject =
+            response.Content.ReadAsStringAsync() |> Async.AwaitTask |> Async.RunSynchronously
+            |> JsonConvert.DeserializeObject<ProblemDetailsDto>
+        Assert.Equal("Invalid Email Address", responseObject.Title)
+        Assert.Equal("The e-mail address is invalid.", responseObject.Detail))
+
+
+        let content = new StringContent(content, Encoding.UTF8, "application/json")
+        let! response = httpClient.PostAsync(url, content) |> Async.AwaitTask
+        response.EnsureSuccessStatusCode () |> ignore
+        let! content = response.Content.ReadAsStringAsync() |> Async.AwaitTask
+        return content
+
+
+    Assert.False(emailWasSent)
+//    let! response = HttpRequest.postAsync httpClient $"http://localhost:/bookings" serializedBooking
+//    |> (fun response ->
+//        response.StatusCode |> shouldEqual HttpStatusCode.BadRequest
+//        let responseObject =
+//            response.Content.ReadAsStringAsync() |> Async.AwaitTask |> Async.RunSynchronously
+//            |> JsonConvert.DeserializeObject<ProblemDetailsDto>
+//        responseObject.Title |> shouldEqual "Empty body"
+//        responseObject.Detail |> shouldEqual "The request body is empty.")
+//
 //    response.StatusCode |> shouldEqual HttpStatusCode.BadRequest
-//    
 //
-//    |> fun responseTask ->
-//        let response = receiveResponse responseTask
-//        let statusCode = extractStatusCodeFromHttpResponse response
-//        let contentTypeHeader = extractContentTypeFromHttpResponse response
-//        let responseBody = extractBodyFromHttpResponse<ProblemDetailsDto> response
-//
-//        statusCode |> shouldEqual StatusCodes.Status400BadRequest
-//        contentTypeHeader |> shouldEqual "application/problem+json"
-//        responseBody
-//        |> shouldEqual
-//            (
-//                {
-//                    ProblemDetailsDto.Title = "Start date is greater than end date"
-//                    Detail = "The start date is greater than end date"
-//                }
-//            )    
-    Assert.True(emailWasSent)
+//    let deserializedResponse = JsonConvert.DeserializeObject<ProblemDetailsDto>(response)
+
+    //Assert.Equal(StatusCodes.Status400BadRequest, deserializedResponse.StatusCode)
 }
