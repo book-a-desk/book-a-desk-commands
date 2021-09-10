@@ -2,6 +2,7 @@
 
 open System.Net
 open System.Net.Http
+open System.Text
 open Book_A_Desk.Infrastructure.DynamoDbEventStore
 open Newtonsoft.Json
 open System
@@ -34,7 +35,7 @@ let offices =
 let mockGetOffices () =
     offices
     
-let domainName = "domain.com"
+let domainName = "broadsign.com"
     
 let mockReservationCommandFactory : ReservationCommandsFactory =
     {
@@ -50,7 +51,7 @@ let booking  =
     {
         Office = { Id = mockOfficeId.ToString() }
         Date = DateTime.MaxValue
-        User = { Email = "someEmail" }
+        User = { Email = "someEmail@broadsign.com" }
     } : InputBooking
 
 [<Fact>]
@@ -84,7 +85,7 @@ let ``GIVEN A Book-A-Desk server, WHEN booking a desk, THEN an email notificatio
 }
 
 [<Fact>]
-let ``GIVEN an invalid reservation details WHEN booking a desk THEN it returns 400 and Reservation Error Title and Details`` () = async {
+let ``GIVEN an invalid reservation details WHEN booking a desk THEN it returns 400 And Reservation Error Title and Details And no notification by email is sent`` () = async {
     emailWasSent <- false
     let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification
     use httpClient = TestServer.createAndRun mockApiDependencyFactory
@@ -99,6 +100,8 @@ let ``GIVEN an invalid reservation details WHEN booking a desk THEN it returns 4
     let url = sprintf "http://localhost:/bookings"
 
     let postRequest = new HttpRequestMessage(HttpMethod.Post, url)
+    let content = new StringContent(serializedBooking, Encoding.UTF8, "application/json")
+    postRequest.Content <- content
 
     httpClient.SendAsync postRequest |> Async.AwaitTask |> Async.RunSynchronously
      |> (fun response ->
@@ -109,27 +112,5 @@ let ``GIVEN an invalid reservation details WHEN booking a desk THEN it returns 4
         Assert.Equal("Invalid Email Address", responseObject.Title)
         Assert.Equal("The e-mail address is invalid.", responseObject.Detail))
 
-
-        let content = new StringContent(content, Encoding.UTF8, "application/json")
-        let! response = httpClient.PostAsync(url, content) |> Async.AwaitTask
-        response.EnsureSuccessStatusCode () |> ignore
-        let! content = response.Content.ReadAsStringAsync() |> Async.AwaitTask
-        return content
-
-
     Assert.False(emailWasSent)
-//    let! response = HttpRequest.postAsync httpClient $"http://localhost:/bookings" serializedBooking
-//    |> (fun response ->
-//        response.StatusCode |> shouldEqual HttpStatusCode.BadRequest
-//        let responseObject =
-//            response.Content.ReadAsStringAsync() |> Async.AwaitTask |> Async.RunSynchronously
-//            |> JsonConvert.DeserializeObject<ProblemDetailsDto>
-//        responseObject.Title |> shouldEqual "Empty body"
-//        responseObject.Detail |> shouldEqual "The request body is empty.")
-//
-//    response.StatusCode |> shouldEqual HttpStatusCode.BadRequest
-//
-//    let deserializedResponse = JsonConvert.DeserializeObject<ProblemDetailsDto>(response)
-
-    //Assert.Equal(StatusCodes.Status400BadRequest, deserializedResponse.StatusCode)
 }
