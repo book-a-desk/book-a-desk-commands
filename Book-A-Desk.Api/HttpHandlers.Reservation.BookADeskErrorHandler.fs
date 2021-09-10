@@ -16,7 +16,7 @@ type BookADeskError =
 type ProblemDetailsDto =
     {
         Title: string
-        Detail: string
+        Details: string
     }
 
 type ResponseError =
@@ -51,7 +51,7 @@ module BookADeskErrorHandler =
                         StatusCode = StatusCodes.Status400BadRequest
                         Error = {
                                     ProblemDetailsDto.Title = "Invalid Email Address"
-                                    Detail = "The e-mail address is invalid."
+                                    Details = "The e-mail address is invalid."
                                 }
                     }
             | DateLowerThanToday ->
@@ -59,7 +59,7 @@ module BookADeskErrorHandler =
                         StatusCode = StatusCodes.Status400BadRequest
                         Error = {
                                     ProblemDetailsDto.Title = "Date Lower Than Today"
-                                    Detail = "Date must be greater than today."
+                                    Details = "Date must be greater than today."
                                 }
                     }
             | InvalidOfficeId ->
@@ -67,7 +67,7 @@ module BookADeskErrorHandler =
                         StatusCode = StatusCodes.Status400BadRequest
                         Error = {
                                     ProblemDetailsDto.Title = "Invalid Office Id"
-                                    Detail = "You must enter a valid office ID."
+                                    Details = "You must enter a valid office ID."
                                 }
                     }
             | OfficeHasNoAvailability (date : DateTime) ->
@@ -75,7 +75,7 @@ module BookADeskErrorHandler =
                         StatusCode = StatusCodes.Status400BadRequest
                         Error = {
                                     ProblemDetailsDto.Title = "Office Has No Availability"
-                                    Detail = $"The office is booked out at {date.ToShortDateString()}"
+                                    Details = $"The office is booked out at {date.ToShortDateString()}"
                                 }
                     }
             | UserHadBookedBefore (userHadBookedBeforeParam : UserHadBookedBeforeParam) ->
@@ -83,7 +83,7 @@ module BookADeskErrorHandler =
                         StatusCode = StatusCodes.Status400BadRequest
                         Error = {
                                     ProblemDetailsDto.Title = "User Had Booked Before"
-                                    Detail = $"The office is already booked out at {userHadBookedBeforeParam.Date.ToShortDateString()} for user {userHadBookedBeforeParam.EmailAddress}"
+                                    Details = $"The office is already booked out at {userHadBookedBeforeParam.Date.ToShortDateString()} for user {userHadBookedBeforeParam.EmailAddress}"
                                 }
                     }
             | GenericError (description: string) ->
@@ -91,7 +91,7 @@ module BookADeskErrorHandler =
                         StatusCode = StatusCodes.Status500InternalServerError
                         Error = {
                                     ProblemDetailsDto.Title = "Generic Error"
-                                    Detail = description
+                                    Details = description
                                 }
                     }
         {

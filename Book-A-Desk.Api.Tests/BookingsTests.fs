@@ -43,7 +43,7 @@ let mockReservationCommandFactory : ReservationCommandsFactory =
     }
     
 let mutable emailWasSent = false 
-let mockEmailNotification booking =
+let mockEmailNotification _ =
     emailWasSent <- true
     async { return emailWasSent }  
 
@@ -54,6 +54,8 @@ let booking  =
         User = { Email = "someEmail@broadsign.com" }
     } : InputBooking
 
+let url = sprintf "http://localhost:/bookings"
+
 [<Fact>]
 let ``GIVEN A Book-A-Desk server, WHEN booking a desk, THEN a desk is booked`` () = async {
     emailWasSent <- false
@@ -62,7 +64,7 @@ let ``GIVEN A Book-A-Desk server, WHEN booking a desk, THEN a desk is booked`` (
     
     let serializedBooking = JsonConvert.SerializeObject(booking)
 
-    let! result = HttpRequest.postAsync httpClient $"http://localhost:/bookings" serializedBooking
+    let! result = HttpRequest.postAsync httpClient url serializedBooking
 
     let deserializedResult = JsonConvert.DeserializeObject<Booking>(result)
 
@@ -79,7 +81,7 @@ let ``GIVEN A Book-A-Desk server, WHEN booking a desk, THEN an email notificatio
     
     let serializedBooking = JsonConvert.SerializeObject(booking)
 
-    let! result = HttpRequest.postAsync httpClient $"http://localhost:/bookings" serializedBooking
+    let! result = HttpRequest.postAsync httpClient url serializedBooking
     
     Assert.True(emailWasSent)
 }
@@ -94,10 +96,11 @@ let ``GIVEN an invalid reservation details WHEN booking a desk THEN it returns 4
         {
             booking with User = { Email = "invalidEmail" }
         } : InputBooking
+
+    let expectedTitle = "Invalid Email Address"
+    let expectedDetails = "The e-mail address is invalid."
     
     let serializedBooking = JsonConvert.SerializeObject(bookingInvalidEmail)
-
-    let url = sprintf "http://localhost:/bookings"
 
     let postRequest = new HttpRequestMessage(HttpMethod.Post, url)
     let content = new StringContent(serializedBooking, Encoding.UTF8, "application/json")
@@ -109,8 +112,76 @@ let ``GIVEN an invalid reservation details WHEN booking a desk THEN it returns 4
         let responseObject =
             response.Content.ReadAsStringAsync() |> Async.AwaitTask |> Async.RunSynchronously
             |> JsonConvert.DeserializeObject<ProblemDetailsDto>
-        Assert.Equal("Invalid Email Address", responseObject.Title)
-        Assert.Equal("The e-mail address is invalid.", responseObject.Detail))
+        Assert.Equal(expectedTitle, responseObject.Title)
+        Assert.Equal(expectedDetails, responseObject.Details))
+
+    Assert.False(emailWasSent)
+}
+
+[<Fact>]
+let ``GIVEN an reservation WHEN notifying success fails THEN it returns 500 And error description And no notification by email is sent`` () = async {
+    emailWasSent <- false
+
+    let mockEmailNotification _ =
+        emailWasSent <- false
+        async { return emailWasSent }
+
+    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification
+    use httpClient = TestServer.createAndRun mockApiDependencyFactory
+
+    let serializedBooking = JsonConvert.SerializeObject(booking)
+
+    let expectedTitle = "Generic Error"
+    let expectedDetails = "Error sending notification error for someEmail@broadsign.com at 31/12/9999"
+
+    let postRequest = new HttpRequestMessage(HttpMethod.Post, url)
+    let content = new StringContent(serializedBooking, Encoding.UTF8, "application/json")
+    postRequest.Content <- content
+
+    httpClient.SendAsync postRequest |> Async.AwaitTask |> Async.RunSynchronously
+     |> (fun response ->
+        Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode)
+        let responseObject =
+            response.Content.ReadAsStringAsync() |> Async.AwaitTask |> Async.RunSynchronously
+            |> JsonConvert.DeserializeObject<ProblemDetailsDto>
+        Assert.Equal(expectedTitle, responseObject.Title)
+        Assert.Equal(expectedDetails, responseObject.Details))
+
+    Assert.False(emailWasSent)
+}
+
+[<Fact>]
+let ``GIVEN an reservation WHEN database service fails THEN it returns 500 And Database error description And no notification by email is sent`` () = async {
+    emailWasSent <- false
+
+    let error = "Database error"
+
+    let mockProvideEventStore _ =
+        {
+            GetEvents = fun _ -> Error error |> async.Return
+            AppendEvents = fun _ -> () |> async.Return
+        } : DynamoDbEventStore
+
+    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification
+    use httpClient = TestServer.createAndRun mockApiDependencyFactory
+
+    let serializedBooking = JsonConvert.SerializeObject(booking)
+
+    let expectedTitle = "Generic Error"
+    let expectedDetails = error
+
+    let postRequest = new HttpRequestMessage(HttpMethod.Post, url)
+    let content = new StringContent(serializedBooking, Encoding.UTF8, "application/json")
+    postRequest.Content <- content
+
+    httpClient.SendAsync postRequest |> Async.AwaitTask |> Async.RunSynchronously
+     |> (fun response ->
+        Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode)
+        let responseObject =
+            response.Content.ReadAsStringAsync() |> Async.AwaitTask |> Async.RunSynchronously
+            |> JsonConvert.DeserializeObject<ProblemDetailsDto>
+        Assert.Equal(expectedTitle, responseObject.Title)
+        Assert.Equal(expectedDetails, responseObject.Details))
 
     Assert.False(emailWasSent)
 }
