@@ -35,7 +35,7 @@ let offices =
 let mockGetOffices () =
     offices
     
-let domainName = "broadsign.com"
+let domainName = "domain.com"
     
 let mockReservationCommandFactory : ReservationCommandsFactory =
     {
@@ -51,7 +51,7 @@ let booking  =
     {
         Office = { Id = mockOfficeId.ToString() }
         Date = DateTime.MaxValue
-        User = { Email = "someEmail@broadsign.com" }
+        User = { Email = "someEmail@domain.com" }
     } : InputBooking
 
 let url = sprintf "http://localhost:/bookings"
@@ -64,7 +64,7 @@ let ``GIVEN A Book-A-Desk server, WHEN booking a desk, THEN a desk is booked`` (
     
     let serializedBooking = JsonConvert.SerializeObject(booking)
 
-    let! result = HttpRequest.postAsync httpClient url serializedBooking
+    let! result = HttpRequest.postAsyncGetContent httpClient url serializedBooking
 
     let deserializedResult = JsonConvert.DeserializeObject<Booking>(result)
 
@@ -81,7 +81,7 @@ let ``GIVEN A Book-A-Desk server, WHEN booking a desk, THEN an email notificatio
     
     let serializedBooking = JsonConvert.SerializeObject(booking)
 
-    let! result = HttpRequest.postAsync httpClient url serializedBooking
+    let! result = HttpRequest.postAsyncGetContent httpClient url serializedBooking
     
     Assert.True(emailWasSent)
 }
@@ -102,11 +102,9 @@ let ``GIVEN an invalid reservation details WHEN booking a desk THEN it returns 4
     
     let serializedBooking = JsonConvert.SerializeObject(bookingInvalidEmail)
 
-    let postRequest = new HttpRequestMessage(HttpMethod.Post, url)
-    let content = new StringContent(serializedBooking, Encoding.UTF8, "application/json")
-    postRequest.Content <- content
+    let! response = HttpRequest.sendPostAsyncRequest httpClient url serializedBooking
 
-    httpClient.SendAsync postRequest |> Async.AwaitTask |> Async.RunSynchronously
+    response
      |> (fun response ->
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode)
         let responseObject =
@@ -134,11 +132,9 @@ let ``GIVEN an reservation WHEN notifying success fails THEN it returns 500 And 
     let expectedTitle = "Generic Error"
     let expectedDetails = $"Error sending notification error for %s{booking.User.Email} at %s{booking.Date.ToShortDateString()}"
 
-    let postRequest = new HttpRequestMessage(HttpMethod.Post, url)
-    let content = new StringContent(serializedBooking, Encoding.UTF8, "application/json")
-    postRequest.Content <- content
+    let! response = HttpRequest.sendPostAsyncRequest httpClient url serializedBooking
 
-    httpClient.SendAsync postRequest |> Async.AwaitTask |> Async.RunSynchronously
+    response
      |> (fun response ->
         Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode)
         let responseObject =
@@ -170,12 +166,10 @@ let ``GIVEN an reservation WHEN database service fails THEN it returns 500 And D
     let expectedTitle = "Generic Error"
     let expectedDetails = error
 
-    let postRequest = new HttpRequestMessage(HttpMethod.Post, url)
-    let content = new StringContent(serializedBooking, Encoding.UTF8, "application/json")
-    postRequest.Content <- content
+    let! response = HttpRequest.sendPostAsyncRequest httpClient url serializedBooking
 
-    httpClient.SendAsync postRequest |> Async.AwaitTask |> Async.RunSynchronously
-     |> (fun response ->
+    response
+    |> (fun response ->
         Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode)
         let responseObject =
             response.Content.ReadAsStringAsync() |> Async.AwaitTask |> Async.RunSynchronously
