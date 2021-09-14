@@ -42,14 +42,12 @@ module rec OfficeQueriesHandler =
                 return officeAvailability
         }
     
-    let getOfficeNameById (officeId: OfficeId) getOffices =
+    let getOfficeById (officeId: OfficeId) getOffices =
         let result = getAll getOffices
         match result with
         | Ok offices ->
             offices
             |> List.tryFind (fun (o:Office) -> officeId.Equals(o.Id))
-            |> function
-                | None -> "Unknown" |> CityName
-                | Some (o:Office) -> o.City
+            |> Ok
         | Error e ->
-            "Unknown" |> CityName
+            Error e

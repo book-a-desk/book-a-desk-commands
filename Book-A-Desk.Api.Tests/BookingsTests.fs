@@ -24,6 +24,7 @@ let mockOffice =
         Id = mockOfficeId |> OfficeId
         City = CityName "SomeCityName"
         BookableDesksPerDay = 32
+        OpeningHoursText = "some opening hours"
     }
 
 let offices = 
@@ -39,11 +40,6 @@ let mockReservationCommandFactory : ReservationCommandsFactory =
         CreateBookADeskCommand = fun () -> BookADeskReservationCommand.provide offices domainName
     }
     
-let mutable emailWasSent = false 
-let mockEmailNotification booking =
-    emailWasSent <- true
-    async { return emailWasSent }  
-
 let booking  =
     {
         Office = { Id = mockOfficeId.ToString() }
@@ -53,7 +49,8 @@ let booking  =
 
 [<Fact>]
 let ``GIVEN A Book-A-Desk server, WHEN booking a desk, THEN a desk is booked`` () = async {
-    emailWasSent <- false
+    let mockEmailNotification _ = async { return Ok () }
+        
     let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification
     use httpClient = TestServer.createAndRun mockApiDependencyFactory
     
@@ -70,13 +67,17 @@ let ``GIVEN A Book-A-Desk server, WHEN booking a desk, THEN a desk is booked`` (
 
 [<Fact>]
 let ``GIVEN A Book-A-Desk server, WHEN booking a desk, THEN an email notification must be sent`` () = async {
-    emailWasSent <- false    
+    let mutable emailWasSent = false
+    let mockEmailNotification _ =
+        emailWasSent <- true
+        async { return Ok () }
+        
     let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification
     use httpClient = TestServer.createAndRun mockApiDependencyFactory
     
     let serializedBooking = JsonConvert.SerializeObject(booking)
 
-    let! result = HttpRequest.postAsync httpClient $"http://localhost:/bookings" serializedBooking
+    do! HttpRequest.postAsync httpClient $"http://localhost:/bookings" serializedBooking |> Async.Ignore
     
     Assert.True(emailWasSent)
 }
