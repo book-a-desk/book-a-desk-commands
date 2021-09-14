@@ -41,6 +41,10 @@ module rec OfficesHttpHandler =
                         {
                             Id = officeId.ToString()
                             Name = cityName
+                            OpeningHours =
+                                {
+                                    Text = o.OpeningHoursText
+                                }
                         })
                     |> List.toArray
                     |> fun l -> { Offices.Items = l }
