@@ -74,13 +74,9 @@ module rec BookingNotifier =
         mailMessage
         
     let createMailText (bookingDate : DateTime) (office : Office) =
-            let openingHours =
-                match office.OpeningHoursText with
-                | Some openingHours -> $"Please note that the office has the following opening hours: {openingHours}"
-                | None -> ""
             let (CityName officeName) = office.City
             $"You have booked a desk at %s{bookingDate.ToShortDateString()} in the Office %s{officeName}{Environment.NewLine}" +
-            $"{openingHours}{Environment.NewLine}It is your responsibility to verify that the office is open for the date" +
+            $"{office.OpeningHoursText}{Environment.NewLine}It is your responsibility to verify that the office is open for the date" +
             "That you have booked"
             
     let getOffice officeId getOffices : Result<_,_> = result {

@@ -24,7 +24,7 @@ let mockOffice =
         Id = mockOfficeId |> OfficeId
         City = CityName "SomeCityName"
         BookableDesksPerDay = 32
-        OpeningHoursText = None
+        OpeningHoursText = "some opening hours"
     }
 
 let offices = 

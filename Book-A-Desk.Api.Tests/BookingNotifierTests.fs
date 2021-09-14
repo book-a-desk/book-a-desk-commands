@@ -19,7 +19,7 @@ let ``GIVEN A booking WHEN calling to SendEmailNotification THEN SendAsync metho
             Id = officeId |> OfficeId
             City = CityName "SomeCityName"
             BookableDesksPerDay = totalDesks
-            OpeningHoursText = None
+            OpeningHoursText = "some opening hours"
         }
     let mockedOfficeReference =
         {
