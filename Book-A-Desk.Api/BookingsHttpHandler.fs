@@ -69,6 +69,7 @@ module BookingsHttpHandler =
                         }
                     match! notifySuccess booking with
                     | Ok _ ->
+                        printfn $"Notification message sent for %s{booking.User.Email} at %s{booking.Date.ToShortDateString()}"
                         return! json output next context
                     | Error e ->
                         context.SetStatusCode(500)
