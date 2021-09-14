@@ -25,11 +25,17 @@ type Booking =
         Date: DateTime
         User: UserReference
     }
+    
+type OpeningHours =
+    {
+        Text: string
+    }
 
 type Office =
     {
         Id: string
         Name: string
+        OpeningHours : OpeningHours
     }
 
 type OfficeAvailability =

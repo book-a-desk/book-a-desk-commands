@@ -56,8 +56,10 @@ let ``GIVEN A Book-A-Desk server, WHEN getting the offices endpoint, THEN office
     let office = offices.Items.[0]
     let (OfficeId id) = mockOffice.Id
     let (CityName cityName) = mockOffice.City
+    let openingHoursText = mockOffice.OpeningHoursText
     Assert.Equal(id.ToString(), office.Id)
     Assert.Equal(cityName, office.Name)
+    Assert.Equal(openingHoursText, office.OpeningHours.Text)
 }
 
 [<Fact>]
