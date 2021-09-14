@@ -47,7 +47,7 @@ let ``GIVEN A Book-A-Desk server, WHEN getting the offices endpoint, THEN office
     
     let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification
     use httpClient = TestServer.createAndRun mockApiDependencyFactory
-    let! result = HttpRequest.getAsync httpClient "http://localhost/offices"
+    let! result = HttpRequest.getAsyncGetContent httpClient "http://localhost/offices"
 
     let deserializeOptions = JsonSerializerOptions(JsonSerializerDefaults.Web)
     let offices = JsonSerializer.Deserialize<Book_A_Desk.Api.Models.Offices>(result, deserializeOptions)
@@ -84,7 +84,7 @@ let ``GIVEN A Book-A-Desk server, WHEN getting the office availability by date, 
     let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification
     use httpClient = TestServer.createAndRun mockApiDependencyFactory
 
-    let! result = HttpRequest.getAsync httpClient $"http://localhost/offices/{officeId.ToString()}/availabilities?date={date.ToString()}"
+    let! result = HttpRequest.getAsyncGetContent httpClient $"http://localhost/offices/{officeId.ToString()}/availabilities?date={date.ToString()}"
 
     let deserializeOptions = JsonSerializerOptions(JsonSerializerDefaults.Web)
     let officeAvailability = JsonSerializer.Deserialize<Book_A_Desk.Api.Models.OfficeAvailability>(result, deserializeOptions)

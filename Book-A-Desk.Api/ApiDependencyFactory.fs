@@ -19,6 +19,7 @@ module ApiDependencyFactory =
                 getEventStore
                 reservationCommandsFactory
                 notifySuccess
+                <| BookADeskErrorHandler.initialize()                
 
         let createOfficesHttpHandler bearerToken =
             OfficesHttpHandler.initialize

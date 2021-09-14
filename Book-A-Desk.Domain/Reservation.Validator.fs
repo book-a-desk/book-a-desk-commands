@@ -9,6 +9,19 @@ open Book_A_Desk.Domain
 open Book_A_Desk.Domain.Office.Domain
 open Book_A_Desk.Domain.Reservation.Commands
 
+type UserHadBookedBeforeParam =
+    {
+        Date: DateTime
+        EmailAddress: EmailAddress        
+    }
+
+type ReservationError =
+    | InvalidEmailAddress
+    | DateLowerThanToday
+    | InvalidOfficeId
+    | OfficeHasNoAvailability of DateTime
+    | UserHadBookedBefore of UserHadBookedBeforeParam
+
 module BookADeskReservationValidator =
     
     let private validateCorporateEmail email validDomainName =
@@ -20,27 +33,27 @@ module BookADeskReservationValidator =
         if isValidEmail && hasCorporateDomain.Success then
             Ok()
         else
-            Error "The e-mail address is invalid."
+            InvalidEmailAddress |> Error
             
     let private validateDateIsGreaterThanToday requestedDate =
         let allowedDate = DateTime.Today.AddDays(1.)
         if requestedDate < allowedDate then
-            Error "Date must be greater than today."
+            DateLowerThanToday |> Error
         else
             Ok ()
             
     let private validateOfficeIdIsValid officeId (offices : Office list) =
         if offices |> List.exists (fun office -> office.Id = officeId) |> not then
-            Error "You must enter a valid office ID."
+            InvalidOfficeId |> Error
         else
             Ok ()
     
     let private getNumberOfAvailableDesk officeId (offices : Office list) =
         match offices |> List.tryFind (fun x -> x.Id = officeId) with
-         | Some office ->
-             Ok office.BookableDesksPerDay
-         | None ->
-             Error "You must enter a valid office ID."
+        | Some office ->
+            Ok office.BookableDesksPerDay
+        | None ->
+            InvalidOfficeId |> Error
     
     let private validateOfficeIsAvailable reservationAggregate officeId getOffices (date : DateTime) = result {   
         let! maxAllowedBookingsPerOffice = getNumberOfAvailableDesk officeId getOffices
@@ -53,7 +66,7 @@ module BookADeskReservationValidator =
         if isAvailable then
             return ()
         else
-            return! Error ($"The office is booked out at {date.ToShortDateString()}" )
+            return! date |> OfficeHasNoAvailability |> Error
     }
     
     let private validateUserHasNotBookedYet reservationAggregate emailAddress officeId (date : DateTime) = result {
@@ -64,7 +77,12 @@ module BookADeskReservationValidator =
         | [] ->
             return ()
         | _ ->
-            return! Error ($"The office is already booked out at {date.ToShortDateString()} for user {emailAddress}")
+            let userHadBookedBeforeParam =
+                {
+                    Date = date
+                    EmailAddress = emailAddress
+                }
+            return! userHadBookedBeforeParam |> UserHadBookedBefore |> Error
     }
             
     let validateCommand (offices: Office list) (cmd : BookADesk) reservationAggregate domainName = result {
