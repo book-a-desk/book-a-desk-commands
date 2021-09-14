@@ -29,52 +29,47 @@ module BookingsHttpHandler =
         task {
             let! sent = notifySuccess booking
             match sent with
-                | true ->
-                            printfn $"Notification message sent for %s{booking.User.Email} at %s{booking.Date.ToShortDateString()}"
-                            return! json output next context
-                | false ->
-                            let error = $"Error sending notification error for %s{booking.User.Email} at %s{booking.Date.ToShortDateString()}"
-                            let responseError = (errorHandler.MapStringToAssignBookADeskError error)
-                                                |> errorHandler.ConvertErrorToResponseError
-                            context.SetStatusCode(StatusCodes.Status500InternalServerError)
-                            return! json responseError.Error next context
+            | Ok _ ->
+                printfn $"Notification message sent for %s{booking.User.Email} at %s{booking.Date.ToShortDateString()}"
+                return! json output next context
+            | Error e ->
+                let error =
+                    $"Error sending notification error for %s{booking.User.Email} at %s{booking.Date.ToShortDateString()} because {e}"
+                let responseError = (errorHandler.MapStringToAssignBookADeskError error)
+                                    |> errorHandler.ConvertErrorToResponseError
+                context.SetStatusCode(StatusCodes.Status500InternalServerError)
+                return! json responseError.Error next context
         }
 
-    let private handleCommand command eventStore reservationCommandsFactory errorHandler = async {
+    let private handleCommand command eventStore reservationCommandsFactory errorHandler = asyncResult {
         let (ReservationId aggregateId) = ReservationAggregate.Id
-
-        match! eventStore.GetEvents aggregateId with
-        | Ok events ->
-            let handler = ReservationsCommandHandler.provide (events |> List.ofSeq) reservationCommandsFactory
-            let results = handler.Handle command
-                            |> Result.mapError errorHandler.MapReservationErrorToAssignBookADeskError
-
-            match results with
-            | Ok events ->
-                let appendEvents eventsToAppend : Result<Async<unit>,ResponseError> =
-                    eventsToAppend
-                    |> Seq.ofList
-                    |> (fun events -> aggregateId, events)
-                    |> List.singleton
-                    |> Map.ofList
-                    |> eventStore.AppendEvents
-                    |> Ok
-
-                return appendEvents events
-            | Error error ->
-                return error
-                        |> errorHandler.ConvertErrorToResponseError
-                        |> Error
-        | Error error ->
-            return (errorHandler.MapStringToAssignBookADeskError error)
-                    |> errorHandler.ConvertErrorToResponseError
-                    |> Error
+        let! events =
+            eventStore.GetEvents aggregateId
+            |> Async.map(
+                Result.mapError (
+                    errorHandler.MapStringToAssignBookADeskError >> errorHandler.ConvertErrorToResponseError))
+        let handler = ReservationsCommandHandler.provide (events |> List.ofSeq) reservationCommandsFactory
+        
+        let! events =
+            handler.Handle command
+            |> Result.mapError (
+                errorHandler.MapReservationErrorToAssignBookADeskError >> errorHandler.ConvertErrorToResponseError)
+                        
+        let appendEvents eventsToAppend : Async<unit> =
+            eventsToAppend
+            |> Seq.ofList
+            |> (fun events -> aggregateId, events)
+            |> List.singleton
+            |> Map.ofList
+            |> eventStore.AppendEvents
+            
+        return! appendEvents events
     }
 
     let initialize
         (provideEventStore : IAmazonDynamoDB -> DynamoDbEventStore)
         reservationCommandsFactory
-        (notifySuccess: Models.Booking-> Async<bool>)
+        (notifySuccess: Models.Booking-> Async<Result<unit, string>>)
         (errorHandler: BookADeskErrorHandler) =
 
         let handlePostWith booking = fun next (context : HttpContext) ->
@@ -98,7 +93,7 @@ module BookingsHttpHandler =
                             Date = booking.Date
                             User = { Email = booking.User.Email }
                         }
-
+                    
                     return! notifyBooking output booking notifySuccess errorHandler next context
                 | Error (response: ResponseError) ->
                     context.SetStatusCode(response.StatusCode)

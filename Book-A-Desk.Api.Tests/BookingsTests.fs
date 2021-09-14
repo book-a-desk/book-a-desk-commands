@@ -1,9 +1,9 @@
 ﻿module Book_A_Desk.Api.Tests.BookingsTests
 
+open FsToolkit.ErrorHandling
 open System.Net
 open System.Net.Http
 open System.Text
-open Book_A_Desk.Infrastructure.DynamoDbEventStore
 open Newtonsoft.Json
 open System
 open Xunit
@@ -13,6 +13,7 @@ open Book_A_Desk.Api.Models
 open Book_A_Desk.Domain.CommandHandler
 open Book_A_Desk.Domain.Reservation.Commands
 open Book_A_Desk.Domain.Office.Domain
+open Book_A_Desk.Infrastructure.DynamoDbEventStore
 
 let mockProvideEventStore _ =
     {
@@ -27,6 +28,7 @@ let mockOffice =
         Id = mockOfficeId |> OfficeId
         City = CityName "SomeCityName"
         BookableDesksPerDay = 32
+        OpeningHoursText = "some opening hours"
     }
 
 let offices = 
@@ -41,11 +43,6 @@ let mockReservationCommandFactory : ReservationCommandsFactory =
     {
         CreateBookADeskCommand = fun () -> BookADeskReservationCommand.provide offices domainName
     }
-    
-let mutable emailWasSent = false 
-let mockEmailNotification _ =
-    emailWasSent <- true
-    async { return emailWasSent }  
 
 let booking  =
     {
@@ -58,7 +55,11 @@ let url = sprintf "http://localhost:/bookings"
 
 [<Fact>]
 let ``GIVEN A Book-A-Desk server, WHEN booking a desk, THEN a desk is booked`` () = async {
-    emailWasSent <- false
+    let mutable emailWasSent = false 
+    let mockEmailNotification _ =
+        emailWasSent <- true
+        asyncResult { return () }
+        
     let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification
     use httpClient = TestServer.createAndRun mockApiDependencyFactory
     
@@ -75,7 +76,11 @@ let ``GIVEN A Book-A-Desk server, WHEN booking a desk, THEN a desk is booked`` (
 
 [<Fact>]
 let ``GIVEN A Book-A-Desk server, WHEN booking a desk, THEN an email notification must be sent`` () = async {
-    emailWasSent <- false
+    let mutable emailWasSent = false 
+    let mockEmailNotification _ =
+        emailWasSent <- true
+        asyncResult { return () }
+        
     let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification
     use httpClient = TestServer.createAndRun mockApiDependencyFactory
     
@@ -88,7 +93,11 @@ let ``GIVEN A Book-A-Desk server, WHEN booking a desk, THEN an email notificatio
 
 [<Fact>]
 let ``GIVEN an invalid reservation details WHEN booking a desk THEN it returns 400 And Reservation Error Title and Details And no notification by email is sent`` () = async {
-    emailWasSent <- false
+    let mutable emailWasSent = false 
+    let mockEmailNotification _ =
+        emailWasSent <- true
+        asyncResult { return () }
+        
     let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification
     use httpClient = TestServer.createAndRun mockApiDependencyFactory
     
@@ -118,11 +127,9 @@ let ``GIVEN an invalid reservation details WHEN booking a desk THEN it returns 4
 
 [<Fact>]
 let ``GIVEN an reservation WHEN notifying success fails THEN it returns 500 And error description And no notification by email is sent`` () = async {
-    emailWasSent <- false
-
+    let error = "an error happened"
     let mockEmailNotification _ =
-        emailWasSent <- false
-        async { return emailWasSent }
+        Error error |> async.Return
 
     let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification
     use httpClient = TestServer.createAndRun mockApiDependencyFactory
@@ -130,7 +137,7 @@ let ``GIVEN an reservation WHEN notifying success fails THEN it returns 500 And 
     let serializedBooking = JsonConvert.SerializeObject(booking)
 
     let expectedTitle = "Generic Error"
-    let expectedDetails = $"Error sending notification error for %s{booking.User.Email} at %s{booking.Date.ToShortDateString()}"
+    let expectedDetails = $"Error sending notification error for %s{booking.User.Email} at %s{booking.Date.ToShortDateString()} because {error}"
 
     let! response = HttpRequest.sendPostAsyncRequest httpClient url serializedBooking
 
@@ -142,13 +149,14 @@ let ``GIVEN an reservation WHEN notifying success fails THEN it returns 500 And 
             |> JsonConvert.DeserializeObject<ProblemDetailsDto>
         Assert.Equal(expectedTitle, responseObject.Title)
         Assert.Equal(expectedDetails, responseObject.Details))
-
-    Assert.False(emailWasSent)
 }
 
 [<Fact>]
 let ``GIVEN an reservation WHEN database service fails THEN it returns 500 And Database error description And no notification by email is sent`` () = async {
-    emailWasSent <- false
+    let mutable emailWasSent = false 
+    let mockEmailNotification _ =
+        emailWasSent <- true
+        asyncResult { return () }
 
     let error = "Database error"
 
