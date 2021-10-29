@@ -37,8 +37,6 @@ workflows:
           name: push-image-to-dev
           ecr-account-url: ${AWS_ECR_ACCOUNT_URL_DEV}
           aws-account-id: ${AWS_ACCOUNT_DEV}
-          feature-flags:
-            - feature-flags-book-a-desk-dev
           authenticate-aws:
             - authenticate-aws-book-a-desk-dev
           context:
@@ -65,8 +63,6 @@ workflows:
           name: push-image-to-test
           ecr-account-url: ${AWS_ECR_ACCOUNT_URL_TEST}
           aws-account-id: ${AWS_ACCOUNT_TEST}
-          feature-flags:
-            - feature-flags-book-a-desk-test
           authenticate-aws:
             - authenticate-aws-book-a-desk-test
           context:
@@ -98,8 +94,6 @@ workflows:
           name: push-image-to-prod
           ecr-account-url: ${AWS_ECR_ACCOUNT_URL_PROD}
           aws-account-id: ${AWS_ACCOUNT_PROD}
-          feature-flags:
-            - feature-flags-book-a-desk-prod
           authenticate-aws:
             - authenticate-aws-book-a-desk-prod
           context:
@@ -229,30 +223,6 @@ commands:
             echo "export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID_BACKEND_PROD}" >> $BASH_ENV
             echo "export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY_BACKEND_PROD}" >> $BASH_ENV
 
-  feature-flags-book-a-desk-dev:
-    description: "Configure environment variables for Book A Desk Dev"
-    steps:
-      - run:
-          name: "Initialize BASH_ENV variables"
-          command: |
-            echo "export BOOKING_CANCELLATION=${BOOKING_CANCELLATION_ENABLED_DEV}" >> $BASH_ENV
-
-  feature-flags-book-a-desk-test:
-    description: "Configure environment variables for Book A Desk Test"
-    steps:
-      - run:
-          name: "Initialize BASH_ENV variables"
-          command: |
-            echo "export BOOKING_CANCELLATION=${BOOKING_CANCELLATION_ENABLED_TEST}" >> $BASH_ENV
-          
-  feature-flags-book-a-desk-prod:
-    description: "Configure environment variables for Book A Desk Prod"
-    steps:
-      - run:
-          name: "Initialize BASH_ENV variables"
-          command: |
-            echo "export BOOKING_CANCELLATION=${BOOKING_CANCELLATION_ENABLED_PROD}" >> $BASH_ENV          
-          
   aws-cloudformation-deploy:
     parameters:
       aws-key-id-secret-id:
@@ -333,15 +303,12 @@ jobs:
         type: string
       aws-account-id:
         type: string
-      feature-flags:
-        type: steps
       authenticate-aws:
         type: steps
     steps:
       - attach_workspace:
           at: ./
       - steps: << parameters.authenticate-aws >>
-      - steps: << parameters.feature-flags >>
       - log-aws-identity
       - aws-cli/setup:
           aws-region: AWS_REGION
