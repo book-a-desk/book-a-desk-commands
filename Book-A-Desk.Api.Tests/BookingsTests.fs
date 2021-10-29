@@ -1,5 +1,6 @@
 ﻿module Book_A_Desk.Api.Tests.BookingsTests
 
+open Book_A_Desk.Domain.Cancellation.Commands
 open FsToolkit.ErrorHandling
 open System.Net
 open System.Net.Http
@@ -42,6 +43,7 @@ let domainName = "domain.com"
 let mockReservationCommandFactory : ReservationCommandsFactory =
     {
         CreateBookADeskCommand = fun () -> BookADeskReservationCommand.provide offices domainName
+        CreateCancelBookADeskCommand = fun () -> BookADeskCancellationCommand.provide offices domainName
     }
 
 let booking  =

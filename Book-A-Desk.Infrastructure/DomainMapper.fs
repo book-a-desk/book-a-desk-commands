@@ -1,6 +1,5 @@
 ﻿namespace Book_A_Desk.Infrastructure
 
-open System
 open System.Text.Json
 open Book_A_Desk.Domain
 open Book_A_Desk.Domain.Events
@@ -21,8 +20,18 @@ module rec DomainMapper =
                 Date = deskBooked.Date.Date
                 EmailAddress = EmailAddress deskBooked.EmailAddress
                 OfficeId = OfficeId deskBooked.OfficeId          
-            }
+            } : DeskBooked
             |> DeskBooked
+            |> ReservationEvent
+        | ReservationType.DeskCancelled ->
+            let deskCancelled = JsonSerializer.Deserialize<Book_A_Desk.Infrastructure.DeskCancelled> infraEvent.Event
+            {
+                ReservationId = ReservationId infraEvent.AggregateId
+                Date = deskCancelled.Date.Date
+                EmailAddress = EmailAddress deskCancelled.EmailAddress
+                OfficeId = OfficeId deskCancelled.OfficeId
+            } : DeskCancelled
+            |> DeskCancelled
             |> ReservationEvent
     
     let toInfra (domainEvents: DomainEvent seq) =
@@ -48,4 +57,21 @@ module rec DomainMapper =
                     AggregateId = reservationId
                     ReservationType = ReservationType.DeskBooked
                     Event =  JsonSerializer.Serialize infraDeskBooked
+                }
+            | DeskCancelled deskCancelled ->
+                let (ReservationId reservationId) = deskCancelled.ReservationId
+                let infraDeskCancelled =
+                    {
+                        Date = deskCancelled.Date
+                        EmailAddress =
+                            let (EmailAddress email) = deskCancelled.EmailAddress
+                            email
+                        OfficeId =
+                            let (OfficeId officeId) = deskCancelled.OfficeId
+                            officeId
+                    }
+                {
+                    AggregateId = reservationId
+                    ReservationType = ReservationType.DeskCancelled
+                    Event = JsonSerializer.Serialize infraDeskCancelled
                 }

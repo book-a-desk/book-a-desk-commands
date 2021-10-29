@@ -2,6 +2,7 @@
 
 open System
 open Book_A_Desk.Core
+open Book_A_Desk.Domain.Errors
 open Book_A_desk.Domain.Helpers.Tests
 open Xunit
 
@@ -237,11 +238,11 @@ let ``GIVEN A Book-A-Desk Reservation command with the user already booked, WHEN
                             ]
         }
 
-    let userHadBookedBeforeParam =
+    let userHadBookedBeforeParam : UserHadBookedBeforeParam =
         {
             Date = bookedDate
             EmailAddress = EmailAddress emailAddress
-        }    
+        }
     
     let result = BookADeskReservationValidator.validateCommand offices command aReservationAggregate domainName
     result |> Helpers.shouldBeErrorAndEqualTo (ReservationError.UserHadBookedBefore userHadBookedBeforeParam |> Error)

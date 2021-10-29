@@ -3,13 +3,13 @@
 open System
 open System.Text.Json
 
-open Book_A_Desk.Domain.QueriesHandler
 open Xunit
 
 open Book_A_Desk.Api
 open Book_A_Desk.Domain
 open Book_A_Desk.Domain.CommandHandler
 open Book_A_Desk.Domain.Reservation.Commands
+open Book_A_Desk.Domain.Cancellation.Commands
 open Book_A_Desk.Domain.Events
 open Book_A_Desk.Domain.Office.Domain
 open Book_A_Desk.Domain.Reservation
@@ -33,6 +33,7 @@ let offices =
 let mockReservationCommandFactory : ReservationCommandsFactory =
     {
         CreateBookADeskCommand = fun () -> BookADeskReservationCommand.provide offices domainName
+        CreateCancelBookADeskCommand = fun () -> BookADeskCancellationCommand.provide offices domainName
     }
 
 [<Fact>]

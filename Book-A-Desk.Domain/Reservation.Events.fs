@@ -6,6 +6,13 @@ open Book_A_Desk.Domain
 open Book_A_Desk.Domain.Reservation.Domain
 open Book_A_Desk.Domain.Office.Domain
 
+type DeskCancelled =
+    {
+        ReservationId: ReservationId
+        Date: DateTime
+        EmailAddress: EmailAddress
+        OfficeId: OfficeId
+    }
 type DeskBooked =
     {
         ReservationId: ReservationId
@@ -16,3 +23,4 @@ type DeskBooked =
 
 type ReservationEvent =
     | DeskBooked of DeskBooked
+    | DeskCancelled of DeskCancelled

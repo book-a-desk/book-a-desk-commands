@@ -1,9 +1,10 @@
 namespace Book_A_Desk.Api
 
 open System
+open Giraffe
 open Microsoft.AspNetCore.Http
 
-open Book_A_Desk.Domain.Reservation
+open Book_A_Desk.Domain.Errors
 
 type BookADeskError =
     | InvalidEmailAddress
@@ -11,6 +12,7 @@ type BookADeskError =
     | InvalidOfficeId
     | OfficeHasNoAvailability of DateTime
     | UserHadBookedBefore of UserHadBookedBeforeParam
+    | UserHasNotBookedBefore of UserHasNotBookedBeforeParam
     | GenericError of string
 
 type ProblemDetailsDto =
@@ -41,6 +43,7 @@ module BookADeskErrorHandler =
             | ReservationError.InvalidOfficeId -> InvalidOfficeId
             | ReservationError.OfficeHasNoAvailability date -> date |> OfficeHasNoAvailability
             | ReservationError.UserHadBookedBefore userHadBookedBeforeParam -> userHadBookedBeforeParam |> UserHadBookedBefore
+            | ReservationError.UserHasNotBookedBefore userHasNotBookedBeforeParam -> userHasNotBookedBeforeParam |> UserHasNotBookedBefore
 
         let mapStringToAssignBookADeskError (description: string) = GenericError description
 
@@ -84,6 +87,14 @@ module BookADeskErrorHandler =
                         Error = {
                                     ProblemDetailsDto.Title = "User Had Booked Before"
                                     Details = $"The office is already booked out at {userHadBookedBeforeParam.Date.ToShortDateString()} for user {userHadBookedBeforeParam.EmailAddress}"
+                                }
+                    }
+            | UserHasNotBookedBefore (userHasNotBookedBeforeParam : UserHasNotBookedBeforeParam) ->
+                    {
+                        StatusCode = StatusCodes.Status400BadRequest
+                        Error = {
+                                    ProblemDetailsDto.Title = "User Has Not Booked Before"
+                                    Details = $"The office is not booked at {userHasNotBookedBeforeParam.Date.ToShortDateString()} for user {userHasNotBookedBeforeParam.EmailAddress}"
                                 }
                     }
             | GenericError (description: string) ->
