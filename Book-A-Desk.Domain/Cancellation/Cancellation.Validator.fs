@@ -24,7 +24,7 @@ module BookADeskCancellationValidator =
             |> List.filter(fun bookedDesk -> bookedDesk.Date.Date = date.Date && bookedDesk.OfficeId = officeId && bookedDesk.EmailAddress = emailAddress)
         match alreadyBookedDesks with
         | [] ->
-            let userHasNotBookedBeforeParam : UserHasNotBookedBeforeParam =
+            let userHasNotBookedBeforeParam : UserBookingParam =
                 {
                     Date = date
                     EmailAddress = emailAddress

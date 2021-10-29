@@ -41,7 +41,7 @@ module BookADeskReservationValidator =
         | [] ->
             return ()
         | _ ->
-            let userHadBookedBeforeParam : UserHadBookedBeforeParam =
+            let userHadBookedBeforeParam : UserBookingParam =
                 {
                     Date = date
                     EmailAddress = emailAddress

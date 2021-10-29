@@ -194,14 +194,14 @@ let ``GIVEN A Book-A-Desk Cancellation command with the user not already booked,
             OfficeId = office.Id
         } : CancelBookADesk
     
-    let userHasNotBookedBeforeParam : UserHasNotBookedBeforeParam =
+    let userBookingParam : UserBookingParam =
         {
             Date = DateTime.MaxValue
             EmailAddress = EmailAddress $"email@{domainName}"
         }
     
     let result = BookADeskCancellationValidator.validateCommand offices command emptyReservationAggregate domainName
-    result |> Helpers.shouldBeErrorAndEqualTo (ReservationError.UserHasNotBookedBefore userHasNotBookedBeforeParam |> Error)
+    result |> Helpers.shouldBeErrorAndEqualTo (ReservationError.UserHasNotBookedBefore userBookingParam |> Error)
     
 [<Fact>]
 let ``GIVEN A Book-A-Desk Cancellation command with the user booked on a different date, WHEN validating the command, THEN validation should fail.`` () =
@@ -227,14 +227,14 @@ let ``GIVEN A Book-A-Desk Cancellation command with the user booked on a differe
                             ]
         }
     
-    let userHasNotBookedBeforeParam : UserHasNotBookedBeforeParam =
+    let userBookingParam : UserBookingParam =
         {
             Date = cancelledDate
             EmailAddress = EmailAddress $"email@{domainName}"
         }
     
     let result = BookADeskCancellationValidator.validateCommand offices command bookedReservationAggregate domainName
-    result |> Helpers.shouldBeErrorAndEqualTo (ReservationError.UserHasNotBookedBefore userHasNotBookedBeforeParam |> Error)
+    result |> Helpers.shouldBeErrorAndEqualTo (ReservationError.UserHasNotBookedBefore userBookingParam |> Error)
     
 [<Fact>]
 let ``GIVEN A Book-A-Desk Cancellation command with the user booked in a different office, WHEN validating the command, THEN validation should fail.`` () =
@@ -260,11 +260,11 @@ let ``GIVEN A Book-A-Desk Cancellation command with the user booked in a differe
                             ]
         }
     
-    let userHasNotBookedBeforeParam : UserHasNotBookedBeforeParam =
+    let userBookingParam : UserBookingParam =
         {
             Date = DateTime.MaxValue
             EmailAddress = EmailAddress $"email@{domainName}"
         }
     
     let result = BookADeskCancellationValidator.validateCommand offices command bookedReservationAggregate domainName
-    result |> Helpers.shouldBeErrorAndEqualTo (ReservationError.UserHasNotBookedBefore userHasNotBookedBeforeParam |> Error)
+    result |> Helpers.shouldBeErrorAndEqualTo (ReservationError.UserHasNotBookedBefore userBookingParam |> Error)

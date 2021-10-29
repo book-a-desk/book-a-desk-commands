@@ -8,13 +8,7 @@ type GenericError =
     | GetEventsException of string
 
 
-type UserHadBookedBeforeParam =
-    {
-        Date: DateTime
-        EmailAddress: EmailAddress        
-    }
-
-type UserHasNotBookedBeforeParam =
+type UserBookingParam =
     {
         Date: DateTime
         EmailAddress: EmailAddress        
@@ -25,5 +19,5 @@ type ReservationError =
     | DateLowerThanToday
     | InvalidOfficeId
     | OfficeHasNoAvailability of DateTime
-    | UserHadBookedBefore of UserHadBookedBeforeParam
-    | UserHasNotBookedBefore of UserHasNotBookedBeforeParam
+    | UserHadBookedBefore of UserBookingParam
+    | UserHasNotBookedBefore of UserBookingParam

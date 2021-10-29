@@ -238,11 +238,11 @@ let ``GIVEN A Book-A-Desk Reservation command with the user already booked, WHEN
                             ]
         }
 
-    let userHadBookedBeforeParam : UserHadBookedBeforeParam =
+    let userBookingParam : UserBookingParam =
         {
             Date = bookedDate
             EmailAddress = EmailAddress emailAddress
         }
     
     let result = BookADeskReservationValidator.validateCommand offices command aReservationAggregate domainName
-    result |> Helpers.shouldBeErrorAndEqualTo (ReservationError.UserHadBookedBefore userHadBookedBeforeParam |> Error)
+    result |> Helpers.shouldBeErrorAndEqualTo (ReservationError.UserHadBookedBefore userBookingParam |> Error)
