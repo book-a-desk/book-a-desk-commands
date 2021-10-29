@@ -75,10 +75,11 @@ let configureDynamoDB (sp : ServiceProvider) =
     printfn $"OfficeTableName: {dynamoDBConfiguration.OfficeTableName}"
 
 let configureFeatureFlags (sp : ServiceProvider) =
+    let config = sp.GetService<IConfiguration>()
     {
-        BookingCancellation = Environment.GetEnvironmentVariable("BOOKING_CANCELLATION") |> bool.Parse
+        BookingCancellation = config.["FeatureFlags:BookingCancellation"] |> bool.Parse
     }
-
+        
 let configureEmailService (sp : ServiceProvider) =
     let config = sp.GetService<IConfiguration>()
     {
