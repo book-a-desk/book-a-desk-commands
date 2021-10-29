@@ -6,11 +6,15 @@ open Giraffe
 
 type FlagsHttpHandler =
     {
-        HandleFlags: unit -> HttpHandler
+        HandleGetAll: unit -> HttpHandler
     }
 
 module rec FlagsHttpHandler =
-    let handle next context = task {
-         let bookingCancellation = Environment.GetEnvironmentVariable("BOOKING_CANCELLATION") |> bool.Parse
-         return! Successful.OK bookingCancellation next context
+    let initialize getFeatureFlags =
+        {
+            HandleGetAll = fun () -> handleGetAll getFeatureFlags 
+        }
+    let handleGetAll getFeatureFlags = fun next context ->
+         task {
+             return! Successful.OK getFeatureFlags next context
      }
