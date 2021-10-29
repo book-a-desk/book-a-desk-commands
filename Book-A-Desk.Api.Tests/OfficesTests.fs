@@ -67,12 +67,12 @@ let ``GIVEN A Book-A-Desk server, WHEN getting the offices endpoint, THEN office
 let ``GIVEN A Book-A-Desk server, WHEN getting the office availability by date, THEN office availability is returned`` () = async {
     let date = DateTime(2100,02,01)
     let aBooking =
-        {
+        ({
             ReservationId = ReservationAggregate.Id
             Date = date
             EmailAddress = "anEmail" |> EmailAddress
             OfficeId = officeId |> OfficeId
-        } |> ReservationEvent.DeskBooked |> ReservationEvent
+        } : Reservation.Events.DeskBooked) |> ReservationEvent.DeskBooked |> ReservationEvent
     let mockGetOffices () = offices
 
     let mockProvideEventStore _ =

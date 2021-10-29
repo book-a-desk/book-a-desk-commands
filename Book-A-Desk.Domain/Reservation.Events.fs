@@ -5,15 +5,15 @@ open System
 open Book_A_Desk.Domain
 open Book_A_Desk.Domain.Reservation.Domain
 open Book_A_Desk.Domain.Office.Domain
-
-type DeskCancelled =
+type DeskBooked =
     {
         ReservationId: ReservationId
         Date: DateTime
         EmailAddress: EmailAddress
         OfficeId: OfficeId
     }
-type DeskBooked =
+
+type DeskCancelled =
     {
         ReservationId: ReservationId
         Date: DateTime
