@@ -32,6 +32,10 @@ module Routes =
                     route "/health"
                         >=> HealthHttpHandler.handle
                 ]
+                GET >=> choose [ 
+                    route "/flags"
+                        >=> FlagsHttpHandler.handle
+                ]
                 RequestErrors.NOT_FOUND "Not Found"
             ]
 

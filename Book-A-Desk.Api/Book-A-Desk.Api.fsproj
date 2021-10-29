@@ -13,6 +13,7 @@
     <Compile Include="OfficesHttpHandler.fs" />
     <Compile Include="HttpHandlers.Reservation.BookADeskErrorHandler.fs" />
     <Compile Include="BookingsHttpHandler.fs" />
+    <Compile Include="FlagsHttpHandler.fs" />
     <Compile Include="HealthHttpHandler.fs" />
     <Compile Include="HttpHandlers.fs" />
     <Compile Include="ApiDependencyFactory.fs" />
