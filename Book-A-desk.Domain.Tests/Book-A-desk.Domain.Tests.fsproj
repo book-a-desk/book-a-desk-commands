@@ -15,6 +15,7 @@
         <Compile Include="Reservation.Validator.Tests.fs" />
         <Compile Include="QueriesHandler.Offices.Tests.fs" />
         <Compile Include="Cancellation.Validator.Tests.fs" />
+        <Compile Include="Reservation.Aggregate.Tests.fs" />
     </ItemGroup>
 
     <ItemGroup>
