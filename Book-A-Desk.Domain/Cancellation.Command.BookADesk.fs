@@ -30,7 +30,6 @@ module BookADeskCancellationCommand =
             (validate cmd reservationAggregate)
             |> Result.map (execute cmd)
 
-
         {
             ExecuteWith = executeWith
         }
