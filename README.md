@@ -22,6 +22,28 @@ Running Book A Desk with a local dynamo db instance:
 This will start a local Book a Desk container listening to port 5000 and a dynamo db local instance listening on port 9000.
 
 ### One Time setup
+AWS Client configuration
+
+Create two new files with the aws developer configuration:
+- C:\Users\USERNAME\.aws\config
+```
+    [default]
+    region = your_aws_region
+```
+Note: us-east-2 is the region of book-a-desk.dev environment.
+
+- C:\Users\USERNAME\.aws\credentials
+
+```
+    [default]
+    aws_access_key_id = your_access_key_id
+    aws_secret_access_key = your_secret_access_key
+    aws_session_token= your_session_token
+```
+Note: Get credentials from book-a-desk.dev from `Command line or programmatic access` after validating your access here: https://broadsign-portal.awsapps.com/start#/
+
+Browse [this](https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/setup-credentials.html) page for more detail information about aws development configuration. It applies to different languages.
+
 After running `docker compose up`, you will need to create the tables required for Book a Desk by running these commands (requires aws cli):
 
     `aws dynamodb create-table --endpoint-url "http://localhost:9000" --table-name ReservationEvents --key-schema AttributeName=AggregateId,KeyType=HASH --attribute-definitions AttributeName=AggregateId,AttributeType=S --provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1`

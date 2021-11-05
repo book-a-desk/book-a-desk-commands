@@ -32,6 +32,12 @@ module Routes =
                     route "/health"
                         >=> HealthHttpHandler.handle
                 ]
+                GET >=> choose [ 
+                    route "/flags" >=> (
+                        apiDependencyFactory.CreateFeatureFlagsHttpHandler ()
+                        |> fun h -> h.HandleGetAll ()
+                    )
+                ]
                 RequestErrors.NOT_FOUND "Not Found"
             ]
 
