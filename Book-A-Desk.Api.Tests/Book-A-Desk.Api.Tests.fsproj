@@ -12,6 +12,7 @@
     <Compile Include="TestServer.fs" />
     <Compile Include="HttpRequest.fs" />
     <Compile Include="OfficesTests.fs" />
+    <Compile Include="FeatureFlagsTests.fs" />
     <Compile Include="BookingsTests.fs" />
     <Compile Include="BookingNotifierTests.fs" />
   </ItemGroup>

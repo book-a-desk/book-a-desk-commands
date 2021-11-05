@@ -53,6 +53,8 @@ let booking  =
 
 let url = sprintf "http://localhost:/bookings"
 
+let mockFeatureToggle = "True"
+
 [<Fact>]
 let ``GIVEN A Book-A-Desk server, WHEN booking a desk, THEN a desk is booked`` () = async {
     let mutable emailWasSent = false 
@@ -60,7 +62,7 @@ let ``GIVEN A Book-A-Desk server, WHEN booking a desk, THEN a desk is booked`` (
         emailWasSent <- true
         asyncResult { return () }
         
-    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification
+    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification mockFeatureToggle
     use httpClient = TestServer.createAndRun mockApiDependencyFactory
     
     let serializedBooking = JsonConvert.SerializeObject(booking)
@@ -81,7 +83,7 @@ let ``GIVEN A Book-A-Desk server, WHEN booking a desk, THEN an email notificatio
         emailWasSent <- true
         asyncResult { return () }
         
-    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification
+    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification mockFeatureToggle
     use httpClient = TestServer.createAndRun mockApiDependencyFactory
     
     let serializedBooking = JsonConvert.SerializeObject(booking)
@@ -98,7 +100,7 @@ let ``GIVEN an invalid reservation details WHEN booking a desk THEN it returns 4
         emailWasSent <- true
         asyncResult { return () }
         
-    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification
+    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification mockFeatureToggle
     use httpClient = TestServer.createAndRun mockApiDependencyFactory
     
     let bookingInvalidEmail  =
@@ -131,7 +133,7 @@ let ``GIVEN an reservation WHEN notifying success fails THEN it returns 500 And 
     let mockEmailNotification _ =
         Error error |> async.Return
 
-    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification
+    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification mockFeatureToggle
     use httpClient = TestServer.createAndRun mockApiDependencyFactory
 
     let serializedBooking = JsonConvert.SerializeObject(booking)
@@ -166,7 +168,7 @@ let ``GIVEN an reservation WHEN database service fails THEN it returns 500 And D
             AppendEvents = fun _ -> () |> async.Return
         } : DynamoDbEventStore
 
-    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification
+    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification mockFeatureToggle
     use httpClient = TestServer.createAndRun mockApiDependencyFactory
 
     let serializedBooking = JsonConvert.SerializeObject(booking)
