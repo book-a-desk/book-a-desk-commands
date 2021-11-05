@@ -1,41 +1,60 @@
 ﻿namespace Book_A_Desk.Api
 
+open FSharp.Control.Tasks.V2.ContextInsensitive
 open Giraffe
+open Microsoft.AspNetCore.Http
+open System.Threading.Tasks
 
 open Book_A_Desk.Api.Models
-open Microsoft.AspNetCore.Http
-open Okta.AspNetCore
 
 type Routes =
     {
         HttpHandlers: HttpHandler
     }
+    
+type TokenValidationResult =
+| ValidToken
+| InvalidToken of string
+    
 module Routes =
-    let private authorize : HttpHandler =
-        let apiKey = "some-secret-key-1234" // where do we get the key from?
+    let private failAuthorization message context =
+        let failHandler = (text message >=> setStatusCode 401)
+        failHandler earlyReturn context
+    
+    let private authorize
+        (validateToken : string -> Task<TokenValidationResult>)
+        : HttpHandler
+        = fun next (context : HttpContext) -> task {
+        
+        let bearerToken =
+            context.GetRequestHeader("Authorization")
+        
+        match bearerToken with
+        | Ok bearerToken ->            
+            let bearerToken = bearerToken.Replace("Bearer ", "")
+            
+            match! validateToken bearerToken with
+            | ValidToken ->
+                return! next context
+            | InvalidToken message ->
+                return! failAuthorization message context
+        | Error e ->
+            return! failAuthorization $"Could not get bearer token: {e}" context
+    }
 
-        let validateApiKey (ctx : HttpContext) =
-            match ctx.TryGetRequestHeader "X-API-Key" with
-            | Some key -> apiKey.Equals key
-            | None     -> false
-        let accessDenied   = setStatusCode 401 >=> text "Access Denied"
-        let requiresApiKey =
-            authorizeRequest validateApiKey accessDenied
-        requiresApiKey
-
-    let provide (apiDependencyFactory:ApiDependencyFactory) =
+    let provide (apiDependencyFactory:ApiDependencyFactory) validateToken =
         let httpHandlers : HttpHandler =
             choose [
                 GET >=> choose [
                     route "/offices" >=>
-                    authorize >=>
+                    (authorize validateToken) >=>
                     (
                         apiDependencyFactory.CreateOfficesHttpHandler ()
                         |> fun h -> h.HandleGetAll ()
                     )
                     routef "/offices/%O/availabilities" (
                         fun officeId ->
-                            authorize >=>
+                            (authorize validateToken) >=>
                             (
                                 apiDependencyFactory.CreateOfficesHttpHandler ()
                                 |> fun h -> (h.HandleGetByDate officeId)
@@ -43,7 +62,7 @@ module Routes =
                 ]
                 POST >=> choose [
                     route "/bookings" >=>
-                    authorize >=>
+                    (authorize validateToken) >=>
                     JsonBodyValidator.parseBody<Booking> (
                         apiDependencyFactory.CreateBookingsHttpHandler ()
                         |> fun h -> h.HandlePostWith

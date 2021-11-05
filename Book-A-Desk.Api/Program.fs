@@ -15,10 +15,24 @@ open Book_A_Desk.Api
 open Book_A_Desk.Domain.Office.Domain
 open Book_A_Desk.Infrastructure
 open Book_A_Desk.Domain.CommandHandler
+open Microsoft.IdentityModel.Protocols
+open Microsoft.IdentityModel.Protocols.OpenIdConnect
 open Microsoft.IdentityModel.Tokens
 open Okta.AspNetCore
  
 let useDevelopmentStorage = Environment.GetEnvironmentVariable("AWS_DEVELOPMENTSTORAGE") |> bool.Parse
+
+let getOktaIssuer oktaDomain = $"https://{oktaDomain}/oauth2/default"
+
+let mutable configurationManager = None
+let setConfigurationManager oktaIssuer =
+    configurationManager <-
+        ConfigurationManager<OpenIdConnectConfiguration>(
+            oktaIssuer + "/.well-known/oauth-authorization-server",
+            OpenIdConnectConfigurationRetriever(),
+            HttpDocumentRetriever())
+        |> Some
+    
 
 let configureCors (ctx : WebHostBuilderContext) (builder : CorsPolicyBuilder) =
     if ctx.HostingEnvironment.IsDevelopment() || useDevelopmentStorage then
@@ -48,7 +62,15 @@ let configureApp (ctx : WebHostBuilderContext) (app : IApplicationBuilder) =
     
     let apiDependencyFactory = ApiDependencyFactory.provide provideEventStore reservationCommandsFactory getAllOffices bookingNotifier.NotifySuccess
 
-    let routes = Routes.provide apiDependencyFactory
+    let oktaDomain = ctx.Configuration.["Okta:OktaDomain"]
+    let oktaIssuer = getOktaIssuer oktaDomain
+    setConfigurationManager oktaIssuer
+    let configurationManager = configurationManager.Value
+    let oktaAudience = ctx.Configuration.["Okta:OktaAudience"]
+    
+    let validateToken = JwtTokenValidator.validateToken configurationManager oktaIssuer oktaAudience
+    
+    let routes = Routes.provide apiDependencyFactory validateToken
     
     app.UseAuthentication()
        .UseAuthorization() |> ignore
@@ -105,25 +127,6 @@ let configureServices (services : IServiceCollection) =
                     options.DefaultAuthenticateScheme <- OktaDefaults.ApiAuthenticationScheme
                     options.DefaultChallengeScheme <- OktaDefaults.ApiAuthenticationScheme
                     options.DefaultSignInScheme <- OktaDefaults.ApiAuthenticationScheme)
-            .AddJwtBearer(fun options ->
-                options.IncludeErrorDetails <- true
-                options.RefreshOnIssuerKeyNotFound <- false
-                options.SaveToken <- true
-                options.TokenValidationParameters <- TokenValidationParameters(
-                    RequireExpirationTime = false,
-                    RequireSignedTokens = false,
-                    ValidateIssuer = true,
-                    ValidIssuer = config.["OrderBacklog:JWT:Issuer:Name"],
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey =
-                        SymmetricSecurityKey(Base64UrlEncoder.DecodeBytes(config.["OrderBacklog:JWT:Issuer:Key"])),
-                    ValidateLifetime = false,
-                    ClockSkew = TimeSpan.FromSeconds(10.0),
-                        
-                    ValidateAudience = true,
-                    ValidAudiences = config.GetValue<string>("OrderBacklog:JWT:Audiences", String.Empty).Split(','),
-                    SaveSigninToken = true
-                ))
             .AddOktaWebApi(oktaOptions)
             |> ignore
             

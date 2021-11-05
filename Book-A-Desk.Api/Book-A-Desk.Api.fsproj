@@ -21,6 +21,7 @@
     <Compile Include="EmailServiceConfiguration.fs" />
     <Compile Include="BookingNotifier.fs" />
     <Compile Include="SmtpClientManager.fs" />
+    <Compile Include="JwtTokenValidator.fs" />
     <Compile Include="Program.fs" />
     <Content Include="docs\bookADeskOpenAPISpecification.json" />
     <Content Include="..\Dockerfile">
@@ -38,6 +39,7 @@
     <PackageReference Include="FsToolkit.ErrorHandling" Version="2.5.0" />
     <PackageReference Include="Giraffe" Version="4.1.0" />
     <PackageReference Include="MailKit" Version="2.13.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="6.14.1" />
     <PackageReference Include="MimeKit" Version="2.13.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="Okta.AspNetCore" Version="3.5.1" />
