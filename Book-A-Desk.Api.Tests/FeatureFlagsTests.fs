@@ -2,6 +2,7 @@
 
 open System
 open System.Text.Json
+open Book_A_Desk.Domain.Cancellation.Commands
 open Xunit
 open Book_A_Desk.Api
 open Book_A_Desk.Domain.CommandHandler
@@ -36,6 +37,7 @@ let disabledFeatureFlag =
 let mockReservationCommandFactory : ReservationCommandsFactory =
     {
         CreateBookADeskCommand = fun () -> BookADeskReservationCommand.provide offices domainName
+        CreateCancelBookADeskCommand = fun () -> BookADeskCancellationCommand.provide offices domainName
     }
 
 [<Fact>]

@@ -3,13 +3,13 @@
 open System
 open System.Text.Json
 
-open Book_A_Desk.Domain.QueriesHandler
 open Xunit
 
 open Book_A_Desk.Api
 open Book_A_Desk.Domain
 open Book_A_Desk.Domain.CommandHandler
 open Book_A_Desk.Domain.Reservation.Commands
+open Book_A_Desk.Domain.Cancellation.Commands
 open Book_A_Desk.Domain.Events
 open Book_A_Desk.Domain.Office.Domain
 open Book_A_Desk.Domain.Reservation
@@ -35,6 +35,7 @@ let featureFlag = "True"
 let mockReservationCommandFactory : ReservationCommandsFactory =
     {
         CreateBookADeskCommand = fun () -> BookADeskReservationCommand.provide offices domainName
+        CreateCancelBookADeskCommand = fun () -> BookADeskCancellationCommand.provide offices domainName
     }
 
 [<Fact>]
@@ -69,12 +70,12 @@ let ``GIVEN A Book-A-Desk server, WHEN getting the offices endpoint, THEN office
 let ``GIVEN A Book-A-Desk server, WHEN getting the office availability by date, THEN office availability is returned`` () = async {
     let date = DateTime(2100,02,01)
     let aBooking =
-        {
+        ({
             ReservationId = ReservationAggregate.Id
             Date = date
             EmailAddress = "anEmail" |> EmailAddress
             OfficeId = officeId |> OfficeId
-        } |> ReservationEvent.DeskBooked |> ReservationEvent
+        } : Reservation.Events.DeskBooked) |> ReservationEvent.DeskBooked |> ReservationEvent
     let mockGetOffices () = offices
     let mockGetFeatureFlags = featureFlag
 

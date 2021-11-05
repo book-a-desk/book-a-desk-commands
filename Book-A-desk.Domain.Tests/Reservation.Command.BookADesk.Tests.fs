@@ -45,4 +45,4 @@ let ``GIVEN A Book-A-Desk Reservation command, WHEN executing the command and de
     match result with
     | Error _ -> Assert.False(true)
     | Ok events ->
-        Assert.True(events |> List.forall (function | DeskBooked _ -> true ))
+        Assert.True(events |> List.forall (function | DeskBooked _ -> true | DeskCancelled _ -> false))

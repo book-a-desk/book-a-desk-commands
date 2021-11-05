@@ -1,16 +1,18 @@
 namespace Book_A_Desk.Api
 
 open System
+open Giraffe
 open Microsoft.AspNetCore.Http
 
-open Book_A_Desk.Domain.Reservation
+open Book_A_Desk.Domain.Errors
 
 type BookADeskError =
     | InvalidEmailAddress
     | DateLowerThanToday
     | InvalidOfficeId
     | OfficeHasNoAvailability of DateTime
-    | UserHadBookedBefore of UserHadBookedBeforeParam
+    | UserHadBookedBefore of UserBookingParam
+    | UserHasNotBookedBefore of UserBookingParam
     | GenericError of string
 
 type ProblemDetailsDto =
@@ -40,7 +42,8 @@ module BookADeskErrorHandler =
             | ReservationError.DateLowerThanToday -> DateLowerThanToday
             | ReservationError.InvalidOfficeId -> InvalidOfficeId
             | ReservationError.OfficeHasNoAvailability date -> date |> OfficeHasNoAvailability
-            | ReservationError.UserHadBookedBefore userHadBookedBeforeParam -> userHadBookedBeforeParam |> UserHadBookedBefore
+            | ReservationError.UserHadBookedBefore userBookingParam -> userBookingParam |> UserHadBookedBefore
+            | ReservationError.UserHasNotBookedBefore userBookingParam -> userBookingParam |> UserHasNotBookedBefore
 
         let mapStringToAssignBookADeskError (description: string) = GenericError description
 
@@ -78,12 +81,20 @@ module BookADeskErrorHandler =
                                     Details = $"The office is booked out at {date.ToShortDateString()}"
                                 }
                     }
-            | UserHadBookedBefore (userHadBookedBeforeParam : UserHadBookedBeforeParam) ->
+            | UserHadBookedBefore (userBookingParam : UserBookingParam) ->
                     {
                         StatusCode = StatusCodes.Status400BadRequest
                         Error = {
                                     ProblemDetailsDto.Title = "User Had Booked Before"
-                                    Details = $"The office is already booked out at {userHadBookedBeforeParam.Date.ToShortDateString()} for user {userHadBookedBeforeParam.EmailAddress}"
+                                    Details = $"The office is already booked out at {userBookingParam.Date.ToShortDateString()} for user {userBookingParam.EmailAddress}"
+                                }
+                    }
+            | UserHasNotBookedBefore (userBookingParam : UserBookingParam) ->
+                    {
+                        StatusCode = StatusCodes.Status400BadRequest
+                        Error = {
+                                    ProblemDetailsDto.Title = "User Has Not Booked Before"
+                                    Details = $"The office is not booked at {userBookingParam.Date.ToShortDateString()} for user {userBookingParam.EmailAddress}"
                                 }
                     }
             | GenericError (description: string) ->

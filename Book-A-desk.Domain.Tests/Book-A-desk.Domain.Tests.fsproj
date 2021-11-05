@@ -11,8 +11,11 @@
         <Compile Include="Helpers.fs" />
         <Compile Include="DomainBuilders.fs" />
         <Compile Include="Reservation.Command.BookADesk.Tests.fs" />
+        <Compile Include="Cancellation.Command.BookADesk.Tests.fs" />
         <Compile Include="Reservation.Validator.Tests.fs" />
         <Compile Include="QueriesHandler.Offices.Tests.fs" />
+        <Compile Include="Cancellation.Validator.Tests.fs" />
+        <Compile Include="Reservation.Aggregate.Tests.fs" />
     </ItemGroup>
 
     <ItemGroup>
