@@ -110,18 +110,19 @@ let configureServices (services : IServiceCollection) =
                 options.RefreshOnIssuerKeyNotFound <- false
                 options.SaveToken <- true
                 options.TokenValidationParameters <- TokenValidationParameters(
-                    IssuerSigningKey =
-                        SymmetricSecurityKey(Base64UrlEncoder.DecodeBytes(config.["OrderBacklog:JWT:Issuer:Key"])),
-                    ValidateIssuerSigningKey = true,
+                    RequireExpirationTime = false,
+                    RequireSignedTokens = false,
                     ValidateIssuer = true,
                     ValidIssuer = config.["OrderBacklog:JWT:Issuer:Name"],
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey =
+                        SymmetricSecurityKey(Base64UrlEncoder.DecodeBytes(config.["OrderBacklog:JWT:Issuer:Key"])),
+                    ValidateLifetime = false,
+                    ClockSkew = TimeSpan.FromSeconds(10.0),
+                        
                     ValidateAudience = true,
                     ValidAudiences = config.GetValue<string>("OrderBacklog:JWT:Audiences", String.Empty).Split(','),
-                    ValidateLifetime = false,
-                    RequireSignedTokens = false,
-                    SaveSigninToken = true,
-                    RequireExpirationTime = false,
-                    ClockSkew = TimeSpan.FromSeconds(10.0)
+                    SaveSigninToken = true
                 ))
             .AddOktaWebApi(oktaOptions)
             |> ignore

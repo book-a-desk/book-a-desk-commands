@@ -3,6 +3,7 @@
 open Giraffe
 
 open Book_A_Desk.Api.Models
+open Microsoft.AspNetCore.Http
 open Okta.AspNetCore
 
 type Routes =
@@ -11,8 +12,17 @@ type Routes =
     }
 module Routes =
     let private authorize : HttpHandler =
-        requiresAuthentication (challenge OktaDefaults.ApiAuthenticationScheme)
-    
+        let apiKey = "some-secret-key-1234" // where do we get the key from?
+
+        let validateApiKey (ctx : HttpContext) =
+            match ctx.TryGetRequestHeader "X-API-Key" with
+            | Some key -> apiKey.Equals key
+            | None     -> false
+        let accessDenied   = setStatusCode 401 >=> text "Access Denied"
+        let requiresApiKey =
+            authorizeRequest validateApiKey accessDenied
+        requiresApiKey
+
     let provide (apiDependencyFactory:ApiDependencyFactory) =
         let httpHandlers : HttpHandler =
             choose [
