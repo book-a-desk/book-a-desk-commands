@@ -15,6 +15,8 @@ open Book_A_Desk.Api
 open Book_A_Desk.Domain.Office.Domain
 open Book_A_Desk.Infrastructure
 open Book_A_Desk.Domain.CommandHandler
+open Microsoft.IdentityModel.Tokens
+open Okta.AspNetCore
  
 let useDevelopmentStorage = Environment.GetEnvironmentVariable("AWS_DEVELOPMENTSTORAGE") |> bool.Parse
 
@@ -47,6 +49,10 @@ let configureApp (ctx : WebHostBuilderContext) (app : IApplicationBuilder) =
     let apiDependencyFactory = ApiDependencyFactory.provide provideEventStore reservationCommandsFactory getAllOffices bookingNotifier.NotifySuccess
 
     let routes = Routes.provide apiDependencyFactory
+    
+    app.UseAuthentication()
+       .UseAuthorization() |> ignore
+    
     app.UseCors(configureCors ctx)
        .UseGiraffe routes.HttpHandlers
            
@@ -88,8 +94,39 @@ let configureServices (services : IServiceCollection) =
     let serviceProvider = services.BuildServiceProvider()
     let config = serviceProvider.GetService<IConfiguration>()
     
+    let oktaDomain = config.["Okta:OktaDomain"]
+    let oktaOptions = OktaWebApiOptions()
+    oktaOptions.OktaDomain <- oktaDomain
+    
     services.AddGiraffe()
-            .AddCors() |> ignore
+            .AddCors()
+            .AddAuthentication(
+                fun options ->
+                    options.DefaultAuthenticateScheme <- OktaDefaults.ApiAuthenticationScheme
+                    options.DefaultChallengeScheme <- OktaDefaults.ApiAuthenticationScheme
+                    options.DefaultSignInScheme <- OktaDefaults.ApiAuthenticationScheme)
+            .AddJwtBearer(fun options ->
+                options.IncludeErrorDetails <- true
+                options.RefreshOnIssuerKeyNotFound <- false
+                options.SaveToken <- true
+                options.TokenValidationParameters <- TokenValidationParameters(
+                    IssuerSigningKey =
+                        SymmetricSecurityKey(Base64UrlEncoder.DecodeBytes(config.["OrderBacklog:JWT:Issuer:Key"])),
+                    ValidateIssuerSigningKey = true,
+                    ValidateIssuer = true,
+                    ValidIssuer = config.["OrderBacklog:JWT:Issuer:Name"],
+                    ValidateAudience = true,
+                    ValidAudiences = config.GetValue<string>("OrderBacklog:JWT:Audiences", String.Empty).Split(','),
+                    ValidateLifetime = false,
+                    RequireSignedTokens = false,
+                    SaveSigninToken = true,
+                    RequireExpirationTime = false,
+                    ClockSkew = TimeSpan.FromSeconds(10.0)
+                ))
+            .AddOktaWebApi(oktaOptions)
+            |> ignore
+            
+    services.AddAuthorization() |> ignore
             
     match useDevelopmentStorage with
     | false ->

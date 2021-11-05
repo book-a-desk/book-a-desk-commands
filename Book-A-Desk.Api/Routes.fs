@@ -3,27 +3,38 @@
 open Giraffe
 
 open Book_A_Desk.Api.Models
+open Okta.AspNetCore
 
 type Routes =
     {
         HttpHandlers: HttpHandler
     }
 module Routes =
+    let private authorize : HttpHandler =
+        requiresAuthentication (challenge OktaDefaults.ApiAuthenticationScheme)
+    
     let provide (apiDependencyFactory:ApiDependencyFactory) =
         let httpHandlers : HttpHandler =
             choose [
                 GET >=> choose [
-                    route "/offices" >=> (
+                    route "/offices" >=>
+                    authorize >=>
+                    (
                         apiDependencyFactory.CreateOfficesHttpHandler ()
                         |> fun h -> h.HandleGetAll ()
                     )
                     routef "/offices/%O/availabilities" (
-                        apiDependencyFactory.CreateOfficesHttpHandler ()
-                        |> fun h -> h.HandleGetByDate
-                    )
+                        fun officeId ->
+                            authorize >=>
+                            (
+                                apiDependencyFactory.CreateOfficesHttpHandler ()
+                                |> fun h -> (h.HandleGetByDate officeId)
+                            ))
                 ]
                 POST >=> choose [
-                    route "/bookings" >=> JsonBodyValidator.parseBody<Booking> (
+                    route "/bookings" >=>
+                    authorize >=>
+                    JsonBodyValidator.parseBody<Booking> (
                         apiDependencyFactory.CreateBookingsHttpHandler ()
                         |> fun h -> h.HandlePostWith
                     )
