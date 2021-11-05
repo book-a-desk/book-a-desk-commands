@@ -17,7 +17,7 @@ let mockValidateToken _ = ValidToken |> Task.FromResult
 
 let private configureApp apiDependencyFactory (app : IApplicationBuilder) =
     let routes = Routes.provide apiDependencyFactory mockValidateToken
-    app.UseGiraffe routes.HttpHandlers 
+    app.UseGiraffe routes.HttpHandlers
 
 let private configureServices (services : IServiceCollection) =
     let mockDynamoDb = new MockAmazonDynamoDB()

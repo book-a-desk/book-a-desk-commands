@@ -24,14 +24,11 @@ let useDevelopmentStorage = Environment.GetEnvironmentVariable("AWS_DEVELOPMENTS
 
 let getOktaIssuer oktaDomain = $"https://{oktaDomain}/oauth2/default"
 
-let mutable configurationManager = None
-let setConfigurationManager oktaIssuer =
-    configurationManager <-
-        ConfigurationManager<OpenIdConnectConfiguration>(
-            oktaIssuer + "/.well-known/oauth-authorization-server",
-            OpenIdConnectConfigurationRetriever(),
-            HttpDocumentRetriever())
-        |> Some
+let getConfigurationManager oktaIssuer =
+    ConfigurationManager<OpenIdConnectConfiguration>(
+        oktaIssuer + "/.well-known/oauth-authorization-server",
+        OpenIdConnectConfigurationRetriever(),
+        HttpDocumentRetriever())
     
 
 let configureCors (ctx : WebHostBuilderContext) (builder : CorsPolicyBuilder) =
@@ -64,8 +61,7 @@ let configureApp (ctx : WebHostBuilderContext) (app : IApplicationBuilder) =
 
     let oktaDomain = ctx.Configuration.["Okta:OktaDomain"]
     let oktaIssuer = getOktaIssuer oktaDomain
-    setConfigurationManager oktaIssuer
-    let configurationManager = configurationManager.Value
+    let configurationManager = getConfigurationManager oktaIssuer
     let oktaAudience = ctx.Configuration.["Okta:OktaAudience"]
     
     let validateToken = JwtTokenValidator.validateToken configurationManager oktaIssuer oktaAudience
