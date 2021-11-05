@@ -12,6 +12,13 @@ type BookADesk =
         EmailAddress: EmailAddress
         OfficeId: OfficeId
     }
+type CancelBookADesk =
+    {
+        Date: DateTime
+        EmailAddress: EmailAddress
+        OfficeId: OfficeId
+    }
 
 type ReservationCommand =
     | BookADesk of BookADesk
+    | CancelBookADesk of CancelBookADesk

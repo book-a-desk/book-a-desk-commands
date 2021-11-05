@@ -14,10 +14,13 @@
         <Compile Include="Domain.Events.fs" />
         <Compile Include="Reservation.Aggregate.fs" />
         <Compile Include="Reservation.Commands.fs" />
-        <Compile Include="Reservation.Validator.fs" />
-        <Compile Include="Reservation.Command.BookADesk.fs" />
         <Compile Include="Domain.Commands.fs" />
         <Compile Include="Domain.Errors.fs" />
+        <Compile Include="Validator.fs" />
+        <Compile Include="Reservation.Validator.fs" />
+        <Compile Include="Cancellation\Cancellation.Validator.fs" />
+        <Compile Include="Reservation.Command.BookADesk.fs" />
+        <Compile Include="Cancellation.Command.BookADesk.fs" />
         <Compile Include="QueriesHandler.Reservation.fs" />
         <Compile Include="CommandFactory.Reservation.fs" />
         <Compile Include="CommandHandler.Reservations.fs" />

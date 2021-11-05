@@ -33,6 +33,14 @@ module ReservationAggregate =
                    Date = event.Date
                 }
             { reservation with BookedDesks = booking :: reservation.BookedDesks }
+        | DeskCancelled event ->
+            let bookings =
+                reservation.BookedDesks
+                |> List.filter(fun bookedDesk -> bookedDesk.OfficeId <> event.OfficeId ||
+                                                    bookedDesk.EmailAddress <> event.EmailAddress ||
+                                                    bookedDesk.Date <> event.Date
+                               )
+            { reservation with BookedDesks = bookings }
 
 
     let getCurrentStateFrom events =

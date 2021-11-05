@@ -3,13 +3,13 @@
 open System
 open System.Text.Json
 
-open Book_A_Desk.Domain.QueriesHandler
 open Xunit
 
 open Book_A_Desk.Api
 open Book_A_Desk.Domain
 open Book_A_Desk.Domain.CommandHandler
 open Book_A_Desk.Domain.Reservation.Commands
+open Book_A_Desk.Domain.Cancellation.Commands
 open Book_A_Desk.Domain.Events
 open Book_A_Desk.Domain.Office.Domain
 open Book_A_Desk.Domain.Reservation
@@ -29,10 +29,13 @@ let mockOffice =
 
 let offices =
     mockOffice |> List.singleton
+    
+let featureFlag = "True"
 
 let mockReservationCommandFactory : ReservationCommandsFactory =
     {
         CreateBookADeskCommand = fun () -> BookADeskReservationCommand.provide offices domainName
+        CreateCancelBookADeskCommand = fun () -> BookADeskCancellationCommand.provide offices domainName
     }
 
 [<Fact>]
@@ -44,8 +47,9 @@ let ``GIVEN A Book-A-Desk server, WHEN getting the offices endpoint, THEN office
         } : DynamoDbEventStore.DynamoDbEventStore
     let mockEmailNotification booking = async { return Ok () }
     let mockGetOffices () = offices
+    let mockGetFeatureFlags = featureFlag
     
-    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification
+    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification mockGetFeatureFlags
     use httpClient = TestServer.createAndRun mockApiDependencyFactory
     let! result = HttpRequest.getAsyncGetContent httpClient "http://localhost/offices"
 
@@ -66,13 +70,14 @@ let ``GIVEN A Book-A-Desk server, WHEN getting the offices endpoint, THEN office
 let ``GIVEN A Book-A-Desk server, WHEN getting the office availability by date, THEN office availability is returned`` () = async {
     let date = DateTime(2100,02,01)
     let aBooking =
-        {
+        ({
             ReservationId = ReservationAggregate.Id
             Date = date
             EmailAddress = "anEmail" |> EmailAddress
             OfficeId = officeId |> OfficeId
-        } |> ReservationEvent.DeskBooked |> ReservationEvent
+        } : Reservation.Events.DeskBooked) |> ReservationEvent.DeskBooked |> ReservationEvent
     let mockGetOffices () = offices
+    let mockGetFeatureFlags = featureFlag
 
     let mockProvideEventStore _ =
         {
@@ -81,7 +86,7 @@ let ``GIVEN A Book-A-Desk server, WHEN getting the office availability by date, 
         } : DynamoDbEventStore.DynamoDbEventStore
         
     let mockEmailNotification _ = async { return Ok () }  
-    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification
+    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification mockGetFeatureFlags
     use httpClient = TestServer.createAndRun mockApiDependencyFactory
 
     let! result = HttpRequest.getAsyncGetContent httpClient $"http://localhost/offices/{officeId.ToString()}/availabilities?date={date.ToString()}"

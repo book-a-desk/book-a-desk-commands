@@ -1,5 +1,7 @@
 namespace Book_A_Desk.Domain.CommandHandler
 
+open Book_A_Desk.Domain.Cancellation.Commands
+open Book_A_Desk.Domain.Errors
 open Book_A_Desk.Domain.Events
 open Book_A_Desk.Domain.Reservation
 open Book_A_Desk.Domain.Reservation.Domain
@@ -23,6 +25,9 @@ module ReservationsCommandHandler =
             match command with
             | BookADesk command ->
                 let commandExecutor = reservationCommandsFactory.CreateBookADeskCommand ()
+                run commandExecutor.ExecuteWith command ReservationAggregate.Id
+            | CancelBookADesk command ->
+                let commandExecutor = reservationCommandsFactory.CreateCancelBookADeskCommand ()
                 run commandExecutor.ExecuteWith command ReservationAggregate.Id
 
        {

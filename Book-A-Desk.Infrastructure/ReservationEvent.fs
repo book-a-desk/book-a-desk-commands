@@ -5,6 +5,7 @@ open FSharp.AWS.DynamoDB
 
 type ReservationType =
     | DeskBooked
+    | DeskCancelled
 
 type ReservationEvent =
     {
@@ -15,6 +16,13 @@ type ReservationEvent =
     }
     
 type DeskBooked =
+    {
+        Date: DateTime
+        EmailAddress: string
+        OfficeId: Guid
+    }
+    
+type DeskCancelled =
     {
         Date: DateTime
         EmailAddress: string

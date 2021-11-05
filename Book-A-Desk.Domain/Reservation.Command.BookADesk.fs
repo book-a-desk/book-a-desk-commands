@@ -1,5 +1,6 @@
 namespace Book_A_Desk.Domain.Reservation.Commands
 
+open Book_A_Desk.Domain.Errors
 open Book_A_Desk.Domain.Reservation
 open Book_A_Desk.Domain.Reservation.Events
 
@@ -10,7 +11,7 @@ type BookADeskReservationCommand =
 
 module BookADeskReservationCommand =
     let provide offices domainName =
-        let validate (command:BookADesk) reservationAggregate  =
+        let validate (command:BookADesk) reservationAggregate =
              BookADeskReservationValidator.validateCommand offices command reservationAggregate domainName
 
         let execute (command:BookADesk) reservationAggregate =
