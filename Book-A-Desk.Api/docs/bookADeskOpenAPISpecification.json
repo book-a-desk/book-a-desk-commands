@@ -55,6 +55,51 @@
         "x-codegen-request-body-name": "body"
       }
     },
+    "/cancelBookings": {
+      "post": {
+        "tags": [
+          "booking"
+        ],
+        "summary": "Cancel a booking",
+        "operationId": "cancelBooking",
+        "requestBody": {
+          "description": "Booking object that needs to be cancelled",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InputBooking"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Invalid input",
+            "content": {}
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Booking"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "book-a-desk_auth": [
+              "write:bookings",
+              "read:bookings"
+            ]
+          }
+        ],
+        "x-codegen-request-body-name": "body"
+      }
+    },
     "/offices": {
       "get": {
         "tags": [
