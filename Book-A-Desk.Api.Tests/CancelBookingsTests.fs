@@ -1,12 +1,5 @@
 module Book_A_Desk.Api.Tests.CancelBookingsTests
 
-open System.Collections.Generic
-open Book_A_Desk.Domain
-open Book_A_Desk.Domain.Cancellation.Commands
-open Book_A_Desk.Domain.Events
-open Book_A_Desk.Domain.Reservation
-open Book_A_Desk.Domain.Reservation.Domain
-open Book_A_Desk.Domain.Reservation.Events
 open FsToolkit.ErrorHandling
 open System.Net
 open Newtonsoft.Json
@@ -15,16 +8,16 @@ open Xunit
 
 open Book_A_Desk.Api
 open Book_A_Desk.Api.Models
+open Book_A_Desk.Domain
+open Book_A_Desk.Domain.Cancellation.Commands
 open Book_A_Desk.Domain.CommandHandler
+open Book_A_Desk.Domain.Events
+open Book_A_Desk.Domain.Reservation
 open Book_A_Desk.Domain.Reservation.Commands
+open Book_A_Desk.Domain.Reservation.Domain
+open Book_A_Desk.Domain.Reservation.Events
 open Book_A_Desk.Domain.Office.Domain
 open Book_A_Desk.Infrastructure.DynamoDbEventStore
-
-let mockProvideEventStore _ =
-    {
-        GetEvents = fun _ -> Seq.empty |> Ok |> async.Return
-        AppendEvents = fun _ -> () |> async.Return
-    } : DynamoDbEventStore
 
 let mockOfficeId =  Guid.NewGuid ()
 
