@@ -21,7 +21,7 @@ open Book_A_Desk.Infrastructure.DynamoDbEventStore
 
 type CancelBookingsHttpHandler =
     {
-        HandlePostWith: Models.Booking -> HttpHandler
+        HandlePostWith: Models.Cancellation -> HttpHandler
     }
 
 module CancelBookingsHttpHandler =
@@ -71,11 +71,7 @@ module CancelBookingsHttpHandler =
                 match result with
                 | Ok _ ->
                     let output =
-                        {
-                            Office = { Id = cancelBooking.Office.Id }
-                            Date = cancelBooking.Date
-                            User = { Email = cancelBooking.User.Email }
-                        }
+                        "Booking have been cancelled"
                     
                     return! json output next context
                 | Error (response: ResponseError) ->

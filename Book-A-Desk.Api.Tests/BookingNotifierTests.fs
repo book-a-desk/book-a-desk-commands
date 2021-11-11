@@ -38,7 +38,7 @@ let ``GIVEN A booking WHEN calling to SendEmailNotification THEN SendAsync metho
     
     let mockBooking =
         {
-            Office = mockedOfficeReference
+            Booking.Office = mockedOfficeReference
             Date = date
             User = mockedUser
         }

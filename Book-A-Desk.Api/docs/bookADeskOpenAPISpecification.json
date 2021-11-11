@@ -67,7 +67,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/InputBooking"
+                "$ref": "#/components/schemas/InputCancellation"
               }
             }
           },
@@ -80,13 +80,7 @@
           },
           "200": {
             "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Booking"
-                }
-              }
-            }
+            "content": "Booking has been cancelled."
           }
         },
         "security": [
@@ -211,7 +205,47 @@
           }
         }
       },
+      "InputCancellation": {
+        "required": [
+          "office",
+          "date",
+          "user"
+        ],
+        "type": "object",
+        "properties": {
+          "office": {
+            "$ref": "#/components/schemas/OfficeReference"
+          },
+          "date" : {
+            "type": "string",
+            "format": "date"
+          },
+          "user" : {
+            "$ref": "#/components/schemas/UserReference"
+          }
+        }
+      },
       "Booking": {
+        "required": [
+          "office",
+          "date",
+          "user"
+        ],
+        "type": "object",
+        "properties": {
+          "office": {
+            "$ref": "#/components/schemas/OfficeReference"
+          },
+          "date" : {
+            "type": "string",
+            "format": "date"
+          },
+          "user" : {
+            "$ref": "#/components/schemas/UserReference"
+          }
+        }
+      },
+      "Cancellation": {
         "required": [
           "office",
           "date",

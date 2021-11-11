@@ -39,7 +39,7 @@ module Routes =
                     )
                 ]
                 POST >=> choose [
-                    route "/cancelBookings" >=> JsonBodyValidator.parseBody<Booking> (
+                    route "/cancelBookings" >=> JsonBodyValidator.parseBody<Cancellation> (
                         apiDependencyFactory.CreateCancelBookingsHttpHandler ()
                         |> fun h -> h.HandlePostWith
                         )

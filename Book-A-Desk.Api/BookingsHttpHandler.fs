@@ -25,7 +25,7 @@ type BookingsHttpHandler =
     }
 
 module BookingsHttpHandler =
-    let private notifyBooking output booking notifySuccess errorHandler next context =
+    let private notifyBooking output (booking : Models.Booking) notifySuccess errorHandler next context =
         task {
             let! sent = notifySuccess booking
             match sent with
@@ -72,7 +72,7 @@ module BookingsHttpHandler =
         (notifySuccess: Models.Booking-> Async<Result<unit, string>>)
         (errorHandler: BookADeskErrorHandler) =
 
-        let handlePostWith booking = fun next (context : HttpContext) ->
+        let handlePostWith (booking : Models.Booking) = fun next (context : HttpContext) ->
             task {
                 let cmd =
                     {
@@ -89,7 +89,7 @@ module BookingsHttpHandler =
                 | Ok _ ->
                     let output =
                         {
-                            Office = { Id = booking.Office.Id }
+                            Booking.Office = { Id = booking.Office.Id }
                             Date = booking.Date
                             User = { Email = booking.User.Email }
                         }
