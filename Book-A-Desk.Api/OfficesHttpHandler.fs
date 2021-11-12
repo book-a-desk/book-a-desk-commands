@@ -1,6 +1,7 @@
 namespace Book_A_Desk.Api
 
 open Amazon.DynamoDBv2
+open Book_A_Desk.Api.Models
 open Book_A_Desk.Domain.Reservation
 open Book_A_Desk.Domain.Reservation.Domain
 open Book_A_Desk.Infrastructure.DynamoDbEventStore
