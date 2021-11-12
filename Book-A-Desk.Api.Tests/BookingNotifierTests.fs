@@ -1,6 +1,7 @@
 module Book_A_Desk.Api.Tests.BookingNotifierTests
 
 open System
+open System.Threading.Tasks
 open Book_A_Desk.Api
 open Book_A_Desk.Api.Models
 open Book_A_Desk.Domain.Office.Domain
@@ -62,7 +63,7 @@ let ``GIVEN A booking WHEN calling to SendEmailNotification THEN SendAsync metho
                              .Setup(fun x -> <@ x.Connect(any(), any()) @>).Returns(())
                              .Setup(fun x -> <@ x.Disconnect(any(), any()) @>).Returns(())
                              .Setup(fun x -> <@ x.Authenticate(mockEmailConfig.SmtpUsername, mockEmailConfig.SmtpPassword) @>).Returns(())
-                             .Setup(fun x -> <@ x.SendAsync(any()) @>).Returns(task {sendWasCalled <- true})
+                             .Setup(fun x -> <@ x.SendAsync(any()) @>).ReturnsFunc(fun () -> Task.Run(fun () -> sendWasCalled <- true))
                              .Create()
                              
     let bookingNotifier = BookingNotifier.provide mockEmailServiceConfiguration mockSmtpClient mockGetOffices       
