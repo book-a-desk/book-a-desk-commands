@@ -12,6 +12,7 @@ open Book_A_Desk.Domain.QueriesHandler
 type BookingNotifier =
     {
         NotifySuccess: Booking -> Async<Result<unit, string>>
+        NotifyOfficeRestrictionToBooking: Booking -> Async<Result<unit, string>>
     }
     
 type EmailNotificationDetails =
@@ -35,7 +36,27 @@ module rec BookingNotifier =
                 | true -> return ()
                 | false -> return! Error "Could not send email message"
             }
-                                
+        
+        let sendOfficeRestrictionNotification (booking: Booking) = asyncResult {
+                let config = getEmailServiceConfiguration()
+                let! office = getOffice booking.Office.Id getOffices
+                let mailText = createOfficeRestriction office
+                let (CityName officeName) = office.City
+                   
+                let emailNotificationDetails =
+                    {
+                        From = config.EmailSender
+                        To = booking.User.Email
+                        EmailReviewer = String.Empty
+                        Subject = $"Book-A-Desk Office %s{officeName} Restrictions"
+                        Text = mailText                          
+                    }
+                
+                let mailMessage = createEmailMessage emailNotificationDetails
+                
+                return! sendEmail config mailMessage
+            }
+        
         let sendEmailNotification (booking: Booking) = asyncResult {
                 let config = getEmailServiceConfiguration()
                 let! office = getOffice booking.Office.Id getOffices
@@ -55,6 +76,7 @@ module rec BookingNotifier =
             }
         {            
             NotifySuccess = sendEmailNotification
+            NotifyOfficeRestrictionToBooking = sendOfficeRestrictionNotification
         }
         
     let createEmailMessage emailNotificationDetails =
@@ -78,6 +100,10 @@ module rec BookingNotifier =
             $"You have booked a desk at %s{bookingDate.ToShortDateString()} in the Office %s{officeName}{Environment.NewLine}" +
             $"{office.OpeningHoursText}{Environment.NewLine}It is your responsibility to verify that the office is open for the date" +
             "That you have booked"
+    
+    let createOfficeRestriction (office : Office) =
+            let (CityName officeName) = office.City
+            "We inform you that the office has some restrictions."
             
     let getOffice officeId getOffices : Result<_,_> = result {
         let! officeId =

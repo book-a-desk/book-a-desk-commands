@@ -25,8 +25,7 @@ let mockedOfficeReference =
     {
         Id = officeId.ToString()
     }
-let offices =
-    mockOffice |> List.singleton
+let offices = mockOffice |> List.singleton
 let mockGetOffices () = offices
 
 let date = DateTime(2021,02,01)
@@ -96,9 +95,9 @@ let ``GIVEN a booking for the following day WHEN Office opening time happens THE
 
     let getBookings _ = Ok [mockBooking]
 
-    let officeRestrictionWorker = OfficeRestrictionNotifier.provide bookingNotifier mockProvideEventStore mockGetOffices
+    let officeRestrictionNotifier = OfficeRestrictionNotifier.provide bookingNotifier mockProvideEventStore mockGetOffices
 
-    let! result = officeRestrictionWorker.Execute date
+    let! result = officeRestrictionNotifier.Execute date
 
     let isOk = match result with | Ok _ -> true | _ -> false
     Assert.True(isOk)

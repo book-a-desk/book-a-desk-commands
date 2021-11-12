@@ -9,7 +9,6 @@ open FsToolkit.ErrorHandling
 open Giraffe
 open System
 
-open Book_A_Desk.Api.Models
 open Book_A_Desk.Domain.Office.Domain
 open Book_A_Desk.Domain.Office.Queries
 open Book_A_Desk.Domain.Reservation.Queries
@@ -19,7 +18,6 @@ type OfficesHttpHandler =
     {
         HandleGetAll: unit -> HttpHandler
         HandleGetByDate: Guid -> HttpHandler
-        HandleGetByDateFromEventStore: DynamoDbEventStore -> DateTime -> Guid -> Async<Result<OfficeAvailability, string>>
     }
 
 module rec OfficesHttpHandler =
@@ -27,7 +25,6 @@ module rec OfficesHttpHandler =
         {
             HandleGetAll = fun () -> handleGet getOffices
             HandleGetByDate = handleGetByDate eventStore getOffices
-            HandleGetByDateFromEventStore = handleGetByDateFromEventStore getOffices
         }
 
     let handleGet getOffices = fun next context ->
@@ -66,7 +63,7 @@ module rec OfficesHttpHandler =
                 return! text "Date could not be parsed" next context
             | Some date ->
                 let eventStore = provideEventStore (context.GetService<IAmazonDynamoDB>())
-                let! result = handleGetByDateFromEventStore getOffices eventStore date officeId
+                let! result = handleGetByDateFromEventStore eventStore getOffices date officeId
                 
                 match result with
                 | Ok officeAvailability ->
@@ -84,7 +81,7 @@ module rec OfficesHttpHandler =
                     return! text ("Internal Error: " + e) next context
         }
         
-    let handleGetByDateFromEventStore getOffices eventStore date officeId = asyncResult {
+    let private handleGetByDateFromEventStore eventStore getOffices date officeId = asyncResult {
         let (ReservationId aggregateId) = ReservationAggregate.Id
         let! bookingEvents = eventStore.GetEvents aggregateId
         let getBookingsForDate = ReservationsQueriesHandler.get bookingEvents
