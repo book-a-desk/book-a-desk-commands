@@ -11,7 +11,6 @@ open FsToolkit.ErrorHandling
 open MailKit.Net.Smtp
 open Xunit
 
-
 open Book_A_Desk.Domain
 open Book_A_Desk.Domain.Events
 open Book_A_Desk.Domain.Reservation
@@ -35,7 +34,7 @@ let mockedOfficeReference =
 let offices = mockOffice |> List.singleton
 let mockGetOffices () = offices
 
-let date = DateTime(2021,02,01)
+let date = DateTime(2021, 02, 01)
 
 let mockedUser =
     {
@@ -83,7 +82,6 @@ let mockProvideEventStoreWithBooking =
         
 [<Fact>]
 let ``GIVEN a booking for the following day WHEN Office opening time happens THEN an email with office restrictions is sent to bookings email account `` () = async {
-    // Mock SmtpClient using Foq
     let mutable sendWasCalled = false
     let mockSmtpClient = Mock<SmtpClient>()
                              .Setup(fun x -> <@ x.Connect(any(), any()) @>).Returns(())
@@ -102,7 +100,6 @@ let ``GIVEN a booking for the following day WHEN Office opening time happens THE
 
 [<Fact>]
 let ``GIVEN no bookings for the following day WHEN Office opening time happens THEN no email is sent`` () = async {
-    // Mock SmtpClient using Foq
     let mutable sendWasCalled = false
     let mockSmtpClient = Mock<SmtpClient>()
                              .Setup(fun x -> <@ x.Connect(any(), any()) @>).Returns(())
