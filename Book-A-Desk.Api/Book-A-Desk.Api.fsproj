@@ -21,6 +21,7 @@
     <Compile Include="DynamoDB.fs" />
     <Compile Include="EmailServiceConfiguration.fs" />
     <Compile Include="BookingNotifier.fs" />
+    <Compile Include="OfficeRestrictionNotifier.fs" />
     <Compile Include="SmtpClientManager.fs" />
     <Compile Include="FeatureFlags.fs" />
     <Compile Include="Program.fs" />

@@ -47,6 +47,8 @@ let configureApp (ctx : WebHostBuilderContext) (app : IApplicationBuilder) =
     
     let apiDependencyFactory = ApiDependencyFactory.provide provideEventStore reservationCommandsFactory getAllOffices bookingNotifier.NotifySuccess getFeatureFlagsServiceConfiguration
 
+    let officeRestrictionNotifier = OfficeRestrictionNotifier.provide apiDependencyFactory provideEventStore getAllOffices
+
     let routes = Routes.provide apiDependencyFactory
     app.UseCors(configureCors ctx)
        .UseGiraffe routes.HttpHandlers
