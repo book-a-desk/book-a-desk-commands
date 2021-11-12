@@ -85,8 +85,9 @@ module rec BookingNotifier =
         |> mailMessage.From.Add            
         MailboxAddress.Parse(emailNotificationDetails.To)
         |> mailMessage.To.Add
-        MailboxAddress.Parse(emailNotificationDetails.EmailReviewer)
-        |> mailMessage.Cc.Add
+        if emailNotificationDetails.EmailReviewer <> String.Empty then
+            MailboxAddress.Parse(emailNotificationDetails.EmailReviewer)
+            |> mailMessage.Cc.Add
         
         mailMessage.Subject <- emailNotificationDetails.Subject
         let bodyPart = TextPart("plain")
