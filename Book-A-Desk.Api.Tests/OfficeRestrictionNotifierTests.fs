@@ -4,7 +4,6 @@ open System
 open Book_A_Desk.Api
 open Book_A_Desk.Api.Models
 open Book_A_Desk.Domain.Office.Domain
-open Book_A_Desk.Domain.Reservation
 open Book_A_Desk.Infrastructure.DynamoDbEventStore
 open FSharp.Control.Tasks
 open Foq

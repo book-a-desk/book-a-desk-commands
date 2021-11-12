@@ -17,7 +17,7 @@ type OfficeRestrictionNotifier =
     }
 
 module rec OfficeRestrictionNotifier =
-    let provide (notifyRestriction: Booking -> Async<Result<unit, string>>) eventStore (getOffices: unit -> Office list) =
+    let provide (notifyRestriction: Models.Booking -> Async<Result<unit, string>>) eventStore (getOffices: unit -> Office list) =
         
         let notifyRestrictionForBooking (notifyRestriction: Models.Booking -> Async<Result<unit,string>>) (booking:Models.Booking) = task {
             let! sent = notifyRestriction booking
@@ -41,7 +41,7 @@ module rec OfficeRestrictionNotifier =
                 bookings
                 |> List.filter(fun (booking: Booking) -> booking.OfficeId.Equals(officeId))
                 |> List.map(fun (booking:Booking) -> Booking.value officeId booking.Date booking.EmailAddress)
-                |> List.iter (fun (booking: Models.Booking) ->  notifyRestrictionForBooking notifyRestriction booking |> Async.AwaitTask |> Async.RunSynchronously)
+                |> List.iter (fun (booking: Models.Booking) ->  notifyRestrictionForBooking notifyRestriction (booking:Models.Booking) |> Async.AwaitTask |> Async.RunSynchronously)
             | Error e ->
                 printfn $"Internal Error: %s{e}"
         }
