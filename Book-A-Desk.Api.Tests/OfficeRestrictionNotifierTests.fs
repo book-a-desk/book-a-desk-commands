@@ -52,7 +52,7 @@ let aBooking =
         ({
             ReservationId = ReservationAggregate.Id
             Date = date
-            EmailAddress = "anEmail" |> EmailAddress
+            EmailAddress = "booking.user@domain.com" |> EmailAddress
             OfficeId = officeId |> OfficeId
         } : Reservation.Events.DeskBooked) |> ReservationEvent.DeskBooked |> ReservationEvent
 

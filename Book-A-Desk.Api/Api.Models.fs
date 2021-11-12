@@ -28,12 +28,20 @@ type Booking =
         User: UserReference
     }
 module Booking =
+    
+    let private officeIdValue (OfficeId e) = e
+    
+    let private emailAddressValue (EmailAddress e) = e
+    
     let value (officeId:OfficeId) (date: DateTime) (email:EmailAddress) =
         {
-            Office = { Id = officeId.ToString() }
+            Office = { Id = officeId |> officeIdValue |> string }
             Date = date
-            User = { Email = email.ToString() }
+            User = { Email = email |> emailAddressValue }
         }
+        
+    
+    
 type OpeningHours =
     {
         Text: string
