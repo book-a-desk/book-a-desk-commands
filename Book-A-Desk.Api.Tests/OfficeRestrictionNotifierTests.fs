@@ -60,12 +60,6 @@ let mockProvideEventStore =
         AppendEvents = fun _ -> () |> async.Return
     } : DynamoDbEventStore
 
-let mockBookingNotifier =
-    {
-        NotifySuccess = fun _ ->  () |> Ok |> async.Return
-        NotifyOfficeRestrictionToBooking = fun (booking : Models.Booking) ->  () |> Ok |> async.Return
-    } : BookingNotifier
-
 [<Fact>]
 let ``GIVEN a booking for the following day WHEN Office opening time happens THEN an email with office restrictions is sent to bookings email account `` () = async {
     // Mock SmtpClient using Foq
@@ -77,9 +71,9 @@ let ``GIVEN a booking for the following day WHEN Office opening time happens THE
                              .Setup(fun x -> <@ x.SendAsync(any()) @>).Returns(task {sendWasCalled <- true})
                              .Create()
 
-    let getBookings _ = Ok [mockBooking]
+    let bookingNotifier = BookingNotifier.provide mockEmailServiceConfiguration mockSmtpClient mockGetOffices
 
-    let officeRestrictionNotifier = OfficeRestrictionNotifier.provide mockBookingNotifier.NotifyOfficeRestrictionToBooking mockProvideEventStore mockGetOffices
+    let officeRestrictionNotifier = OfficeRestrictionNotifier.provide bookingNotifier.NotifyOfficeRestrictionToBooking mockProvideEventStore mockGetOffices
 
     officeRestrictionNotifier.Execute date |> Async.RunSynchronously
     Assert.True(sendWasCalled)
@@ -95,12 +89,9 @@ let ``GIVEN no bookings for the following day WHEN Office opening time happens T
                              .Setup(fun x -> <@ x.Authenticate(mockEmailConfig.SmtpUsername, mockEmailConfig.SmtpPassword) @>).Returns(())
                              .Setup(fun x -> <@ x.SendAsync(any()) @>).Returns(task {sendWasCalled <- true})
                              .Create()
-
     let bookingNotifier = BookingNotifier.provide mockEmailServiceConfiguration mockSmtpClient mockGetOffices
 
-    let getBookings _ = Ok []
-
-    let officeRestrictionNotifier = OfficeRestrictionNotifier.provide mockBookingNotifier.NotifyOfficeRestrictionToBooking mockProvideEventStore mockGetOffices
+    let officeRestrictionNotifier = OfficeRestrictionNotifier.provide bookingNotifier.NotifyOfficeRestrictionToBooking mockProvideEventStore mockGetOffices
 
     officeRestrictionNotifier.Execute date |> Async.RunSynchronously
     Assert.False(sendWasCalled)
