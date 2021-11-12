@@ -1,6 +1,8 @@
 ﻿namespace Book_A_Desk.Api.Models
 
 open System
+open Book_A_Desk.Domain
+open Book_A_Desk.Domain.Office.Domain
 
 type UserReference =
     {
@@ -25,7 +27,13 @@ type Booking =
         Date: DateTime
         User: UserReference
     }
-    
+module Booking =
+    let value (officeId:OfficeId) (date: DateTime) (email:EmailAddress) =
+        {
+            Office = { Id = officeId.ToString() }
+            Date = date
+            User = { Email = email.ToString() }
+        }
 type OpeningHours =
     {
         Text: string

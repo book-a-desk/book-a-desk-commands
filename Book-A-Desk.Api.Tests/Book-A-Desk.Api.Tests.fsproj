@@ -15,6 +15,7 @@
     <Compile Include="FeatureFlagsTests.fs" />
     <Compile Include="BookingsTests.fs" />
     <Compile Include="BookingNotifierTests.fs" />
+    <Compile Include="OfficeRestrictionNotifierTests.fs" />
   </ItemGroup>
 
   <ItemGroup>

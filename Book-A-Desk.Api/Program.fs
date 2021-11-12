@@ -47,7 +47,8 @@ let configureApp (ctx : WebHostBuilderContext) (app : IApplicationBuilder) =
     
     let apiDependencyFactory = ApiDependencyFactory.provide provideEventStore reservationCommandsFactory getAllOffices bookingNotifier.NotifySuccess getFeatureFlagsServiceConfiguration
 
-    let officeRestrictionNotifier = OfficeRestrictionNotifier.provide bookingNotifier.NotifyOfficeRestrictionToBooking provideEventStore getAllOffices
+    let eventStore = provideEventStore (app.ApplicationServices.GetService<IAmazonDynamoDB>())
+    let officeRestrictionNotifier = OfficeRestrictionNotifier.provide bookingNotifier.NotifyOfficeRestrictionToBooking eventStore getAllOffices
 
     let routes = Routes.provide apiDependencyFactory
     app.UseCors(configureCors ctx)
