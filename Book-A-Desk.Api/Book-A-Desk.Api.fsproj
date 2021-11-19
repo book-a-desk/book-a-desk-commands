@@ -15,6 +15,7 @@
     <Compile Include="BookingsHttpHandler.fs" />
     <Compile Include="FlagsHttpHandler.fs" />
     <Compile Include="HealthHttpHandler.fs" />
+    <Compile Include="CancelBookingsHttpHandler.fs" />
     <Compile Include="HttpHandlers.fs" />
     <Compile Include="ApiDependencyFactory.fs" />
     <Compile Include="Routes.fs" />
