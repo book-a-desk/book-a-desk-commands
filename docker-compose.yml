@@ -27,3 +27,4 @@ services:
       AWS_DEVELOPMENTSTORAGE: 'true'
       AWS_DEVELOPMENTURL: 'http://dynamodb-local:8000'
       DOMAINNAME: 'broadsign.com'
+      FeatureFlags:BookingCancellation: 'true'
