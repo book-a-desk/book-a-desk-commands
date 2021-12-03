@@ -1,6 +1,7 @@
 ﻿namespace Book_A_Desk.Api.Models
 
 open System
+open Book_A_Desk.Core
 open Book_A_Desk.Domain
 open Book_A_Desk.Domain.Office.Domain
 
@@ -65,4 +66,10 @@ type OfficeAvailability =
 type Offices =
     {
         Items: Office array
+    }
+
+type RestrictionNotifier =
+    {
+        OfficeId: OfficeId
+        Date: DateTime
     }

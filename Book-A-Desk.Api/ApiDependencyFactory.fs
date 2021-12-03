@@ -4,6 +4,7 @@ type ApiDependencyFactory =
     {
         CreateBookingsHttpHandler: unit -> BookingsHttpHandler
         CreateOfficesHttpHandler: unit -> OfficesHttpHandler
+        CreateNotifierHttpHandler: unit -> NotifierHttpHandler
         CreateFeatureFlagsHttpHandler: unit -> FlagsHttpHandler
     }
 
@@ -13,6 +14,7 @@ module ApiDependencyFactory =
         reservationCommandsFactory
         getOffices
         notifySuccess
+        notifyOfficeRestrictions
         getFeatureFlags
         =
 
@@ -27,6 +29,12 @@ module ApiDependencyFactory =
             OfficesHttpHandler.initialize
                 getEventStore
                 getOffices
+
+        let createNotifierHttpHandler bearerToken =
+            NotifierHttpHandler.initialize
+                getEventStore
+                notifyOfficeRestrictions
+                <| BookADeskErrorHandler.initialize()
                 
         let createFeatureFlagsHandler bearerToken =
             FlagsHttpHandler.initialize
@@ -35,5 +43,6 @@ module ApiDependencyFactory =
         {
             CreateBookingsHttpHandler = createBookingsHttpHandler
             CreateOfficesHttpHandler = createOfficesHttpHandler
+            CreateNotifierHttpHandler = createNotifierHttpHandler
             CreateFeatureFlagsHttpHandler = createFeatureFlagsHandler
         }

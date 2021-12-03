@@ -44,11 +44,15 @@ let configureApp (ctx : WebHostBuilderContext) (app : IApplicationBuilder) =
     let getEmailServiceConfiguration = (fun () -> app.ApplicationServices.GetService<EmailServiceConfiguration>())
     let getFeatureFlagsServiceConfiguration = (fun () -> app.ApplicationServices.GetService<FeatureFlags>())
     let bookingNotifier = BookingNotifier.provide getEmailServiceConfiguration smtpClientManager.SmtpClient getAllOffices
-    
-    let apiDependencyFactory = ApiDependencyFactory.provide provideEventStore reservationCommandsFactory getAllOffices bookingNotifier.NotifySuccess getFeatureFlagsServiceConfiguration
+    let officeRestrictionNotifier = OfficeRestrictionNotifier.provide bookingNotifier.NotifyOfficeRestrictionToBooking
 
-    let eventStore = provideEventStore (app.ApplicationServices.GetService<IAmazonDynamoDB>())
-    let officeRestrictionNotifier = OfficeRestrictionNotifier.provide bookingNotifier.NotifyOfficeRestrictionToBooking eventStore getAllOffices
+    let apiDependencyFactory = ApiDependencyFactory.provide
+                                   provideEventStore
+                                   reservationCommandsFactory
+                                   getAllOffices
+                                   bookingNotifier.NotifySuccess
+                                   officeRestrictionNotifier.NotifyOfficeRestrictions
+                                   getFeatureFlagsServiceConfiguration
 
     let routes = Routes.provide apiDependencyFactory
     app.UseCors(configureCors ctx)

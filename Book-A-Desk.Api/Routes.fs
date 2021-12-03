@@ -1,5 +1,6 @@
 ﻿namespace Book_A_Desk.Api
 
+open Book_A_Desk.Domain.Office.Domain
 open Giraffe
 
 open Book_A_Desk.Api.Models
@@ -36,6 +37,12 @@ module Routes =
                     route "/flags" >=> (
                         apiDependencyFactory.CreateFeatureFlagsHttpHandler ()
                         |> fun h -> h.HandleGetAll ()
+                    )
+                ]
+                POST >=> choose [
+                    route "/notify-office-restrictions" >=> JsonBodyValidator.parseBody<RestrictionNotifier> (
+                        apiDependencyFactory.CreateNotifierHttpHandler ()
+                        |> fun h -> h.HandlePostWith
                     )
                 ]
                 RequestErrors.NOT_FOUND "Not Found"
