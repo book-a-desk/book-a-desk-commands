@@ -78,6 +78,12 @@ module Routes =
                         |> fun h -> h.HandleGetAll ()
                     )
                 ]
+                POST >=> choose [
+                    route "/cancelBookings" >=> JsonBodyValidator.parseBody<Cancellation> (
+                        apiDependencyFactory.CreateCancelBookingsHttpHandler ()
+                        |> fun h -> h.HandlePostWith
+                        )
+                ]
                 RequestErrors.NOT_FOUND "Not Found"
             ]
 

@@ -1,4 +1,4 @@
-﻿namespace Book_A_Desk.Api
+namespace Book_A_Desk.Api
 
 open System
 
@@ -19,28 +19,12 @@ open Book_A_Desk.Domain.Reservation.Domain
 
 open Book_A_Desk.Infrastructure.DynamoDbEventStore
 
-type BookingsHttpHandler =
+type CancelBookingsHttpHandler =
     {
-        HandlePostWith: Models.Booking -> HttpHandler
+        HandlePostWith: Models.Cancellation -> HttpHandler
     }
 
-module BookingsHttpHandler =
-    let private notifyBooking output (booking : Models.Booking) notifySuccess errorHandler next context =
-        task {
-            let! sent = notifySuccess booking
-            match sent with
-            | Ok _ ->
-                printfn $"Notification message sent for %s{booking.User.Email} at %s{booking.Date.ToShortDateString()}"
-                return! json output next context
-            | Error e ->
-                let error =
-                    $"Error sending notification error for %s{booking.User.Email} at %s{booking.Date.ToShortDateString()} because {e}"
-                let responseError = (errorHandler.MapStringToAssignBookADeskError error)
-                                    |> errorHandler.ConvertErrorToResponseError
-                context.SetStatusCode(StatusCodes.Status500InternalServerError)
-                return! json responseError.Error next context
-        }
-
+module CancelBookingsHttpHandler =
     let private handleCommand command eventStore reservationCommandsFactory errorHandler = asyncResult {
         let (ReservationId aggregateId) = ReservationAggregate.Id
         let! events =
@@ -69,32 +53,27 @@ module BookingsHttpHandler =
     let initialize
         (provideEventStore : IAmazonDynamoDB -> DynamoDbEventStore)
         reservationCommandsFactory
-        (notifySuccess: Models.Booking-> Async<Result<unit, string>>)
         (errorHandler: BookADeskErrorHandler) =
 
-        let handlePostWith (booking : Models.Booking) = fun next (context : HttpContext) ->
+        let handlePostWith cancelBooking = fun next (context : HttpContext) ->
             task {
                 let cmd =
-                    {
-                        BookADesk.OfficeId = Guid.Parse(booking.Office.Id) |> OfficeId // Consider TryParse and return 400 if not valid
-                        Date = booking.Date
-                        EmailAddress = EmailAddress booking.User.Email
-                    }
+                    ({
+                        CancelBookADesk.OfficeId = Guid.Parse(cancelBooking.Office.Id) |> OfficeId // Consider TryParse and return 400 if not valid
+                        Date = cancelBooking.Date
+                        EmailAddress = EmailAddress cancelBooking.User.Email
+                    })
 
                 let eventStore = provideEventStore (context.GetService<IAmazonDynamoDB>())
-                let command = BookADesk cmd
+                let command = CancelBookADesk cmd
 
                 let! result = handleCommand command eventStore reservationCommandsFactory errorHandler
                 match result with
                 | Ok _ ->
                     let output =
-                        {
-                            Booking.Office = { Id = booking.Office.Id }
-                            Date = booking.Date
-                            User = { Email = booking.User.Email }
-                        }
+                        "Booking have been cancelled"
                     
-                    return! notifyBooking output booking notifySuccess errorHandler next context
+                    return! json output next context
                 | Error (response: ResponseError) ->
                     context.SetStatusCode(response.StatusCode)
                     return! json response.Error next context

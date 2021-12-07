@@ -55,6 +55,45 @@
         "x-codegen-request-body-name": "body"
       }
     },
+    "/cancelBookings": {
+      "post": {
+        "tags": [
+          "booking"
+        ],
+        "summary": "Cancel a booking",
+        "operationId": "cancelBooking",
+        "requestBody": {
+          "description": "Booking object that needs to be cancelled",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InputCancellation"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Invalid input",
+            "content": {}
+          },
+          "200": {
+            "description": "OK",
+            "content": "Booking has been cancelled."
+          }
+        },
+        "security": [
+          {
+            "book-a-desk_auth": [
+              "write:bookings",
+              "read:bookings"
+            ]
+          }
+        ],
+        "x-codegen-request-body-name": "body"
+      }
+    },
     "/offices": {
       "get": {
         "tags": [
@@ -166,7 +205,47 @@
           }
         }
       },
+      "InputCancellation": {
+        "required": [
+          "office",
+          "date",
+          "user"
+        ],
+        "type": "object",
+        "properties": {
+          "office": {
+            "$ref": "#/components/schemas/OfficeReference"
+          },
+          "date" : {
+            "type": "string",
+            "format": "date"
+          },
+          "user" : {
+            "$ref": "#/components/schemas/UserReference"
+          }
+        }
+      },
       "Booking": {
+        "required": [
+          "office",
+          "date",
+          "user"
+        ],
+        "type": "object",
+        "properties": {
+          "office": {
+            "$ref": "#/components/schemas/OfficeReference"
+          },
+          "date" : {
+            "type": "string",
+            "format": "date"
+          },
+          "user" : {
+            "$ref": "#/components/schemas/UserReference"
+          }
+        }
+      },
+      "Cancellation": {
         "required": [
           "office",
           "date",
