@@ -1,11 +1,9 @@
 module Book_A_Desk.Api.Tests.BookingNotifierTests
 
 open System
-open System.Threading.Tasks
 open Book_A_Desk.Api
 open Book_A_Desk.Api.Models
 open Book_A_Desk.Domain.Office.Domain
-open Book_A_Desk.Infrastructure.DynamoDbEventStore
 open FSharp.Control.Tasks
 open Foq
 open FsToolkit.ErrorHandling

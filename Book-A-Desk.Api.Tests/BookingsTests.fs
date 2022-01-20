@@ -1,16 +1,14 @@
 ﻿module Book_A_Desk.Api.Tests.BookingsTests
 
-open Book_A_Desk.Domain.Cancellation.Commands
 open FsToolkit.ErrorHandling
 open System.Net
-open System.Net.Http
-open System.Text
 open Newtonsoft.Json
 open System
 open Xunit
 
 open Book_A_Desk.Api
 open Book_A_Desk.Api.Models
+open Book_A_Desk.Domain.Cancellation.Commands
 open Book_A_Desk.Domain.CommandHandler
 open Book_A_Desk.Domain.Reservation.Commands
 open Book_A_Desk.Domain.Office.Domain

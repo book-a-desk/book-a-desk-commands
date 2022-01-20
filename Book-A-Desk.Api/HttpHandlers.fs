@@ -4,6 +4,7 @@ type HttpHandlers =
     {
         Bookings: BookingsHttpHandler
         Offices : OfficesHttpHandler
+        CancelBookings : CancelBookingsHttpHandler
     }
 
 module HttpHandlers =
@@ -11,4 +12,5 @@ module HttpHandlers =
         {
             Bookings = BookingsHttpHandler.initialize eventStore reservationCommandsFactory sendEmailNotification errorHandler
             Offices = OfficesHttpHandler.initialize eventStore getOffices
+            CancelBookings = CancelBookingsHttpHandler.initialize eventStore reservationCommandsFactory errorHandler
         }

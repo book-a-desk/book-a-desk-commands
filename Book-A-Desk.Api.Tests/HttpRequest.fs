@@ -26,5 +26,5 @@ let sendPostAsyncRequest (httpClient : HttpClient) (url : string) (content: stri
         let content = new StringContent(content, Encoding.UTF8, "application/json")
         postRequest.Content <- content
 
-        return httpClient.SendAsync postRequest |> Async.AwaitTask |> Async.RunSynchronously
+        return! httpClient.SendAsync postRequest |> Async.AwaitTask
     }

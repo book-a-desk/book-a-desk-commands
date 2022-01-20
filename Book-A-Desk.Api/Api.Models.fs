@@ -21,6 +21,13 @@ type InputBooking =
         Date: DateTime
         User: UserReference
     }
+    
+type InputCancellation =
+    {
+        Office: OfficeReference
+        Date: DateTime
+        User: UserReference
+    }
 
 type Booking =
     {
@@ -42,6 +49,13 @@ module Booking =
         }
         
     
+    
+type Cancellation =
+    {
+        Office: OfficeReference
+        Date: DateTime
+        User: UserReference
+    }
     
 type OpeningHours =
     {

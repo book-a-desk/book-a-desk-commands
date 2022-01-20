@@ -40,6 +40,12 @@ module Routes =
                     )
                 ]
                 POST >=> choose [
+                    route "/cancelBookings" >=> JsonBodyValidator.parseBody<Cancellation> (
+                        apiDependencyFactory.CreateCancelBookingsHttpHandler ()
+                        |> fun h -> h.HandlePostWith
+                        )
+                ]
+                POST >=> choose [
                     route "/notify-office-restrictions" >=> JsonBodyValidator.parseBody<RestrictionNotifier> (
                         apiDependencyFactory.CreateNotifierHttpHandler ()
                         |> fun h -> h.HandlePostWith
