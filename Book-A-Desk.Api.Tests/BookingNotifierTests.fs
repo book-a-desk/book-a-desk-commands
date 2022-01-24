@@ -1,10 +1,10 @@
 module Book_A_Desk.Api.Tests.BookingNotifierTests
 
 open System
+open System.Threading.Tasks
 open Book_A_Desk.Api
 open Book_A_Desk.Api.Models
 open Book_A_Desk.Domain.Office.Domain
-open FSharp.Control.Tasks
 open Foq
 open FsToolkit.ErrorHandling
 open MailKit.Net.Smtp
@@ -36,7 +36,7 @@ let mockedUser =
 
 let mockBooking =
     {
-        Office = mockedOfficeReference
+        Booking.Office = mockedOfficeReference
         Date = date
         User = mockedUser
     }

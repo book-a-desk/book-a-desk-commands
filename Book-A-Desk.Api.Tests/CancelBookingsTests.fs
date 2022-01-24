@@ -56,11 +56,11 @@ let bookingsUrl = sprintf "http://localhost:/bookings"
 let cancelBookingsUrl = sprintf "http://localhost:/cancelBookings"
 
 let mockFeatureToggle = "True"
+let mockEmailNotification _ = asyncResult { return () }
+let mockOfficeRestrictionNotification _ _ = async { return Ok [()] }
 
 [<Fact>]
-let ``GIVEN A Book-A-Desk server and a booking, WHEN cancelling a desk, THEN a desk is cancelled`` () = async { 
-    let mockEmailNotification _ =
-        asyncResult { return () }
+let ``GIVEN A Book-A-Desk server and a booking, WHEN cancelling a desk, THEN a desk is cancelled`` () = async {
     let event =
         {
             DeskBooked.ReservationId = ReservationAggregate.Id
@@ -82,7 +82,7 @@ let ``GIVEN A Book-A-Desk server and a booking, WHEN cancelling a desk, THEN a d
                 () |> async.Return
         } : DynamoDbEventStore
         
-    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification mockFeatureToggle
+    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification mockOfficeRestrictionNotification mockFeatureToggle
     use httpClient = TestServer.createAndRun mockApiDependencyFactory
     
     let serializedCancellation = JsonConvert.SerializeObject(cancellation)
@@ -103,17 +103,14 @@ let ``GIVEN A Book-A-Desk server and a booking, WHEN cancelling a desk, THEN a d
 }
 
 [<Fact>]
-let ``GIVEN an invalid reservation details WHEN cancelling a desk THEN it returns 400 And Reservation Error Title and Details And no notification by email is sent`` () = async { 
-    let mockEmailNotification _ =
-        asyncResult { return () }
-
+let ``GIVEN an invalid reservation details WHEN cancelling a desk THEN it returns 400 And Reservation Error Title and Details And no notification by email is sent`` () = async {
     let mockProvideEventStore _ =
         {
             GetEvents = fun _ -> Seq.empty |> Ok |> async.Return
             AppendEvents = fun _ -> () |> async.Return
         } : DynamoDbEventStore
         
-    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification mockFeatureToggle
+    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification mockOfficeRestrictionNotification mockFeatureToggle
     use httpClient = TestServer.createAndRun mockApiDependencyFactory
     
     let bookingInvalidEmail  =
@@ -140,9 +137,6 @@ let ``GIVEN an invalid reservation details WHEN cancelling a desk THEN it return
 
 [<Fact>]
 let ``GIVEN an reservation WHEN database service fails THEN it returns 500 And Database error description`` () = async {
-    let mockEmailNotification _ =
-        asyncResult { return () }
-
     let error = "Database error"
 
     let mockProvideEventStore _ =
@@ -151,7 +145,7 @@ let ``GIVEN an reservation WHEN database service fails THEN it returns 500 And D
             AppendEvents = fun _ -> () |> async.Return
         } : DynamoDbEventStore
 
-    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification mockFeatureToggle
+    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification mockOfficeRestrictionNotification mockFeatureToggle
     use httpClient = TestServer.createAndRun mockApiDependencyFactory
 
     let serializedCancellation = JsonConvert.SerializeObject(cancellation)

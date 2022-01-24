@@ -1,6 +1,7 @@
 namespace Book_A_Desk.Api
 
 open Book_A_Desk.Api.Models
+open Book_A_Desk.Core
 open Book_A_Desk.Domain.Reservation
 open Book_A_Desk.Domain.Reservation.Domain
 open Book_A_Desk.Domain.Reservation.Queries
@@ -9,11 +10,11 @@ open Book_A_Desk.Infrastructure.DynamoDbEventStore
 
 type OfficeRestrictionNotifier =
     {
-        NotifyOfficeRestrictions: DynamoDbEventStore -> RestrictionNotifier -> Async<Result<unit,string>>
+        NotifyOfficeRestrictions: DynamoDbEventStore -> RestrictionNotifier -> Async<Result<unit list,string>>
     }
 
 module rec OfficeRestrictionNotifier =
-    let provide notifyRestriction =
+    let provide (notifyRestriction: Models.Booking -> Async<Result<unit, string>>) =
 
         let getEventsByDateFromEventStore eventStore date = asyncResult {
             let (ReservationId aggregateId) = ReservationAggregate.Id
@@ -25,10 +26,13 @@ module rec OfficeRestrictionNotifier =
         let notifyOfficeRestrictions eventStore (restrictionNotifier: RestrictionNotifier) = asyncResult {
             let! bookings = getEventsByDateFromEventStore eventStore restrictionNotifier.Date
 
-            bookings
-            |> List.where(fun (booking: Booking) -> booking.OfficeId.Equals(restrictionNotifier.OfficeId))
-            |> List.map(fun (booking:Booking) -> Booking.value restrictionNotifier.OfficeId booking.Date booking.EmailAddress)
-            |> List.iter (fun booking -> notifyRestriction booking)
+            let! notifyBookings =
+                bookings
+                |> List.where(fun (booking: Booking) -> booking.OfficeId.Equals(restrictionNotifier.OfficeId))
+                |> List.map(fun (booking:Booking) -> notifyRestriction (Booking.value restrictionNotifier.OfficeId booking.Date booking.EmailAddress))
+                |> AyncResultExtension.sequential
+
+            return notifyBookings
         }
 
         {

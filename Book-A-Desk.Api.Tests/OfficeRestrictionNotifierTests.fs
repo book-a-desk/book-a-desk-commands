@@ -79,7 +79,13 @@ let mockProvideEventStoreWithBooking =
             GetEvents = fun _ -> [aBooking] |> Seq.ofList |> Ok |> async.Return
             AppendEvents = fun _ -> () |> async.Return
         } : DynamoDbEventStore
-        
+
+let mockRestrictionNotifier =
+    {
+        OfficeId = officeId |> OfficeId
+        Date = date
+    }
+
 [<Fact>]
 let ``GIVEN a booking for the following day WHEN Office opening time happens THEN an email with office restrictions is sent to bookings email account `` () = async {
     let mutable sendWasCalled = false
@@ -92,9 +98,9 @@ let ``GIVEN a booking for the following day WHEN Office opening time happens THE
 
     let bookingNotifier = BookingNotifier.provide mockEmailServiceConfiguration mockSmtpClient mockGetOffices
 
-    let officeRestrictionNotifier = OfficeRestrictionNotifier.provide bookingNotifier.NotifyOfficeRestrictionToBooking mockProvideEventStoreWithBooking mockGetOffices
+    let officeRestrictionNotifier = OfficeRestrictionNotifier.provide bookingNotifier.NotifyOfficeRestrictionToBooking
 
-    officeRestrictionNotifier.Execute date |> Async.RunSynchronously
+    let result = officeRestrictionNotifier.NotifyOfficeRestrictions mockProvideEventStoreWithBooking mockRestrictionNotifier
     Assert.True(sendWasCalled)
 }
 
@@ -109,9 +115,9 @@ let ``GIVEN no bookings for the following day WHEN Office opening time happens T
                              .Create()
     let bookingNotifier = BookingNotifier.provide mockEmailServiceConfiguration mockSmtpClient mockGetOffices
 
-    let officeRestrictionNotifier = OfficeRestrictionNotifier.provide bookingNotifier.NotifyOfficeRestrictionToBooking mockProvideEventStoreWithoutBooking mockGetOffices
+    let officeRestrictionNotifier = OfficeRestrictionNotifier.provide bookingNotifier.NotifyOfficeRestrictionToBooking
 
-    officeRestrictionNotifier.Execute date |> Async.RunSynchronously
+    let result = officeRestrictionNotifier.NotifyOfficeRestrictions mockProvideEventStoreWithoutBooking mockRestrictionNotifier
     Assert.False(sendWasCalled)
 }
 

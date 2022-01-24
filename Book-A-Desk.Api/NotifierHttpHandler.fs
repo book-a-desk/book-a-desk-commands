@@ -17,7 +17,7 @@ type NotifierHttpHandler =
 module NotifierHttpHandler =
     let initialize
         (provideEventStore: IAmazonDynamoDB -> DynamoDbEventStore)
-        (notifyOfficeRestrictions: DynamoDbEventStore -> RestrictionNotifier -> Async<Result<unit, string>>)
+        (notifyOfficeRestrictions: DynamoDbEventStore -> RestrictionNotifier -> Async<Result<unit list, string>>)
         errorHandler =
 
         let handlePostWith (restrictionNotifier: RestrictionNotifier) = fun next (context : HttpContext) ->
