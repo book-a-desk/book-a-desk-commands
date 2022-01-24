@@ -100,8 +100,12 @@ let ``GIVEN a booking for the following day WHEN Office opening time happens THE
 
     let officeRestrictionNotifier = OfficeRestrictionNotifier.provide bookingNotifier.NotifyOfficeRestrictionToBooking
 
-    let result = officeRestrictionNotifier.NotifyOfficeRestrictions mockProvideEventStoreWithBooking mockRestrictionNotifier
-    Assert.True(sendWasCalled)
+    let! result = officeRestrictionNotifier.NotifyOfficeRestrictions mockProvideEventStoreWithBooking mockRestrictionNotifier
+    match result with
+    | Ok _ ->
+        Assert.True(sendWasCalled)
+    | Error _ ->
+        failwithf "Error test should not fail"
 }
 
 [<Fact>]
@@ -117,7 +121,11 @@ let ``GIVEN no bookings for the following day WHEN Office opening time happens T
 
     let officeRestrictionNotifier = OfficeRestrictionNotifier.provide bookingNotifier.NotifyOfficeRestrictionToBooking
 
-    let result = officeRestrictionNotifier.NotifyOfficeRestrictions mockProvideEventStoreWithoutBooking mockRestrictionNotifier
-    Assert.False(sendWasCalled)
+    let! result = officeRestrictionNotifier.NotifyOfficeRestrictions mockProvideEventStoreWithoutBooking mockRestrictionNotifier
+    match result with
+        | Ok _ ->
+            Assert.False(sendWasCalled)
+        | Error _ ->
+            failwithf "Error test should not fail"
 }
 
