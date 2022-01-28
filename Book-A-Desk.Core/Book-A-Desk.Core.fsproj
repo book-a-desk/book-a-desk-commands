@@ -8,6 +8,11 @@
     <ItemGroup>
       <Compile Include="ResultBuilder.fs" />
       <Compile Include="DateTimeExtension.fs" />
+      <Compile Include="AyncResultExtensions.fs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="FsToolkit.ErrorHandling" Version="2.5.0" />
     </ItemGroup>
 
 </Project>

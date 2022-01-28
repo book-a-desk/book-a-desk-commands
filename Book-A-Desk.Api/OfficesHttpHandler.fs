@@ -1,6 +1,7 @@
 namespace Book_A_Desk.Api
 
 open Amazon.DynamoDBv2
+open Book_A_Desk.Api.Models
 open Book_A_Desk.Domain.Reservation
 open Book_A_Desk.Domain.Reservation.Domain
 open Book_A_Desk.Infrastructure.DynamoDbEventStore
@@ -9,7 +10,6 @@ open FsToolkit.ErrorHandling
 open Giraffe
 open System
 
-open Book_A_Desk.Api.Models
 open Book_A_Desk.Domain.Office.Domain
 open Book_A_Desk.Domain.Office.Queries
 open Book_A_Desk.Domain.Reservation.Queries
@@ -91,7 +91,7 @@ module rec OfficesHttpHandler =
                 OfficeId = officeId |> OfficeId
                 Date = date
             }
-        
+
         let minimumDate = DateTime.UtcNow.Date
         return! OfficeQueriesHandler.getAvailabilities getOffices getBookingsForDate minimumDate query
     }

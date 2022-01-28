@@ -40,7 +40,7 @@ Note: us-east-2 is the region of book-a-desk.dev environment.
     aws_secret_access_key = your_secret_access_key
     aws_session_token= your_session_token
 ```
-Note: Get credentials from book-a-desk.dev from `Command line or programmatic access` after validating your access here: https://broadsign-portal.awsapps.com/start#/
+Note: Get credentials from book-a-desk.dev from `Command line or programmatic access`.
 
 Browse [this](https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/setup-credentials.html) page for more detail information about aws development configuration. It applies to different languages.
 
