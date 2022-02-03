@@ -16,5 +16,6 @@ module rec FlagsHttpHandler =
         }
     let handleGetAll getFeatureFlags = fun next context ->
          task {
-             return! Successful.OK getFeatureFlags next context
+             let flags = getFeatureFlags ()
+             return! Successful.OK flags next context
      }
