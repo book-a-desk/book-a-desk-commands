@@ -55,7 +55,7 @@ let mockReservationCommandFactory : ReservationCommandsFactory =
 let bookingsUrl = sprintf "http://localhost:/bookings"
 let cancelBookingsUrl = sprintf "http://localhost:/cancelBookings"
 
-let mockFeatureToggle = "True"
+let mockFeatureToggle () = "True"
 let mockEmailNotification _ = asyncResult { return () }
 let mockOfficeRestrictionNotification _ _ = async { return Ok [()] }
 

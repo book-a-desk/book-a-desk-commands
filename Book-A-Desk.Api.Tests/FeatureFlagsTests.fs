@@ -51,7 +51,7 @@ let ``GIVEN A Book-A-Desk server, WHEN getting the flags endpoint, THEN enabled 
             AppendEvents = fun _ -> failwith "should not be called"
         } : DynamoDbEventStore.DynamoDbEventStore
     let mockGetOffices () = offices
-    let mockGetFeatureFlags = enabledFeatureFlag
+    let mockGetFeatureFlags () = enabledFeatureFlag
     
     let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification mockOfficeRestrictionNotification mockGetFeatureFlags
     use httpClient = TestServer.createAndRun mockApiDependencyFactory
@@ -72,7 +72,7 @@ let ``GIVEN A Book-A-Desk server, WHEN getting the flags endpoint, THEN disabled
             AppendEvents = fun _ -> failwith "should not be called"
         } : DynamoDbEventStore.DynamoDbEventStore
     let mockGetOffices () = offices
-    let mockGetFeatureFlags = disabledFeatureFlag
+    let mockGetFeatureFlags () = disabledFeatureFlag
     
     let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification mockOfficeRestrictionNotification mockGetFeatureFlags
     use httpClient = TestServer.createAndRun mockApiDependencyFactory
