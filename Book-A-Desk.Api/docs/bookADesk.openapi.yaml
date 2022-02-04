@@ -117,6 +117,23 @@ paths:
         - book-a-desk_auth:
             - read:offices
       x-codegen-request-body-name: body
+  /notify-office-restrictions:
+    get:
+      tags:
+        - Office
+      summary: Send a notification for office restrictions
+      operationId: notifyOfficeRestrictions
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Offices"
+      security:
+        - book-a-desk_auth:
+            - read:offices
+      x-codegen-request-body-name: body
   /flags:
     get:
       tags:
