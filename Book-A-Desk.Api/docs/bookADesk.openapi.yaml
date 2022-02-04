@@ -10,7 +10,7 @@ paths:
   /bookings:
     post:
       tags:
-        - booking
+        - Booking
       summary: Add a new booking to the bookings
       operationId: addBooking
       requestBody:
@@ -40,7 +40,7 @@ paths:
   /cancelBookings:
     post:
       tags:
-        - booking
+        - Booking
       summary: Cancel a booking
       operationId: cancelBooking
       requestBody:
@@ -65,9 +65,9 @@ paths:
   /offices:
     get:
       tags:
-        - office
-        - booking
-      summary: Retrieve all existing offices.
+        - Office
+        - Booking
+      summary: Retrieve all existing offices
       operationId: getOffices
       responses:
         200:
@@ -83,8 +83,8 @@ paths:
   /offices/{officeId}/availabilities:
     get:
       tags:
-        - office
-        - booking
+        - Office
+        - Booking
       summary: Retrieve the availabilities for a given office and date
       operationId: getOfficesByDate
       parameters:
@@ -115,6 +115,19 @@ paths:
         - book-a-desk_auth:
             - read:offices
       x-codegen-request-body-name: body
+  /flags:
+    get:
+      tags:
+        - Flag
+      summary: Returns a collection of feature toggles
+      operationId: GetFlags
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Flags"
 components:
   schemas:
     InputBooking:
@@ -224,6 +237,11 @@ components:
           type: integer
         reservedDesks:
           type: integer
+    Flags:
+      type: object
+      properties:
+        BookingCancellation:
+          type: boolean
   securitySchemes:
     book-a-desk_auth:
       type: oauth2
