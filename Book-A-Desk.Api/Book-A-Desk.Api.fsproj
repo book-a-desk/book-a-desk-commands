@@ -27,7 +27,7 @@
     <Compile Include="SmtpClientManager.fs" />
     <Compile Include="FeatureFlags.fs" />
     <Compile Include="Program.fs" />
-    <Content Include="docs\bookADeskOpenAPISpecification.json" />
+    <Content Include="docs\bookADesk.openapi.yaml" />
     <Content Include="..\Dockerfile">
         <Link>Docker\Dockerfile</Link>
      </Content>
