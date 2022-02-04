@@ -1,0 +1,276 @@
+openapi: 3.0.1
+info:
+  title: Book a desk
+  description: This is a server to book a desk.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+servers:
+  - url: https://localhost/api
+paths:
+  /bookings:
+    post:
+      tags:
+        - Booking
+      summary: Add a new booking to the bookings
+      operationId: addBooking
+      requestBody:
+        description:
+          Booking object that needs to be added to the list of existing\
+          \ bookings
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InputBooking"
+        required: true
+      responses:
+        400:
+          description: Invalid input
+          content: {}
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Booking"
+      security:
+        - book-a-desk_auth:
+            - write:bookings
+            - read:bookings
+      x-codegen-request-body-name: body
+  /cancelBookings:
+    post:
+      tags:
+        - Booking
+      summary: Cancel a booking
+      operationId: cancelBooking
+      requestBody:
+        description: Booking object that needs to be cancelled
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InputCancellation"
+        required: true
+      responses:
+        400:
+          description: Invalid input
+          content: {}
+        200:
+          description: OK
+          content: Booking has been cancelled.
+      security:
+        - book-a-desk_auth:
+            - write:bookings
+            - read:bookings
+      x-codegen-request-body-name: body
+  /offices:
+    get:
+      tags:
+        - Office
+        - Booking
+      summary: Retrieve all existing offices
+      operationId: getOffices
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Offices"
+      security:
+        - book-a-desk_auth:
+            - read:offices
+      x-codegen-request-body-name: body
+  /offices/{officeId}/availabilities:
+    get:
+      tags:
+        - Office
+        - Booking
+      summary: Retrieve the availabilities for a given office and date
+      operationId: getOfficesByDate
+      parameters:
+        - in: path
+          name: officeId
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: date
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OfficeAvailability"
+        400:
+          description: Bad Request
+          content:
+            text/plain:
+              schema:
+                type: string
+      security:
+        - book-a-desk_auth:
+            - read:offices
+      x-codegen-request-body-name: body
+  /notify-office-restrictions:
+    get:
+      tags:
+        - Office
+      summary: Send a notification for office restrictions
+      operationId: notifyOfficeRestrictions
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Offices"
+      security:
+        - book-a-desk_auth:
+            - read:offices
+      x-codegen-request-body-name: body
+  /flags:
+    get:
+      tags:
+        - Flag
+      summary: Returns a collection of feature toggles
+      operationId: GetFlags
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Flags"
+components:
+  schemas:
+    InputBooking:
+      required:
+        - office
+        - date
+        - user
+      type: object
+      properties:
+        office:
+          $ref: "#/components/schemas/OfficeReference"
+        date:
+          type: string
+          format: date
+        user:
+          $ref: "#/components/schemas/UserReference"
+    InputCancellation:
+      required:
+        - office
+        - date
+        - user
+      type: object
+      properties:
+        office:
+          $ref: "#/components/schemas/OfficeReference"
+        date:
+          type: string
+          format: date
+        user:
+          $ref: "#/components/schemas/UserReference"
+    Booking:
+      required:
+        - office
+        - date
+        - user
+      type: object
+      properties:
+        office:
+          $ref: "#/components/schemas/OfficeReference"
+        date:
+          type: string
+          format: date
+        user:
+          $ref: "#/components/schemas/UserReference"
+    Cancellation:
+      required:
+        - office
+        - date
+        - user
+      type: object
+      properties:
+        office:
+          $ref: "#/components/schemas/OfficeReference"
+        date:
+          type: string
+          format: date
+        user:
+          $ref: "#/components/schemas/UserReference"
+    UserReference:
+      required:
+        - email
+      type: object
+      properties:
+        email:
+          type: string
+    OfficeReference:
+      required:
+        - id
+      type: object
+      properties:
+        id:
+          type: string
+    Office:
+      required:
+        - id
+        - name
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        openingHours:
+          type: object
+          properties:
+            text:
+              type: string
+    Offices:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Office"
+    OfficeAvailability:
+      required:
+        - id
+        - totalDesks
+        - availableDesks
+      type: object
+      properties:
+        id:
+          type: string
+        totalDesks:
+          type: integer
+        availableDesks:
+          type: integer
+        reservedDesks:
+          type: integer
+    Flags:
+      type: object
+      properties:
+        BookingCancellation:
+          type: boolean
+  securitySchemes:
+    book-a-desk_auth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: http://petstore.swagger.io/oauth/dialog
+          scopes:
+            write:bookings: modify bookings in your account
+            read:bookings: read your bookings
+    api_key:
+      type: apiKey
+      name: api_key
+      in: header
