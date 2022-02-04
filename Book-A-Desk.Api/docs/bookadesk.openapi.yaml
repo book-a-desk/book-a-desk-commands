@@ -17,8 +17,7 @@ paths:
       operationId: addBooking
       requestBody:
         description:
-          Booking object that needs to be added to the list of existing\
-          \ bookings
+          Booking object that needs to be added to the list of existing bookings
         content:
           application/json:
             schema:
@@ -58,7 +57,7 @@ paths:
           content: {}
         200:
           description: OK
-          content: Booking has been cancelled.
+          content: Booking has been cancelled
       security:
         - book-a-desk_auth:
             - write:bookings
@@ -118,7 +117,7 @@ paths:
             - read:offices
       x-codegen-request-body-name: body
   /notify-office-restrictions:
-    get:
+    post:
       tags:
         - Office
       summary: Send a notification for office restrictions
