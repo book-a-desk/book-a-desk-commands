@@ -67,7 +67,6 @@ paths:
     get:
       tags:
         - Office
-        - Booking
       summary: Retrieve all existing offices
       operationId: getOffices
       responses:
@@ -85,7 +84,6 @@ paths:
     get:
       tags:
         - Office
-        - Booking
       summary: Retrieve the availabilities for a given office and date
       operationId: getOfficesByDate
       parameters:
