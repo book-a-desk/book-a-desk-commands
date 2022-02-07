@@ -82,7 +82,7 @@ let mockProvideEventStoreWithBooking =
 
 let mockRestrictionNotifier =
     {
-        OfficeId = officeId |> OfficeId
+        Office = { Id = officeId.ToString() }
         Date = date
     }
 

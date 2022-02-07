@@ -30,7 +30,7 @@ module rec BookingNotifier =
             asyncResult {
                 smtpClient.Connect(config.SmtpClientUrl, config.SmtpClientPort, SecureSocketOptions.StartTlsWhenAvailable)
                 smtpClient.Authenticate(config.SmtpUsername, config.SmtpPassword)
-                let! response = smtpClient.SendAsync mailMessage |> Async.AwaitIAsyncResult        
+                let! response = smtpClient.SendAsync mailMessage |> Async.AwaitIAsyncResult
                 smtpClient.Disconnect(true)
                 match response with
                 | true -> return ()
@@ -67,7 +67,7 @@ module rec BookingNotifier =
                         To = booking.User.Email
                         EmailReviewer = config.EmailReviewer
                         Subject = "Book-A-Desk Reservation confirmed"
-                        Text = mailText                          
+                        Text = mailText
                     }
                 
                 let mailMessage = createEmailMessage emailNotificationDetails
@@ -99,8 +99,8 @@ module rec BookingNotifier =
     let createMailText (bookingDate : DateTime) (office : Office) =
             let (CityName officeName) = office.City
             $"You have booked a desk at %s{bookingDate.ToShortDateString()} in the Office %s{officeName}{Environment.NewLine}" +
-            $"{office.OpeningHoursText}{Environment.NewLine}It is your responsibility to verify that the office is open for the date" +
-            "That you have booked"
+            $"Opening hours: {office.OpeningHoursText}{Environment.NewLine}" +
+            "It is your responsibility to verify that the office is open for the date that you have booked"
     
     let createOfficeRestriction (office : Office) =
             let (CityName officeName) = office.City

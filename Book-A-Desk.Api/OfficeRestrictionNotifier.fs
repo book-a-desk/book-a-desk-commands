@@ -1,7 +1,9 @@
 namespace Book_A_Desk.Api
 
+open System
 open Book_A_Desk.Api.Models
 open Book_A_Desk.Core
+open Book_A_Desk.Domain.Office.Domain
 open Book_A_Desk.Domain.Reservation
 open Book_A_Desk.Domain.Reservation.Domain
 open Book_A_Desk.Domain.Reservation.Queries
@@ -24,15 +26,15 @@ module rec OfficeRestrictionNotifier =
         }
 
         let notifyOfficeRestrictions eventStore (restrictionNotifier: RestrictionNotifier) = asyncResult {
+            let OfficeId = Guid.Parse(restrictionNotifier.Office.Id) |> OfficeId
             let! bookings = getEventsByDateFromEventStore eventStore restrictionNotifier.Date
 
             let! notifyBookings =
                 bookings
                 |> List.where(fun (booking: Booking) ->
-                    booking.OfficeId.Equals(restrictionNotifier.OfficeId)
-                    && booking.Date.Equals(restrictionNotifier.Date))
+                    booking.OfficeId.Equals(OfficeId))
                 |> List.map(fun (booking:Booking) ->
-                    notifyRestriction (Booking.value restrictionNotifier.OfficeId booking.Date booking.EmailAddress))
+                    notifyRestriction (Booking.value OfficeId  booking.Date booking.EmailAddress))
                 |> AyncResultExtension.sequential
 
             return notifyBookings
