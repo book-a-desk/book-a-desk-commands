@@ -55,14 +55,14 @@ module CancelBookingsHttpHandler =
         reservationCommandsFactory
         (errorHandler: BookADeskErrorHandler) =
 
-        let handlePostWith cancelBooking = fun next (context : HttpContext) ->
+        let handlePostWith (cancelBooking:Cancellation) = fun next (context : HttpContext) ->
             task {
                 let cmd =
-                    ({
+                    {
                         CancelBookADesk.OfficeId = Guid.Parse(cancelBooking.Office.Id) |> OfficeId // Consider TryParse and return 400 if not valid
                         Date = cancelBooking.Date
                         EmailAddress = EmailAddress cancelBooking.User.Email
-                    })
+                    }
 
                 let eventStore = provideEventStore (context.GetService<IAmazonDynamoDB>())
                 let command = CancelBookADesk cmd

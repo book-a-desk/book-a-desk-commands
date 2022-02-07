@@ -84,6 +84,6 @@ type Offices =
 
 type RestrictionNotifier =
     {
-        OfficeId: OfficeId
+        Office: OfficeReference
         Date: DateTime
     }
