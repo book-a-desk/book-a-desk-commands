@@ -34,7 +34,7 @@ module rec OfficeRestrictionNotifier =
                 |> List.where(fun (booking: Booking) ->
                     booking.OfficeId.Equals(officeId))
                 |> List.map(fun (booking:Booking) ->
-                    notifyRestriction (Booking.value OfficeId booking.Date booking.EmailAddress))
+                    notifyRestriction (Booking.value officeId booking.Date booking.EmailAddress))
                 |> AyncResultExtension.sequential
 
             return notifyBookings
