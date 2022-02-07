@@ -26,7 +26,7 @@ module rec OfficeRestrictionNotifier =
         }
 
         let notifyOfficeRestrictions eventStore (restrictionNotifier: RestrictionNotifier) = asyncResult {
-            let OfficeId = Guid.Parse(restrictionNotifier.Office.Id) |> OfficeId
+            let officeId = Guid.Parse(restrictionNotifier.Office.Id) |> OfficeId
             let! bookings = getEventsByDateFromEventStore eventStore restrictionNotifier.Date
 
             let! notifyBookings =
