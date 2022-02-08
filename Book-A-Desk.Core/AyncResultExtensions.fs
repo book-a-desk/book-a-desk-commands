@@ -2,7 +2,7 @@ namespace Book_A_Desk.Core
 
 open FsToolkit.ErrorHandling
 
-module AyncResultExtension =
+module AsyncResultExtension =
     let either ifOk ifError x = async {
         let! value = x
         return! Result.either ifOk ifError value

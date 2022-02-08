@@ -1,6 +1,5 @@
 namespace Book_A_Desk.Api
 
-open System
 open FSharp.Control.Tasks.V2.ContextInsensitive
 open Giraffe
 
