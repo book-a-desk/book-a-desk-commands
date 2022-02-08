@@ -1,6 +1,5 @@
 ﻿namespace Book_A_Desk.Api
 
-open Book_A_Desk.Domain.Office.Domain
 open Giraffe
 
 open Book_A_Desk.Api.Models

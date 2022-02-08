@@ -1,7 +1,6 @@
 namespace Book_A_Desk.Api
 
 open System
-open Giraffe
 open Microsoft.AspNetCore.Http
 
 open Book_A_Desk.Domain.Errors

@@ -1,6 +1,5 @@
 ﻿namespace Book_A_Desk.Domain.QueriesHandler
 
-open System
 open Book_A_Desk.Core
 open Book_A_Desk.Domain.Office.Domain
 open Book_A_Desk.Domain.Office.Queries
