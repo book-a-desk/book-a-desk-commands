@@ -103,7 +103,6 @@ module rec BookingNotifier =
             "It is your responsibility to verify that the office is open for the date that you have booked"
     
     let createOfficeRestriction (office : Office) =
-            let (CityName officeName) = office.City
             "We inform you that the office has some restrictions."
             
     let getOffice officeId getOffices : Result<_,_> = result {
