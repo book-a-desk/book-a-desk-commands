@@ -40,7 +40,7 @@ module rec BookingNotifier =
         let sendOfficeRestrictionNotification (booking: Booking) = asyncResult {
                 let config = getEmailServiceConfiguration()
                 let! office = getOffice booking.Office.Id getOffices
-                let mailText = createOfficeRestriction office
+                let mailText = "We inform you that the office has some restrictions."
                 let (CityName officeName) = office.City
                    
                 let emailNotificationDetails =
@@ -101,9 +101,6 @@ module rec BookingNotifier =
             $"You have booked a desk at %s{bookingDate.ToShortDateString()} in the Office %s{officeName}{Environment.NewLine}" +
             $"Opening hours: {office.OpeningHoursText}{Environment.NewLine}" +
             "It is your responsibility to verify that the office is open for the date that you have booked"
-    
-    let createOfficeRestriction (office : Office) =
-            "We inform you that the office has some restrictions."
             
     let getOffice officeId getOffices : Result<_,_> = result {
         let! officeId =
