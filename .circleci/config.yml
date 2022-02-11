@@ -50,32 +50,6 @@ workflows:
             - aws-credentials
           requires:
             - push-image-to-dev
-      - push-image:
-          name: push-image-to-test
-          ecr-account-url: ${AWS_ECR_ACCOUNT_URL_TEST}
-          aws-account-id: ${AWS_ACCOUNT_TEST}
-          authenticate-aws:
-            - authenticate-aws-book-a-desk-test
-          context:
-            - aws-credentials
-          requires:
-            - deploy-to-dev
-      - deploy:
-          name: deploy-to-test
-          ecr-account-url: ${AWS_ECR_ACCOUNT_URL_TEST}
-          aws-account-id: ${AWS_ACCOUNT_TEST}
-          authenticate-aws:
-            - authenticate-aws-book-a-desk-test
-          aws-key-id-secret-id: ${AWS_ACCESS_KEY_ID_SECRET_TEST}
-          aws-secret-key-secret-id: ${AWS_SECRET_ACCESS_KEY_SECRET_TEST}
-          certificate-id: ${ACM_CERTIFICATE_ID_TEST}
-          hosted-zone-name: ${HOSTED_ZONE_NAME_TEST}
-          stack-name: << pipeline.parameters.stack-name >>
-          cloudformation-role: << pipeline.parameters.cloudformation-role-test >>
-          context:
-            - aws-credentials
-          requires:
-            - push-image-to-test
 
   production:
     when:
