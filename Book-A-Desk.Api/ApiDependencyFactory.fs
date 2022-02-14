@@ -16,7 +16,7 @@ module ApiDependencyFactory =
         getOffices
         notifySuccess
         notifyOfficeRestrictions
-        getFeatureFlags
+        featureFlags
         =
 
         let createBookingsHttpHandler bearerToken =
@@ -39,7 +39,7 @@ module ApiDependencyFactory =
                 
         let createFeatureFlagsHandler bearerToken =
             FlagsHttpHandler.initialize
-                getFeatureFlags
+                featureFlags
                 
         let createCancelBookingsHttpHandler bearerToken =
             CancelBookingsHttpHandler.initialize

@@ -5,6 +5,7 @@ open System.Text.Json
 open Book_A_Desk.Domain.Cancellation.Commands
 open Xunit
 open Book_A_Desk.Api
+open Book_A_Desk.Api.Models
 open Book_A_Desk.Domain.CommandHandler
 open Book_A_Desk.Domain.Reservation.Commands
 open Book_A_Desk.Domain.Office.Domain
@@ -51,9 +52,9 @@ let ``GIVEN A Book-A-Desk server, WHEN getting the flags endpoint, THEN enabled 
             AppendEvents = fun _ -> failwith "should not be called"
         } : DynamoDbEventStore.DynamoDbEventStore
     let mockGetOffices () = offices
-    let mockGetFeatureFlags () = enabledFeatureFlag
+    let featureFlag = enabledFeatureFlag
     
-    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification mockOfficeRestrictionNotification mockGetFeatureFlags
+    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification mockOfficeRestrictionNotification featureFlag
     use httpClient = TestServer.createAndRun mockApiDependencyFactory
     let! result = HttpRequest.getAsyncGetContent httpClient "http://localhost/flags"
 
@@ -72,9 +73,9 @@ let ``GIVEN A Book-A-Desk server, WHEN getting the flags endpoint, THEN disabled
             AppendEvents = fun _ -> failwith "should not be called"
         } : DynamoDbEventStore.DynamoDbEventStore
     let mockGetOffices () = offices
-    let mockGetFeatureFlags () = disabledFeatureFlag
+    let featureFlag = disabledFeatureFlag
     
-    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification mockOfficeRestrictionNotification mockGetFeatureFlags
+    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification mockOfficeRestrictionNotification featureFlag
     use httpClient = TestServer.createAndRun mockApiDependencyFactory
     let! result = HttpRequest.getAsyncGetContent httpClient "http://localhost/flags"
 

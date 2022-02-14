@@ -25,7 +25,6 @@
     <Compile Include="BookingNotifier.fs" />
     <Compile Include="OfficeRestrictionNotifier.fs" />
     <Compile Include="SmtpClientManager.fs" />
-    <Compile Include="FeatureFlags.fs" />
     <Compile Include="JwtTokenValidator.fs" />
     <Compile Include="Program.fs" />
     <Content Include="docs\bookadesk.openapi.yaml" />
