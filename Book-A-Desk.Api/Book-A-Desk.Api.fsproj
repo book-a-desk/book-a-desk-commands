@@ -14,6 +14,7 @@
     <Compile Include="HttpHandlers.Reservation.BookADeskErrorHandler.fs" />
     <Compile Include="NotifierHttpHandler.fs" />
     <Compile Include="BookingsHttpHandler.fs" />
+    <Compile Include="FeatureFlags.fs" />
     <Compile Include="FlagsHttpHandler.fs" />
     <Compile Include="HealthHttpHandler.fs" />
     <Compile Include="CancelBookingsHttpHandler.fs" />
@@ -25,7 +26,6 @@
     <Compile Include="BookingNotifier.fs" />
     <Compile Include="OfficeRestrictionNotifier.fs" />
     <Compile Include="SmtpClientManager.fs" />
-    <Compile Include="FeatureFlags.fs" />
     <Compile Include="Program.fs" />
     <Content Include="docs\bookadesk.openapi.yaml" />
     <Content Include="..\Dockerfile">

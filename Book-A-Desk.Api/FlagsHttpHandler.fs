@@ -9,12 +9,11 @@ type FlagsHttpHandler =
     }
 
 module rec FlagsHttpHandler =
-    let initialize getFeatureFlags =
+    let initialize featureFlags =
         {
-            HandleGetAll = fun () -> handleGetAll getFeatureFlags 
+            HandleGetAll = fun () -> handleGetAll featureFlags 
         }
-    let handleGetAll getFeatureFlags = fun next context ->
+    let handleGetAll (featureFlags : FeatureFlags) = fun next context ->
          task {
-             let flags = getFeatureFlags ()
-             return! Successful.OK flags next context
+             return! Successful.OK featureFlags next context
      }

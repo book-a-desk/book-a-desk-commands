@@ -32,6 +32,11 @@ let configureCors (ctx : WebHostBuilderContext) (builder : CorsPolicyBuilder) =
             .AllowAnyHeader()
             |> ignore
 
+let configureFeatureFlags (config : IConfiguration) =
+    {
+        BookingCancellation = config.["FeatureFlags:BookingCancellation"] |> bool.Parse
+    }
+
 let configureApp (ctx : WebHostBuilderContext) (app : IApplicationBuilder) =
     let provideEventStore amazonDynamoDb = DynamoDbEventStore.provide amazonDynamoDb
 
@@ -42,17 +47,18 @@ let configureApp (ctx : WebHostBuilderContext) (app : IApplicationBuilder) =
     
     let smtpClientManager = SmtpClientManager.provide
     let getEmailServiceConfiguration = (fun () -> app.ApplicationServices.GetService<EmailServiceConfiguration>())
-    let getFeatureFlagsServiceConfiguration = (fun () -> app.ApplicationServices.GetService<FeatureFlags>())
     let bookingNotifier = BookingNotifier.provide getEmailServiceConfiguration smtpClientManager.SmtpClient getAllOffices
     let officeRestrictionNotifier = OfficeRestrictionNotifier.provide bookingNotifier.NotifyOfficeRestrictionToBooking
 
+    let featureFlags = configureFeatureFlags ctx.Configuration
+    
     let apiDependencyFactory = ApiDependencyFactory.provide
                                    provideEventStore
                                    reservationCommandsFactory
                                    getAllOffices
                                    bookingNotifier.NotifySuccess
                                    officeRestrictionNotifier.NotifyOfficeRestrictions
-                                   getFeatureFlagsServiceConfiguration
+                                   featureFlags
 
     let routes = Routes.provide apiDependencyFactory
     app.UseCors(configureCors ctx)
@@ -80,12 +86,6 @@ let configureDynamoDB (sp : ServiceProvider) =
         }
     printfn $"ReservationTableName: {dynamoDBConfiguration.ReservationTableName}"
     printfn $"OfficeTableName: {dynamoDBConfiguration.OfficeTableName}"
-
-let configureFeatureFlags (sp : ServiceProvider) =
-    let config = sp.GetService<IConfiguration>()
-    {
-        BookingCancellation = config.["FeatureFlags:BookingCancellation"] |> bool.Parse
-    }
         
 let configureEmailService (sp : ServiceProvider) =
     let config = sp.GetService<IConfiguration>()
@@ -103,7 +103,6 @@ let configureServices (services : IServiceCollection) =
     let config = serviceProvider.GetService<IConfiguration>()
     
     services.AddGiraffe()
-            .AddSingleton<FeatureFlags>(configureFeatureFlags serviceProvider)
             .AddCors() |> ignore
             
     match useDevelopmentStorage with

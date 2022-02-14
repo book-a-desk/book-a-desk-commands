@@ -55,7 +55,10 @@ let mockReservationCommandFactory : ReservationCommandsFactory =
 let bookingsUrl = sprintf "http://localhost:/bookings"
 let cancelBookingsUrl = sprintf "http://localhost:/cancelBookings"
 
-let mockFeatureToggle () = "True"
+let featureFlag =
+    {
+        BookingCancellation = true
+    }
 let mockEmailNotification _ = asyncResult { return () }
 let mockOfficeRestrictionNotification _ _ = async { return Ok [()] }
 
@@ -82,7 +85,7 @@ let ``GIVEN A Book-A-Desk server and a booking, WHEN cancelling a desk, THEN a d
                 () |> async.Return
         } : DynamoDbEventStore
         
-    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification mockOfficeRestrictionNotification mockFeatureToggle
+    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification mockOfficeRestrictionNotification featureFlag
     use httpClient = TestServer.createAndRun mockApiDependencyFactory
     
     let serializedCancellation = JsonConvert.SerializeObject(cancellation)
@@ -110,7 +113,7 @@ let ``GIVEN an invalid reservation details WHEN cancelling a desk THEN it return
             AppendEvents = fun _ -> () |> async.Return
         } : DynamoDbEventStore
         
-    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification mockOfficeRestrictionNotification mockFeatureToggle
+    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification mockOfficeRestrictionNotification featureFlag
     use httpClient = TestServer.createAndRun mockApiDependencyFactory
     
     let bookingInvalidEmail  =
@@ -145,7 +148,7 @@ let ``GIVEN an reservation WHEN database service fails THEN it returns 500 And D
             AppendEvents = fun _ -> () |> async.Return
         } : DynamoDbEventStore
 
-    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification mockOfficeRestrictionNotification mockFeatureToggle
+    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification mockOfficeRestrictionNotification featureFlag
     use httpClient = TestServer.createAndRun mockApiDependencyFactory
 
     let serializedCancellation = JsonConvert.SerializeObject(cancellation)
