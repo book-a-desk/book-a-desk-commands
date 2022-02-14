@@ -3,18 +3,19 @@ namespace Book_A_Desk.Api
 open FSharp.Control.Tasks.V2.ContextInsensitive
 open Giraffe
 
+open Book_A_Desk.Api.Models
+
 type FlagsHttpHandler =
     {
         HandleGetAll: unit -> HttpHandler
     }
 
 module rec FlagsHttpHandler =
-    let initialize getFeatureFlags =
+    let initialize featureFlags =
         {
-            HandleGetAll = fun () -> handleGetAll getFeatureFlags 
+            HandleGetAll = fun () -> handleGetAll featureFlags 
         }
-    let handleGetAll getFeatureFlags = fun next context ->
+    let handleGetAll (featureFlags : FeatureFlags) = fun next context ->
          task {
-             let flags = getFeatureFlags ()
-             return! Successful.OK flags next context
+             return! json featureFlags next context
      }

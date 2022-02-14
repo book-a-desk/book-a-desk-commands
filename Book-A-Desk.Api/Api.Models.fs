@@ -86,3 +86,8 @@ type RestrictionNotifier =
         Office: OfficeReference
         Date: DateTime
     }
+    
+type FeatureFlags =
+    {
+        BookingCancellation: bool
+    }
