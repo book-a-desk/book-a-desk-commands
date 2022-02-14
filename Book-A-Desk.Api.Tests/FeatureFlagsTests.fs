@@ -40,6 +40,9 @@ let mockReservationCommandFactory : ReservationCommandsFactory =
         CreateCancelBookADeskCommand = fun () -> BookADeskCancellationCommand.provide offices domainName
     }
 
+let mockEmailNotification _ = async { return Ok () }
+let mockOfficeRestrictionNotification _ _ = async { return Ok [()] }
+
 [<Fact>]
 let ``GIVEN A Book-A-Desk server, WHEN getting the flags endpoint, THEN enabled flags are returned`` () = async {
     let mockProvideEventStore _ =
@@ -47,11 +50,10 @@ let ``GIVEN A Book-A-Desk server, WHEN getting the flags endpoint, THEN enabled 
             GetEvents = fun _ -> failwith "should not be called"
             AppendEvents = fun _ -> failwith "should not be called"
         } : DynamoDbEventStore.DynamoDbEventStore
-    let mockEmailNotification _ = async { return Ok () }
     let mockGetOffices () = offices
-    let mockGetFeatureFlags = enabledFeatureFlag
+    let mockGetFeatureFlags () = enabledFeatureFlag
     
-    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification mockGetFeatureFlags
+    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification mockOfficeRestrictionNotification mockGetFeatureFlags
     use httpClient = TestServer.createAndRun mockApiDependencyFactory
     let! result = HttpRequest.getAsyncGetContent httpClient "http://localhost/flags"
 
@@ -69,11 +71,10 @@ let ``GIVEN A Book-A-Desk server, WHEN getting the flags endpoint, THEN disabled
             GetEvents = fun _ -> failwith "should not be called"
             AppendEvents = fun _ -> failwith "should not be called"
         } : DynamoDbEventStore.DynamoDbEventStore
-    let mockEmailNotification _ = async { return Ok () }
     let mockGetOffices () = offices
-    let mockGetFeatureFlags = disabledFeatureFlag
+    let mockGetFeatureFlags () = disabledFeatureFlag
     
-    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification mockGetFeatureFlags
+    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification mockOfficeRestrictionNotification mockGetFeatureFlags
     use httpClient = TestServer.createAndRun mockApiDependencyFactory
     let! result = HttpRequest.getAsyncGetContent httpClient "http://localhost/flags"
 

@@ -38,6 +38,9 @@ let mockReservationCommandFactory : ReservationCommandsFactory =
         CreateCancelBookADeskCommand = fun () -> BookADeskCancellationCommand.provide offices domainName
     }
 
+let mockEmailNotification _ = async { return Ok () }
+let mockOfficeRestrictionNotification _ _ = async { return Ok [()] }
+
 [<Fact>]
 let ``GIVEN A Book-A-Desk server, WHEN getting the offices endpoint, THEN offices are returned`` () = async {
     let mockProvideEventStore _ =
@@ -45,11 +48,10 @@ let ``GIVEN A Book-A-Desk server, WHEN getting the offices endpoint, THEN office
             GetEvents = fun _ -> failwith "should not be called"
             AppendEvents = fun _ -> failwith "should not be called"
         } : DynamoDbEventStore.DynamoDbEventStore
-    let mockEmailNotification booking = async { return Ok () }
     let mockGetOffices () = offices
-    let mockGetFeatureFlags = featureFlag
+    let mockGetFeatureFlags () = featureFlag
     
-    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification mockGetFeatureFlags
+    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification mockOfficeRestrictionNotification mockGetFeatureFlags
     use httpClient = TestServer.createAndRun mockApiDependencyFactory
     let! result = HttpRequest.getAsyncGetContent httpClient "http://localhost/offices"
 
@@ -77,16 +79,15 @@ let ``GIVEN A Book-A-Desk server, WHEN getting the office availability by date, 
             OfficeId = officeId |> OfficeId
         } : Reservation.Events.DeskBooked) |> ReservationEvent.DeskBooked |> ReservationEvent
     let mockGetOffices () = offices
-    let mockGetFeatureFlags = featureFlag
+    let mockGetFeatureFlags () = featureFlag
 
     let mockProvideEventStore _ =
         {
             GetEvents = fun _ -> [aBooking] |> Seq.ofList |> Ok |> async.Return
             AppendEvents = fun _ -> failwith "should not be called"
         } : DynamoDbEventStore.DynamoDbEventStore
-        
-    let mockEmailNotification _ = async { return Ok () }  
-    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification mockGetFeatureFlags
+
+    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification mockOfficeRestrictionNotification mockGetFeatureFlags
     use httpClient = TestServer.createAndRun mockApiDependencyFactory
 
     let! result = HttpRequest.getAsyncGetContent httpClient $"http://localhost/offices/{officeId.ToString()}/availabilities?date={date.ToString()}"

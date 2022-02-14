@@ -57,8 +57,15 @@ let configureApp (ctx : WebHostBuilderContext) (app : IApplicationBuilder) =
     let getEmailServiceConfiguration = (fun () -> app.ApplicationServices.GetService<EmailServiceConfiguration>())
     let getFeatureFlagsServiceConfiguration = (fun () -> app.ApplicationServices.GetService<FeatureFlags>())
     let bookingNotifier = BookingNotifier.provide getEmailServiceConfiguration smtpClientManager.SmtpClient getAllOffices
-    
-    let apiDependencyFactory = ApiDependencyFactory.provide provideEventStore reservationCommandsFactory getAllOffices bookingNotifier.NotifySuccess getFeatureFlagsServiceConfiguration
+    let officeRestrictionNotifier = OfficeRestrictionNotifier.provide bookingNotifier.NotifyOfficeRestrictionToBooking
+
+    let apiDependencyFactory = ApiDependencyFactory.provide
+                                   provideEventStore
+                                   reservationCommandsFactory
+                                   getAllOffices
+                                   bookingNotifier.NotifySuccess
+                                   officeRestrictionNotifier.NotifyOfficeRestrictions
+                                   getFeatureFlagsServiceConfiguration
 
     let oktaDomain = ctx.Configuration.["Okta:OktaDomain"]
     let oktaIssuer = getOktaIssuer oktaDomain
