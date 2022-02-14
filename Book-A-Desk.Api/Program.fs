@@ -12,6 +12,7 @@ open Microsoft.Extensions.DependencyInjection
 open Giraffe
 
 open Book_A_Desk.Api
+open Book_A_Desk.Api.Models
 open Book_A_Desk.Domain.Office.Domain
 open Book_A_Desk.Infrastructure
 open Book_A_Desk.Domain.CommandHandler

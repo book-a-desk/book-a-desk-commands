@@ -6,6 +6,7 @@ open System.Text.Json
 open Xunit
 
 open Book_A_Desk.Api
+open Book_A_Desk.Api.Models
 open Book_A_Desk.Domain
 open Book_A_Desk.Domain.CommandHandler
 open Book_A_Desk.Domain.Reservation.Commands
