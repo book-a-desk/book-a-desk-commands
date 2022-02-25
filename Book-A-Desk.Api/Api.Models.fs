@@ -90,4 +90,5 @@ type RestrictionNotifier =
 type FeatureFlags =
     {
         BookingCancellation: bool
+        GetBookingsEnabled: bool
     }

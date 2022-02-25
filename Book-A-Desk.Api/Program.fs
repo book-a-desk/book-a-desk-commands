@@ -36,6 +36,7 @@ let configureCors (ctx : WebHostBuilderContext) (builder : CorsPolicyBuilder) =
 let configureFeatureFlags (config : IConfiguration) =
     {
         BookingCancellation = config.["FeatureFlags:BookingCancellation"] |> bool.Parse
+        GetBookingsEnabled = config.["FeatureFlags:GetBookingsEnabled"] |> bool.Parse
     }
 
 let configureApp (ctx : WebHostBuilderContext) (app : IApplicationBuilder) =
