@@ -34,6 +34,7 @@ let offices =
 let featureFlag =
     {
         BookingCancellation = true
+        GetBookingsEnabled = true
     }
 
 let mockReservationCommandFactory : ReservationCommandsFactory =
