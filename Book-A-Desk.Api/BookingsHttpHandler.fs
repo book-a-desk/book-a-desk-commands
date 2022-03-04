@@ -3,6 +3,7 @@
 open System
 
 open Amazon.DynamoDBv2
+open Book_A_Desk.Domain.Reservation.Queries
 open FsToolkit.ErrorHandling.Operator.Result
 open Microsoft.AspNetCore.Http
 open Giraffe
@@ -22,6 +23,7 @@ open Book_A_Desk.Infrastructure.DynamoDbEventStore
 type BookingsHttpHandler =
     {
         HandlePostWith: Models.Booking -> HttpHandler
+        HandleGetByEmailAndDate: unit -> HttpHandler
     }
 
 module BookingsHttpHandler =
@@ -100,6 +102,45 @@ module BookingsHttpHandler =
                     return! json response.Error next context
             }
 
+        let handleGetByEmailAndDateFromEventStore eventStore email date = asyncResult {
+            let (ReservationId aggregateId) = ReservationAggregate.Id
+            let! bookingEvents = eventStore.GetEvents aggregateId
+            return! ReservationsQueriesHandler.getUserBookingsStartFrom bookingEvents email date
+        }
+        
+        let handleGetByEmailAndDate () = fun next context ->
+            task {
+                let email = InputParser.parseEmailFromContext context
+                match email with
+                | None ->
+                    context.SetStatusCode(400)
+                    return! text "Email could not be parsed" next context
+                | Some email ->
+                    let date = InputParser.parseDateFromContext context
+                    match date with
+                    | None ->
+                        context.SetStatusCode(400)
+                        return! text "Date could not be parsed" next context
+                    | Some date ->
+                        let eventStore = provideEventStore (context.GetService<IAmazonDynamoDB>())
+                        let! result = handleGetByEmailAndDateFromEventStore eventStore email date
+                    
+                        match result with
+                        | Ok bookings ->
+                            let bookings =
+                                bookings
+                                |> List.map (fun (booking:Booking) ->
+                                    Booking.value booking.OfficeId booking.Date booking.EmailAddress
+                                    )
+                                |> List.toArray
+                                |> fun l -> { Bookings.Items = l }
+                            return! json bookings next context
+                        | Error e ->
+                            context.SetStatusCode(500)
+                            return! text ("Internal Error: " + e) next context
+        }
+        
         {
             HandlePostWith = handlePostWith
+            HandleGetByEmailAndDate = handleGetByEmailAndDate
         }
