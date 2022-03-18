@@ -7,11 +7,7 @@ open Book_A_Desk.Domain.Office.Domain
 open Book_A_Desk.Domain.Reservation
 open Book_A_Desk.Domain.Reservation.Events
 open Book_A_Desk.Domain.Reservation.Queries
-open Book_A_Desk.Infrastructure
-open Book_A_desk.Domain.Tests
 open Xunit
-
-open Book_A_Desk.Domain.QueriesHandler
 
 [<Fact>]
 let ``GIVEN A ReservationQueriesHandler, WHEN getting the booking, THEN booking is returned`` () =
