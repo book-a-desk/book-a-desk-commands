@@ -38,6 +38,40 @@ paths:
             - write:bookings
             - read:bookings
       x-codegen-request-body-name: body
+    get:
+      tags:
+        - Booking
+      parameters:
+        - in: query
+          name: email
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: date
+          required: true
+          schema:
+            type: string
+            format: date
+      summary: Get booking details
+      operationId: getBookings
+      responses:
+        400:
+          description: Bad Request
+          content:
+            text/plain:
+              schema:
+                type: string
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Bookings"
+      security:
+        - book-a-desk_auth:
+            - read:bookings
+      x-codegen-request-body-name: body
   /cancelBookings:
     post:
       tags:
@@ -174,6 +208,13 @@ components:
           format: date
         user:
           $ref: "#/components/schemas/UserReference"
+    Bookings:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Booking"
     Booking:
       required:
         - office
@@ -257,6 +298,8 @@ components:
       type: object
       properties:
         BookingCancellation:
+          type: boolean
+        GetBookings:
           type: boolean
   securitySchemes:
     book-a-desk_auth:

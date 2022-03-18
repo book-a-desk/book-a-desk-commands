@@ -28,6 +28,12 @@ module Routes =
                         |> fun h -> h.HandlePostWith
                     )
                 ]
+                GET >=> choose [
+                    route "/bookings" >=>  (
+                        apiDependencyFactory.CreateBookingsHttpHandler ()
+                        |> fun h -> h.HandleGetByEmailAndDate ()
+                    )
+                ]
                 GET >=> choose [ 
                     route "/health"
                         >=> HealthHttpHandler.handle
