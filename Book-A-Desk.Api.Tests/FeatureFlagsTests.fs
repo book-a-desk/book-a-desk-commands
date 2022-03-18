@@ -28,13 +28,13 @@ let offices =
 let enabledFeatureFlag =
     {
         BookingCancellation = true
-        GetBookingsEnabled = true
+        GetBookings = true
     }
 
 let disabledFeatureFlag =
     {
         BookingCancellation = false
-        GetBookingsEnabled = false
+        GetBookings = false
     }
 
 let mockReservationCommandFactory : ReservationCommandsFactory =

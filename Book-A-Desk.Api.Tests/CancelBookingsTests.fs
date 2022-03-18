@@ -58,7 +58,7 @@ let cancelBookingsUrl = sprintf "http://localhost:/cancelBookings"
 let featureFlag =
     {
         BookingCancellation = true
-        GetBookingsEnabled = true
+        GetBookings = true
     }
 let mockEmailNotification _ = asyncResult { return () }
 let mockOfficeRestrictionNotification _ _ = async { return Ok [()] }

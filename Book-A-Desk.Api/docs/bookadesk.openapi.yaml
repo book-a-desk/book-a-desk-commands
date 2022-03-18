@@ -299,7 +299,7 @@ components:
       properties:
         BookingCancellation:
           type: boolean
-        GetBookingsEnabled:
+        GetBookings:
           type: boolean
   securitySchemes:
     book-a-desk_auth:
