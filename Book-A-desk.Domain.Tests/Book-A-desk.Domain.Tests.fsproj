@@ -16,6 +16,7 @@
         <Compile Include="QueriesHandler.Offices.Tests.fs" />
         <Compile Include="Cancellation.Validator.Tests.fs" />
         <Compile Include="Reservation.Aggregate.Tests.fs" />
+        <Compile Include="QueriesHandler.Reservation.Tests.fs" />
     </ItemGroup>
 
     <ItemGroup>
@@ -27,6 +28,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Book-A-Desk.Domain\Book-A-Desk.Domain.fsproj" />
+      <ProjectReference Include="..\Book-A-Desk.Infrastructure\Book-A-Desk.Infrastructure.fsproj" />
     </ItemGroup>
 
 </Project>
