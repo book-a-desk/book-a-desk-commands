@@ -111,33 +111,34 @@ module BookingsHttpHandler =
         let handleGetByEmailAndDate () = fun next context ->
             task {
                 let email = InputParser.parseEmailFromContext context
-                match email with
-                | None ->
+                let date = InputParser.parseDateFromContext context
+                match email, date with
+                | None, None ->
+                    context.SetStatusCode(400)
+                    return! text "Email and start date could not be parsed" next context
+                | Some _, None ->
+                    context.SetStatusCode(400)
+                    return! text "Start date could not be parsed" next context
+                | None, Some _ ->
                     context.SetStatusCode(400)
                     return! text "Email could not be parsed" next context
-                | Some email ->
-                    let date = InputParser.parseDateFromContext context
-                    match date with
-                    | None ->
-                        context.SetStatusCode(400)
-                        return! text "Date could not be parsed" next context
-                    | Some date ->
-                        let eventStore = provideEventStore (context.GetService<IAmazonDynamoDB>())
-                        let! result = handleGetByEmailAndDateFromEventStore eventStore email date
+                | Some email, Some date ->
+                    let eventStore = provideEventStore (context.GetService<IAmazonDynamoDB>())
+                    let! result = handleGetByEmailAndDateFromEventStore eventStore email date
                     
-                        match result with
-                        | Ok bookings ->
-                            let bookings =
-                                bookings
-                                |> List.map (fun (booking:Booking) ->
-                                    Booking.value booking.OfficeId booking.Date booking.EmailAddress
-                                    )
-                                |> List.toArray
-                                |> fun l -> { Bookings.Items = l }
-                            return! json bookings next context
-                        | Error e ->
-                            context.SetStatusCode(500)
-                            return! text ("Internal Error: " + e) next context
+                    match result with
+                    | Ok bookings ->
+                        let bookings =
+                            bookings
+                            |> List.map (fun (booking:Booking) ->
+                                Booking.value booking.OfficeId booking.Date booking.EmailAddress
+                                )
+                            |> List.toArray
+                            |> fun l -> { Bookings.Items = l }
+                        return! json bookings next context
+                    | Error e ->
+                        context.SetStatusCode(500)
+                        return! text ("Internal Error: " + e) next context
         }
         
         {
