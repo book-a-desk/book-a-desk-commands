@@ -96,27 +96,26 @@ module rec BookingNotifier =
         bodyPart.Text <- emailNotificationDetails.Text
         mailMessage.Body <- bodyPart
         mailMessage
-        
-    let createMailText (bookingDate : DateTime) (office : Office) =
-            let (CityName officeName) = office.City
-            $"You have booked a desk at %s{bookingDate.ToShortDateString()} in the Office %s{officeName}{Environment.NewLine}" +
-            $"Opening hours: {office.OpeningHoursText}{Environment.NewLine}" +
-            $"It is your responsibility to verify that the office is open for the date that you have booked.{Environment.NewLine}{Environment.NewLine}" +
+
+    let healthQuestionnaireMailMessage =
             $"SVP, veuillez répondre au questionnaire sur l’état de santé. Si vous répondez oui à une des questions, nous vous demandons de rester à la maison.{Environment.NewLine}{Environment.NewLine}" +
             $"Si vous avez d’autres questions, n’hésitez pas à écrire à <a href=\"mailto:Anastasia.vlahos@broadsign.com\">Anastasia.vlahos@broadsign.com</a>.{Environment.NewLine}{Environment.NewLine}" +
             $"We ask that you please fill out our health questionnaire. Should you answer yes to any of the questions, we politely ask that you refrain from coming into the office.{Environment.NewLine}{Environment.NewLine}" +
             $"If you have any questions at all, please feel free to reach out to <a href=\"mailto:Anastasia.vlahos@broadsign.com\">Anastasia.vlahos@broadsign.com</a>.{Environment.NewLine}{Environment.NewLine}" +
             $"Link:  <a href=\"https://forms.gle/FyzgXfst8FYRukih9\">Questionnaire sur la Santé // Health Questionnaire</a>.{Environment.NewLine}"
 
+    let createMailText (bookingDate : DateTime) (office : Office) =
+            let (CityName officeName) = office.City
+            $"You have booked a desk at %s{bookingDate.ToShortDateString()} in the Office %s{officeName}{Environment.NewLine}" +
+            $"Opening hours: {office.OpeningHoursText}{Environment.NewLine}" +
+            $"It is your responsibility to verify that the office is open for the date that you have booked.{Environment.NewLine}{Environment.NewLine}" +
+            healthQuestionnaireMailMessage
+
     let createOfficeRestriction (office : Office) =
             let (CityName officeName) = office.City
             $"We inform you that the Office %s{officeName} has some restrictions.{Environment.NewLine}" +
             $"If you have not already filled the health questionnaire, please follow the next instructions:{Environment.NewLine}{Environment.NewLine}" +
-            $"SVP, veuillez répondre au questionnaire sur l’état de santé. Si vous répondez oui à une des questions, nous vous demandons de rester à la maison.{Environment.NewLine}{Environment.NewLine}" +
-            $"Si vous avez d’autres questions, n’hésitez pas à écrire à <a href=\"mailto:Anastasia.vlahos@broadsign.com\">Anastasia.vlahos@broadsign.com</a>.{Environment.NewLine}{Environment.NewLine}" +
-            $"We ask that you please fill out our health questionnaire. Should you answer yes to any of the questions, we politely ask that you refrain from coming into the office.{Environment.NewLine}{Environment.NewLine}" +
-            $"If you have any questions at all, please feel free to reach out to <a href=\"mailto:Anastasia.vlahos@broadsign.com\">Anastasia.vlahos@broadsign.com</a>.{Environment.NewLine}{Environment.NewLine}" +
-            $"Link:  <a href=\"https://forms.gle/FyzgXfst8FYRukih9\">Questionnaire sur la Santé // Health Questionnaire</a>.{Environment.NewLine}"
+            healthQuestionnaireMailMessage
             
     let getOffice officeId getOffices : Result<_,_> = result {
         let! officeId =
