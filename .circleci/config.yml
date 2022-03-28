@@ -297,7 +297,8 @@ jobs:
             - << pipeline.parameters.docker-tar-filename >>
 
   push-image:
-    machine: true
+    machine:
+      image: ubuntu-2004:202201-02
     parameters:
       ecr-account-url:
         type: string
@@ -317,7 +318,8 @@ jobs:
           aws-account-id: << parameters.aws-account-id >>
 
   deploy:
-    machine: true
+    machine:
+      image: ubuntu-2004:202201-02
     parameters:
       ecr-account-url:
         type: string
