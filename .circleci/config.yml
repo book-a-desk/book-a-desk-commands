@@ -257,6 +257,7 @@ jobs:
         auth:
           username: mydockerhub-user
           password: $DOCKERHUB_PASSWORD
+    resource_class: small
     steps:
       - checkout
       - run:
@@ -277,9 +278,11 @@ jobs:
     docker:
       - image: circleci/buildpack-deps:latest
         user: root
+    resource_class: small
     steps:
       - checkout
-      - setup_remote_docker
+      - setup_remote_docker:
+          docker_layer_caching: true
       - run:
           name: Build Docker image
           command: |
@@ -299,6 +302,7 @@ jobs:
   push-image:
     machine:
       image: ubuntu-2004:202201-02
+    resource_class: medium
     parameters:
       ecr-account-url:
         type: string
@@ -320,6 +324,7 @@ jobs:
   deploy:
     machine:
       image: ubuntu-2004:202201-02
+    resource_class: medium
     parameters:
       ecr-account-url:
         type: string
