@@ -33,9 +33,9 @@
         let office = 
             {
                 Id = Guid.NewGuid() |> OfficeId
-                City = CityName "Montreal"
+                City = CityName "Montréal"
                 BookableDesksPerDay = 32
-                OpeningHoursText = "Some Montreal opening hours"
+                OpeningHoursText = "Some Montréal opening hours"
             }
         let newOffice =
             {
