@@ -129,19 +129,20 @@ module rec BookingNotifier =
             let (CityName officeName) = office.City
             let bookingDateFr = bookingDate.ToString("dd/MM/yyyy")
             let bookingDateEn = bookingDate.ToString("MM/dd/yyyy")
+            let openingHoursFr = if office.City.ToString() = "Berlin" then "de 7h à 19h du mardi au jeudi" else "de 7h30 à 18h30 du mardi au jeudi"
 
-            $"Vous avez réservé un bureau le %s{bookingDateFr} dans le bureau %s{officeName} Heures d'ouverture : {office.OpeningHoursText}.{newLine}" +
+            $"Vous avez effectué une réservation le %s{bookingDateFr} au bureau de %s{officeName} (Heures d'ouverture : {openingHoursFr}).{newLine}" +
             $"Vous êtes responsable de vérifier que le bureau est ouvert à la date que vous avez réservée.{newLine}{newLine}" +
             vaccinationPolicyMailMessageFr +
-            $"------------------------------------------{newLine}" +
-            $"You have booked a desk at %s{bookingDateEn} in the Office %s{officeName} Opening hours: {office.OpeningHoursText}.{newLine}" +
+            $"------------------------------------------{newLine}{newLine}" +
+            $"You have booked a desk at %s{bookingDateEn} in the Office %s{officeName} (Opening hours: {office.OpeningHoursText}).{newLine}" +
             $"It is your responsibility to verify that the office is open for the date that you have booked.{newLine}{newLine}" +
             vaccinationPolicyMailMessageEn
 
     let createOfficeRestriction (office : Office) =
             let (CityName officeName) = office.City
 
-            $"Nous vous informons que le bureau %s{officeName} a certaines restrictions.{newLine}" +
+            $"Nous vous informons que le bureau de %s{officeName} a certaines restrictions.{newLine}" +
             $"Veuillez lire attentivement les dernières mises à jour de la politique de vaccination :{newLine}{newLine}" +
             vaccinationPolicyMailMessageFr +
             $"------------------------------------------{newLine}" +
