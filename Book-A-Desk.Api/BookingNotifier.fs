@@ -104,7 +104,7 @@ module rec BookingNotifier =
             $"If you have any questions at all, please feel free to reach out to <a href=\"mailto:Anastasia.vlahos@broadsign.com\">Anastasia.vlahos@broadsign.com</a>.{newLine}{newLine}" +
             $"Link:  <a href=\"https://forms.gle/FyzgXfst8FYRukih9\">Health questionnaire</a>.{newLine}{newLine}" +
             $"------------------------------------------{newLine}{newLine}" +
-            $"Merci de bien vouloir répondre au questionnaire sur l'état de santé. Si vois répondez oui à l'une des questions, nous vois demandons de rester chez vous.{newLine}" +
+            $"Merci de bien vouloir répondre au questionnaire sur l'état de santé. Si vois répondez oui à l'une des questions, nous vous demandons de rester chez vous.{newLine}" +
             $"Si vous avez d’autres questions, n’hésitez pas à écrire à <a href=\"mailto:Anastasia.vlahos@broadsign.com\">Anastasia.vlahos@broadsign.com</a>.{newLine}{newLine}" +
             $"Lien:  <a href=\"https://forms.gle/FyzgXfst8FYRukih9\">Questionnaire sur la santé</a>.{newLine}"
 
