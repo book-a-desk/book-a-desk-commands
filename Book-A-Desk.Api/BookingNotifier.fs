@@ -146,7 +146,7 @@ module rec BookingNotifier =
             vaccinationPolicyMailMessageFr +
             $"------------------------------------------{newLine}" +
             $"We inform you that the Office %s{officeName} has some restrictions.{newLine}" +
-            $"Please read carefully the last updates on Vaccination Policy / Politique de vaccination:{newLine}{newLine}" +
+            $"Please read carefully the last updates on vaccination policy:{newLine}{newLine}" +
             vaccinationPolicyMailMessageEn
             
     let getOffice officeId getOffices : Result<_,_> = result {
