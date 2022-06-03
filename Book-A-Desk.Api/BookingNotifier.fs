@@ -114,7 +114,7 @@ module rec BookingNotifier =
         $"1. Tout d’abord, nous allons mettre à jour notre politique pour permettre aux employés et aux visiteurs non vaccinés de venir au bureau sur présentation d’un résultat négatif à un test rapide de dépistage de la COVID-19.{newLine}" +
         $"2. Les employés vaccinés ne devront plus s’inscrire à l’avance pour se rendre au bureau ou remplir le questionnaire de santé. Cependant, vous devrez toujours respecter la politique ci-jointe et vous abstenir de vous rendre au bureau si vous présentez des symptômes de la COVID-19, si vous recevez un test positif à la COVID-19 ou si vous avez été en contact avec quelqu’un qui a reçu un test positif à la COVID-19.{newLine}{newLine}" +
         $"Vous trouverez notre politique de vaccination dans Bamboo.{newLine}{newLine}" +
-        $"Si vous avez des questions, n’hésitez pas à communiquer avec moi ou quelqu'un en RH.{newLine}" +
+        $"Si vous avez des questions, n’hésitez pas à communiquer RH.{newLine}" +
         $"Merci!{newLine}{newLine}"
 
     let vaccinationPolicyMailMessageEn =
@@ -122,7 +122,7 @@ module rec BookingNotifier =
         $"1. First, we will be updating our policy to allow unvaccinated employees and visitors to come to the office upon provision of a negative COVID-19 test result obtained from a rapid test.{newLine}" +
         $"2. Vaccinated employees will no longer have to register in advance to go to the office or fill out the health questionnaire. However, they will still be expected to follow the attached policy and refrain from going into the office if they are experiencing symptoms that would lead them to believe that they could have COVID-19, tested positive for COVID-19 or were exposed to someone who tested positive.{newLine}{newLine}" +
         $"Please find our updated vaccination policy in Bamboo.{newLine}{newLine}" +
-        $"For any questions, don't be shy to reach out to myself or any of us in HR.{newLine}" +
+        $"For any questions, don't be shy to reach out HR.{newLine}" +
         $"Thank you!{newLine}{newLine}"
 
     let createMailText (bookingDate : DateTime) (office : Office) =
