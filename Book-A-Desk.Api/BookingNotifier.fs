@@ -129,7 +129,7 @@ module rec BookingNotifier =
             let (CityName officeName) = office.City
             let bookingDateFr = bookingDate.ToString("dd/MM/yyyy")
             let bookingDateEn = bookingDate.ToString("MM/dd/yyyy")
-            let openingHoursFr = if office.City.ToString() = "Berlin" then "de 7h à 19h du mardi au jeudi" else "de 7h30 à 18h30 du mardi au jeudi"
+            let openingHoursFr = if office.City = (CityName "Berlin") then "de 7h à 19h du mardi au jeudi" else "de 7h30 à 18h30 du mardi au jeudi"
 
             $"Vous avez effectué une réservation le %s{bookingDateFr} au bureau de %s{officeName} (Heures d'ouverture : {openingHoursFr}).{newLine}" +
             $"Vous êtes responsable de vérifier que le bureau est ouvert à la date que vous avez réservée.{newLine}{newLine}" +
