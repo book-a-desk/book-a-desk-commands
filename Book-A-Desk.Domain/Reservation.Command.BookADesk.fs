@@ -18,7 +18,7 @@ module BookADeskReservationCommand =
 
         let execute (command:BookADesk) reservationAggregate =
             {
-                DeskBooked.ReservationId = Guid.NewGuid() |> ReservationId
+                DeskBooked.ReservationId = ReservationAggregate.Id
                 Date = command.Date
                 EmailAddress = command.EmailAddress
                 OfficeId = command.OfficeId
