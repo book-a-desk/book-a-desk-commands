@@ -123,15 +123,24 @@ module rec BookingNotifier =
         $"2. Vaccinated employees will no longer have to register in advance to go to the office or fill out the health questionnaire. However, they will still be expected to follow the attached policy and refrain from going into the office if they are experiencing symptoms that would lead them to believe that they could have COVID-19, tested positive for COVID-19 or were exposed to someone who tested positive.{newLine}{newLine}" +
         $"Please find our updated vaccination policy in Bamboo.{newLine}{newLine}" +
         $"For any questions, don't be shy to reach out HR.{newLine}" +
-        $"Thank you!{newLine}{newLine}"
+        $"Thank you!"
+    
+    let getOfficeNameInFrench (officeName : string) =
+        if officeName = "Montreal" then "Montréal" else officeName
+        
+    let getOpeningHoursInFrench (officeName : string) =
+        if officeName = "Berlin" then "de 7h à 19h du mardi au jeudi"
+        elif officeName = "Montreal" then "de 7h30 à 18h30 du mardi au jeudi"  
+        else ""
 
     let createMailText (bookingDate : DateTime) (office : Office) =
             let (CityName officeName) = office.City
             let bookingDateFr = bookingDate.ToString("dd/MM/yyyy")
             let bookingDateEn = bookingDate.ToString("MM/dd/yyyy")
-            let openingHoursFr = if office.City = (CityName "Berlin") then "de 7h à 19h du mardi au jeudi" else "de 7h30 à 18h30 du mardi au jeudi"
+            let openingHoursFr = getOpeningHoursInFrench officeName
+            let officeNameFr = getOfficeNameInFrench officeName
 
-            $"Vous avez effectué une réservation le %s{bookingDateFr} au bureau de %s{officeName} (Heures d'ouverture : {openingHoursFr}).{newLine}" +
+            $"Vous avez effectué une réservation le %s{bookingDateFr} au bureau de %s{officeNameFr} (Heures d'ouverture : {openingHoursFr}).{newLine}" +
             $"Vous êtes responsable de vérifier que le bureau est ouvert à la date que vous avez réservée.{newLine}{newLine}" +
             vaccinationPolicyMailMessageFr +
             $"------------------------------------------{newLine}{newLine}" +
@@ -141,11 +150,12 @@ module rec BookingNotifier =
 
     let createOfficeRestriction (office : Office) =
             let (CityName officeName) = office.City
-
-            $"Nous vous informons que le bureau de %s{officeName} a certaines restrictions.{newLine}" +
+            let officeNameFr = getOfficeNameInFrench officeName
+            
+            $"Nous vous informons que le bureau de %s{officeNameFr} a certaines restrictions.{newLine}" +
             $"Veuillez lire attentivement les dernières mises à jour de la politique de vaccination :{newLine}{newLine}" +
             vaccinationPolicyMailMessageFr +
-            $"------------------------------------------{newLine}" +
+            $"------------------------------------------{newLine}{newLine}" +
             $"We inform you that the Office %s{officeName} has some restrictions.{newLine}" +
             $"Please read carefully the last updates on vaccination policy:{newLine}{newLine}" +
             vaccinationPolicyMailMessageEn
