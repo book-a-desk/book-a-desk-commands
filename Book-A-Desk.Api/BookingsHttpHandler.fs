@@ -109,6 +109,12 @@ module BookingsHttpHandler =
             return! ReservationsQueriesHandler.getUserBookingsStartFrom bookingEvents email date
         }
         
+        let handleGetByDateFromEventStore eventStore date = asyncResult {
+            let (ReservationId aggregateId) = ReservationAggregate.Id
+            let! bookingEvents = eventStore.GetEvents aggregateId
+            return! ReservationsQueriesHandler.getUsersBookingsStartFrom bookingEvents date
+        }
+        
         let handleGetByEmailAndDate () = fun next context ->
             task {
                 if featureFlags.GetBookings then
@@ -121,9 +127,23 @@ module BookingsHttpHandler =
                     | Some _, None ->
                         context.SetStatusCode(400)
                         return! text "Start date could not be parsed" next context
-                    | None, Some _ ->
-                        context.SetStatusCode(400)
-                        return! text "Email could not be parsed" next context
+                    | None, Some date ->
+                        let eventStore = provideEventStore (context.GetService<IAmazonDynamoDB>())
+                        let! result = handleGetByDateFromEventStore eventStore date
+                        
+                        match result with
+                        | Ok bookings ->
+                            let bookings =
+                                bookings
+                                |> List.map (fun (booking:Booking) ->
+                                    Booking.value booking.OfficeId booking.Date booking.EmailAddress
+                                    )
+                                |> List.toArray
+                                |> fun l -> { Bookings.Items = l }
+                            return! json bookings next context
+                        | Error e ->
+                            context.SetStatusCode(500)
+                            return! text ("Internal Error: " + e) next context
                     | Some email, Some date ->
                         let eventStore = provideEventStore (context.GetService<IAmazonDynamoDB>())
                         let! result = handleGetByEmailAndDateFromEventStore eventStore email date

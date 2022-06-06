@@ -125,7 +125,7 @@ let ``GIVEN A Book-A-Desk server and multiple bookings, WHEN getting bookings, T
         
     let mockProvideEventStore _ =
         {
-            GetEvents = fun _ -> [aBooking1; aBooking2; aBooking2] |> Seq.ofList |> Ok |> async.Return
+            GetEvents = fun _ -> [aBooking1; aBooking2; aBooking3] |> Seq.ofList |> Ok |> async.Return
             AppendEvents = fun _ -> failwith "should not be called"
         } : DynamoDbEventStore
     
@@ -143,4 +143,58 @@ let ``GIVEN A Book-A-Desk server and multiple bookings, WHEN getting bookings, T
     Assert.Equal(emailQuery, booking.User.Email)
     Assert.Equal(date1, booking.Date)
     Assert.Equal(officeId.ToString(), booking.Office.Id)
+}
+
+[<Fact>]
+let ``GIVEN A Book-A-Desk server and multiple bookings, WHEN getting bookings without email provided, THEN all bookings of future date are returned`` () = async {
+    let emailQuery = "email1@test.com"
+    let dateQuery = DateTime(2030,02,01)
+    let officeId = Guid.Parse("16C3D468-C115-4452-8502-58B821D6640B") |> OfficeId
+    
+    let email1 = emailQuery |> EmailAddress
+    let date1 = DateTime(2100, 01, 20)
+    let aBooking1 =
+        ({  
+            ReservationId = ReservationAggregate.Id
+            Date = date1
+            EmailAddress = email1
+            OfficeId = officeId 
+        } : Events.DeskBooked) |> ReservationEvent.DeskBooked |> ReservationEvent
+        
+    let email2 = "email2@test.com" |> EmailAddress
+    let date2 = DateTime(2100, 01, 21)
+    let aBooking2 =
+        ({  
+            ReservationId = ReservationAggregate.Id
+            Date = date2
+            EmailAddress = email2 
+            OfficeId = officeId 
+        } : Events.DeskBooked) |> ReservationEvent.DeskBooked |> ReservationEvent
+        
+    let date3 = DateTime(2100, 01, 22)
+    let aBooking3 =
+        ({  
+            ReservationId = ReservationAggregate.Id
+            Date = date3
+            EmailAddress = email2
+            OfficeId = officeId 
+        } : Events.DeskBooked) |> ReservationEvent.DeskBooked |> ReservationEvent
+        
+    let mockProvideEventStore _ =
+        {
+            GetEvents = fun _ -> [aBooking1; aBooking2; aBooking3] |> Seq.ofList |> Ok |> async.Return
+            AppendEvents = fun _ -> failwith "should not be called"
+        } : DynamoDbEventStore
+    
+    let mockEmailNotification _ = asyncResult { return () }
+        
+    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification mockOfficeRestrictionNotification featureFlag
+    use httpClient = TestServer.createAndRun mockApiDependencyFactory
+    
+    let! result = HttpRequest.getAsyncGetContent httpClient $"http://localhost/bookings?date={dateQuery.ToString()}"
+
+    let deserializedResult = JsonConvert.DeserializeObject<Bookings>(result)
+
+    let bookings = deserializedResult.Items
+    Assert.Equal(3, bookings.Length)
 }
