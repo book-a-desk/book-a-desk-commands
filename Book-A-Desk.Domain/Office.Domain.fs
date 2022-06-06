@@ -26,7 +26,7 @@ module Offices =
         [
             {
                 Id = Guid.Parse("4B774D13-645B-4378-A925-1DA565A35FD7") |> OfficeId
-                City = CityName "Montréal"
+                City = CityName "Montreal"
                 BookableDesksPerDay = 34
                 OpeningHoursText = "7:30am to 6:30pm from Tuesday to Thursday"
             }
