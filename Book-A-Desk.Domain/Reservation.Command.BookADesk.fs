@@ -1,7 +1,9 @@
 namespace Book_A_Desk.Domain.Reservation.Commands
 
+open System
 open Book_A_Desk.Domain.Errors
 open Book_A_Desk.Domain.Reservation
+open Book_A_Desk.Domain.Reservation.Domain
 open Book_A_Desk.Domain.Reservation.Events
 
 type BookADeskReservationCommand =
@@ -16,7 +18,7 @@ module BookADeskReservationCommand =
 
         let execute (command:BookADesk) reservationAggregate =
             {
-                DeskBooked.ReservationId = ReservationAggregate.Id
+                DeskBooked.ReservationId = Guid.NewGuid() |> ReservationId
                 Date = command.Date
                 EmailAddress = command.EmailAddress
                 OfficeId = command.OfficeId
