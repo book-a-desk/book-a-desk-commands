@@ -23,10 +23,6 @@ Parameters:
       Specifies a comma-separated list of 3 VPC Availability Zones for
       the creation of new subnets. These zones must have the available status.
     Default: ca-central-1a,ca-central-1b,ca-central-1d
-  AWSKeyIDSecretID:
-    Type: String
-  AWSSecretKeySecretID:
-    Type: String
   CertificateID:
     Type: String
     Description: AWS Certificate Id
@@ -151,13 +147,6 @@ Resources:
           Image: !Ref Image
           PortMappings:
             - ContainerPort: !Ref ContainerPort
-          Secrets:
-            -
-              Name: AWS_KEYID
-              ValueFrom: !Sub "arn:aws:secretsmanager:ca-central-1:${AWS::AccountId}:secret:${AWSKeyIDSecretID}"
-            -
-              Name: AWS_SECRETKEY
-              ValueFrom: !Sub "arn:aws:secretsmanager:ca-central-1:${AWS::AccountId}:secret:${AWSSecretKeySecretID}"
           # Send logs to CloudWatch Logs
           LogConfiguration:
             LogDriver: awslogs
@@ -177,7 +166,6 @@ Resources:
             Action: 'sts:AssumeRole'
       ManagedPolicyArns:
         - 'arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy'
-        - 'arn:aws:iam::aws:policy/SecretsManagerReadWrite'
   TaskRole:
     Type: AWS::IAM::Role
     Properties:
