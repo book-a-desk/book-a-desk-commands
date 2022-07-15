@@ -190,6 +190,7 @@ Resources:
             Action: 'sts:AssumeRole'
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess
+        - arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess
   ContainerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:

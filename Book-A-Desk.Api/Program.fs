@@ -74,8 +74,8 @@ let configureAppConfiguration (builder : IConfigurationBuilder) =
         let awsSecretKey = Environment.GetEnvironmentVariable("AWS_SECRETKEY")
         let credentials = BasicAWSCredentials(awsKeyId, awsSecretKey)
         let options = AWSOptions()
-        options.Region <- RegionEndpoint.GetBySystemName(region)
-        options.Credentials <- credentials
+//        options.Region <- RegionEndpoint.GetBySystemName(region)
+//        options.Credentials <- credentials
         builder.AddSystemsManager($"/BookADesk/", options) |> ignore
     | true -> ()
     
