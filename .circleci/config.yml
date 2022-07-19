@@ -49,8 +49,6 @@ workflows:
           aws-account-id: ${AWS_ACCOUNT_DEV}
           authenticate-aws:
             - authenticate-aws-book-a-desk-dev
-          aws-key-id-secret-id: ${AWS_ACCESS_KEY_ID_SECRET_DEV}
-          aws-secret-key-secret-id: ${AWS_SECRET_ACCESS_KEY_SECRET_DEV}
           certificate-id: ${ACM_CERTIFICATE_ID_DEV}
           hosted-zone-name: ${HOSTED_ZONE_NAME_DEV}
           stack-name: << pipeline.parameters.stack-name >>
@@ -75,8 +73,6 @@ workflows:
           aws-account-id: ${AWS_ACCOUNT_TEST}
           authenticate-aws:
             - authenticate-aws-book-a-desk-test
-          aws-key-id-secret-id: ${AWS_ACCESS_KEY_ID_SECRET_TEST}
-          aws-secret-key-secret-id: ${AWS_SECRET_ACCESS_KEY_SECRET_TEST}
           certificate-id: ${ACM_CERTIFICATE_ID_TEST}
           hosted-zone-name: ${HOSTED_ZONE_NAME_TEST}
           stack-name: << pipeline.parameters.stack-name >>
@@ -106,8 +102,6 @@ workflows:
           aws-account-id: ${AWS_ACCOUNT_PROD}
           authenticate-aws:
             - authenticate-aws-book-a-desk-prod
-          aws-key-id-secret-id: ${AWS_ACCESS_KEY_ID_SECRET_PROD}
-          aws-secret-key-secret-id: ${AWS_SECRET_ACCESS_KEY_SECRET_PROD}
           certificate-id: ${ACM_CERTIFICATE_ID_PROD}
           hosted-zone-name: ${HOSTED_ZONE_NAME_PROD}
           stack-name: << pipeline.parameters.stack-name >>
@@ -225,10 +219,6 @@ commands:
 
   aws-cloudformation-deploy:
     parameters:
-      aws-key-id-secret-id:
-        type: string
-      aws-secret-key-secret-id:
-        type: string
       certificate-id:
         type: string
       hosted-zone-name:
@@ -244,7 +234,7 @@ commands:
           name: Ensure infrastructure is up to date
           command: |
             aws cloudformation deploy \
-              --parameter-overrides "AWSKeyIDSecretID=<< parameters.aws-key-id-secret-id >>" "AWSSecretKeySecretID=<< parameters.aws-secret-key-secret-id >>" "CertificateID=<< parameters.certificate-id >>" "HostedZoneName=<< parameters.hosted-zone-name >>" "Image=<< parameters.ecr-account-url >>/<< pipeline.parameters.docker-repo >>:<< pipeline.parameters.docker-img-version >>" \
+              --parameter-overrides "CertificateID=<< parameters.certificate-id >>" "HostedZoneName=<< parameters.hosted-zone-name >>" "Image=<< parameters.ecr-account-url >>/<< pipeline.parameters.docker-repo >>:<< pipeline.parameters.docker-img-version >>" \
               --stack-name << parameters.stack-name >> \
               --template-file ./infra/cf.yaml \
               --capabilities CAPABILITY_NAMED_IAM \
@@ -332,10 +322,6 @@ jobs:
         type: string
       authenticate-aws:
         type: steps
-      aws-key-id-secret-id:
-        type: string
-      aws-secret-key-secret-id:
-        type: string
       certificate-id:
         type: string
       hosted-zone-name:
@@ -353,8 +339,6 @@ jobs:
       - aws-cloudformation-deploy:
           ecr-account-url: << parameters.ecr-account-url >>
           certificate-id: << parameters.certificate-id >>
-          aws-key-id-secret-id: << parameters.aws-key-id-secret-id >>
-          aws-secret-key-secret-id: << parameters.aws-secret-key-secret-id >>
           hosted-zone-name: << parameters.hosted-zone-name >>
           stack-name: << parameters.stack-name >>
           cloudformation-role: << parameters.cloudformation-role >>
