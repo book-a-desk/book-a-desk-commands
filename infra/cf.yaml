@@ -1,28 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 
 Parameters:
-  VpcCIDR:
-    Description: Please enter the IP range (CIDR notation) for this VPC
-    Type: String
-    Default: 10.1.0.0/16
-  PublicSubnet1CIDR:
-    Description: Please enter the IP range (CIDR notation) for the public subnet in the first Availability Zone
-    Type: String
-    Default: 10.1.0.0/24
-  PublicSubnet2CIDR:
-    Description: Please enter the IP range (CIDR notation) for the public subnet in the second Availability Zone
-    Type: String
-    Default: 10.1.1.0/24
-  PublicSubnet3CIDR:
-    Description: Please enter the IP range (CIDR notation) for the public subnet in the second Availability Zone
-    Type: String
-    Default: 10.1.2.0/24
-  VpcAvailabilityZones:
-    Type: CommaDelimitedList
-    Description: >
-      Specifies a comma-separated list of 3 VPC Availability Zones for
-      the creation of new subnets. These zones must have the available status.
-    Default: ca-central-1a,ca-central-1b,ca-central-1d
   CertificateID:
     Type: String
     Description: AWS Certificate Id
@@ -54,78 +32,10 @@ Parameters:
   MaxContainers:
     Type: Number
     Default: 1
+  NetworkStackParameter:
+    Type: String
 
 Resources:
-  VPC:
-    Type: AWS::EC2::VPC
-    Properties:
-      CidrBlock: !Ref VpcCIDR
-      EnableDnsSupport: true
-      EnableDnsHostnames: true
-  InternetGateway:
-    Type: AWS::EC2::InternetGateway
-  InternetGatewayAttachment:
-    Type: AWS::EC2::VPCGatewayAttachment
-    Properties:
-      InternetGatewayId: !Ref InternetGateway
-      VpcId: !Ref VPC
-  SubnetA:
-    Type: AWS::EC2::Subnet
-    Properties:
-      VpcId: !Ref VPC
-      CidrBlock: !Ref PublicSubnet1CIDR
-      AvailabilityZone: !Select [ 0, !Ref VpcAvailabilityZones ]
-      MapPublicIpOnLaunch: true
-      Tags:
-        - Key: Name
-          Value: Public Subnet (AZ1)
-  SubnetB:
-    Type: AWS::EC2::Subnet
-    Properties:
-      VpcId: !Ref VPC
-      CidrBlock: !Ref PublicSubnet2CIDR
-      AvailabilityZone: !Select [ 1, !Ref VpcAvailabilityZones ]
-      MapPublicIpOnLaunch: true
-      Tags:
-        - Key: Name
-          Value: Public Subnet (AZ2)
-  SubnetC:
-    Type: AWS::EC2::Subnet
-    Properties:
-      VpcId: !Ref VPC
-      CidrBlock: !Ref PublicSubnet3CIDR
-      AvailabilityZone: !Select [ 2, !Ref VpcAvailabilityZones ]
-      MapPublicIpOnLaunch: true
-      Tags:
-        - Key: Name
-          Value: Public Subnet (AZ3)
-  RouteViaIgw:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId: !Ref VPC
-  PublicRouteViaIgw:
-    Type: AWS::EC2::Route
-    DependsOn: InternetGatewayAttachment
-    Properties:
-      RouteTableId: !Ref RouteViaIgw
-      DestinationCidrBlock: 0.0.0.0/0
-      GatewayId: !Ref InternetGateway
-  PubSubnet1RouteTableAssociation:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      SubnetId: !Ref SubnetA
-      RouteTableId: !Ref RouteViaIgw
-  PubSubnet2RouteTableAssociation:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      SubnetId: !Ref SubnetB
-      RouteTableId: !Ref RouteViaIgw
-  PubSubnet3RouteTableAssociation:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      SubnetId: !Ref SubnetC
-      RouteTableId: !Ref RouteViaIgw
-
   BookADeskCommandsECSCluster:
     Type: AWS::ECS::Cluster
     Properties:
@@ -183,7 +93,9 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: !Join [ '', [ !Ref ServiceName, ContainerSecurityGroup ] ]
-      VpcId: !Ref VPC
+      VpcId:
+        - Fn::ImportValue:
+            !Sub "${NetworkStackParameter}-VPCID"
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: !Ref ContainerPort
@@ -193,7 +105,9 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: !Join [ '', [ !Ref ServiceName, LoadBalancerSecurityGroup ] ]
-      VpcId: !Ref VPC
+      VpcId:
+        - Fn::ImportValue:
+            !Sub "${NetworkStackParameter}-VPCID"
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: !Ref LoadBalancerPort
@@ -220,9 +134,12 @@ Resources:
           # change to DISABLED if you're using private subnets that have access to a NAT gateway
           AssignPublicIp: ENABLED
           Subnets:
-            - !Ref SubnetA
-            - !Ref SubnetB
-            - !Ref SubnetC
+            - Fn::ImportValue:
+                !Sub "${NetworkStackParameter}-SubnetAID"
+            - Fn::ImportValue:
+                !Sub "${NetworkStackParameter}-SubnetBID"
+            - Fn::ImportValue:
+                !Sub "${NetworkStackParameter}-SubnetCID"
           SecurityGroups:
             - !Ref ContainerSecurityGroup
       LoadBalancers:
@@ -245,7 +162,9 @@ Resources:
         - Key: deregistration_delay.timeout_seconds
           Value: 60 # default is 300
       TargetType: ip
-      VpcId: !Ref VPC
+      VpcId:
+        - Fn::ImportValue:
+            !Sub "${NetworkStackParameter}-VPCID"
   ListenerHTTPS:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
@@ -270,9 +189,12 @@ Resources:
       SecurityGroups:
         - !Ref LoadBalancerSecurityGroup
       Subnets:
-        - !Ref SubnetA
-        - !Ref SubnetB
-        - !Ref SubnetC
+        - Fn::ImportValue:
+            !Sub "${NetworkStackParameter}-SubnetAID"
+        - Fn::ImportValue:
+            !Sub "${NetworkStackParameter}-SubnetBID"
+        - Fn::ImportValue:
+            !Sub "${NetworkStackParameter}-SubnetCID"
   DNSRecord:
     Type: AWS::Route53::RecordSet
     Properties:

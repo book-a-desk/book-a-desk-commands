@@ -134,9 +134,12 @@ parameters:
   cloudformation-role-prod:
     type: string
     default: arn:aws:iam::${AWS_ACCOUNT_PROD}:role/cloudformationstackbackendprod
-  stack-name:
+  network-stack-name:
     type: string
-    default: book-a-desk-backend
+    default: book-a-desk-network
+  backend-service-stack-name:
+    type: string
+    default: book-a-desk-backend-service
 
 commands:
   publish-test-results:
@@ -234,8 +237,12 @@ commands:
           name: Ensure infrastructure is up to date
           command: |
             aws cloudformation deploy \
+              --stack-name << parameters.network-stack-name >> \
+              --template-file ./infra/network.yaml \
+              --role-arn << parameters.cloudformation-role >>
+            aws cloudformation deploy \
               --parameter-overrides "CertificateID=<< parameters.certificate-id >>" "HostedZoneName=<< parameters.hosted-zone-name >>" "Image=<< parameters.ecr-account-url >>/<< pipeline.parameters.docker-repo >>:<< pipeline.parameters.docker-img-version >>" \
-              --stack-name << parameters.stack-name >> \
+              --stack-name << parameters.backend-service-stack-name >> \
               --template-file ./infra/cf.yaml \
               --capabilities CAPABILITY_NAMED_IAM \
               --role-arn << parameters.cloudformation-role >>
