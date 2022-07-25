@@ -93,9 +93,8 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: !Join [ '', [ !Ref ServiceName, ContainerSecurityGroup ] ]
-      VpcId:
-        - Fn::ImportValue:
-            !Sub "${NetworkStackParameter}-VPCID"
+      VpcId: !ImportValue
+        'Fn::Sub': '${NetworkStackParameter}-VpcID'
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: !Ref ContainerPort
@@ -105,9 +104,8 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: !Join [ '', [ !Ref ServiceName, LoadBalancerSecurityGroup ] ]
-      VpcId:
-        - Fn::ImportValue:
-            !Sub "${NetworkStackParameter}-VPCID"
+      VpcId: !ImportValue
+        'Fn::Sub': '${NetworkStackParameter}-VpcID'
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: !Ref LoadBalancerPort
@@ -162,9 +160,8 @@ Resources:
         - Key: deregistration_delay.timeout_seconds
           Value: 60 # default is 300
       TargetType: ip
-      VpcId:
-        - Fn::ImportValue:
-            !Sub "${NetworkStackParameter}-VPCID"
+      VpcId: !ImportValue
+        'Fn::Sub': '${NetworkStackParameter}-VpcID'
   ListenerHTTPS:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:

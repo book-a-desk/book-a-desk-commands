@@ -101,22 +101,22 @@ Outputs:
       Ref: VPC
     Export:
       Name:
-        'Fn::Sub': '${AWS::StackName}-VPCID'
-  Subnet1ID:
+        'Fn::Sub': '${AWS::StackName}-VpcID'
+  SubnetAID:
     Description: Id of Subnet A
     Value:
       Ref: SubnetA
     Export:
       Name:
         'Fn::Sub': '${AWS::StackName}-SubnetAID'
-  Subnet2ID:
+  SubnetBID:
     Description: Id of Subnet B
     Value:
       Ref: SubnetB
     Export:
       Name:
         'Fn::Sub': '${AWS::StackName}-SubnetBID'
-  Subnet3ID:
+  SubnetCID:
     Description: Id of Subnet C
     Value:
       Ref: SubnetC
