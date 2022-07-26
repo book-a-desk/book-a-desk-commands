@@ -51,7 +51,8 @@ workflows:
             - authenticate-aws-book-a-desk-dev
           certificate-id: ${ACM_CERTIFICATE_ID_DEV}
           hosted-zone-name: ${HOSTED_ZONE_NAME_DEV}
-          stack-name: << pipeline.parameters.stack-name >>
+          network-stack-name: << pipeline.parameters.network-stack-name >>
+          service-stack-name: << pipeline.parameters.backend-service-stack-name >>
           cloudformation-role: << pipeline.parameters.cloudformation-role-dev >>
           context:
             - aws-credentials
@@ -75,7 +76,8 @@ workflows:
             - authenticate-aws-book-a-desk-test
           certificate-id: ${ACM_CERTIFICATE_ID_TEST}
           hosted-zone-name: ${HOSTED_ZONE_NAME_TEST}
-          stack-name: << pipeline.parameters.stack-name >>
+          network-stack-name: << pipeline.parameters.network-stack-name >>
+          service-stack-name: << pipeline.parameters.backend-service-stack-name >>
           cloudformation-role: << pipeline.parameters.cloudformation-role-test >>
           context:
             - aws-credentials
@@ -104,7 +106,8 @@ workflows:
             - authenticate-aws-book-a-desk-prod
           certificate-id: ${ACM_CERTIFICATE_ID_PROD}
           hosted-zone-name: ${HOSTED_ZONE_NAME_PROD}
-          stack-name: << pipeline.parameters.stack-name >>
+          network-stack-name: << pipeline.parameters.network-stack-name >>
+          service-stack-name: << pipeline.parameters.backend-service-stack-name >>
           cloudformation-role: << pipeline.parameters.cloudformation-role-prod >>
           context:
             - aws-credentials
@@ -134,9 +137,12 @@ parameters:
   cloudformation-role-prod:
     type: string
     default: arn:aws:iam::${AWS_ACCOUNT_PROD}:role/cloudformationstackbackendprod
-  stack-name:
+  network-stack-name:
     type: string
-    default: book-a-desk-backend
+    default: book-a-desk-network
+  backend-service-stack-name:
+    type: string
+    default: book-a-desk-backend-service
 
 commands:
   publish-test-results:
@@ -225,7 +231,9 @@ commands:
         type: string
       ecr-account-url:
         type: string
-      stack-name:
+      network-stack-name:
+        type: string
+      service-stack-name:
         type: string
       cloudformation-role:
         type: string
@@ -234,8 +242,12 @@ commands:
           name: Ensure infrastructure is up to date
           command: |
             aws cloudformation deploy \
-              --parameter-overrides "CertificateID=<< parameters.certificate-id >>" "HostedZoneName=<< parameters.hosted-zone-name >>" "Image=<< parameters.ecr-account-url >>/<< pipeline.parameters.docker-repo >>:<< pipeline.parameters.docker-img-version >>" \
-              --stack-name << parameters.stack-name >> \
+              --stack-name << parameters.network-stack-name >> \
+              --template-file ./infra/network.yaml \
+              --role-arn << parameters.cloudformation-role >>
+            aws cloudformation deploy \
+              --parameter-overrides "CertificateID=<< parameters.certificate-id >>" "HostedZoneName=<< parameters.hosted-zone-name >>" "Image=<< parameters.ecr-account-url >>/<< pipeline.parameters.docker-repo >>:<< pipeline.parameters.docker-img-version >>" "NetworkStackParameter=<< parameters.network-stack-name >>" \
+              --stack-name << parameters.service-stack-name >> \
               --template-file ./infra/cf.yaml \
               --capabilities CAPABILITY_NAMED_IAM \
               --role-arn << parameters.cloudformation-role >>
@@ -326,7 +338,9 @@ jobs:
         type: string
       hosted-zone-name:
         type: string
-      stack-name:
+      network-stack-name:
+        type: string
+      service-stack-name:
         type: string
       cloudformation-role:
         type: string
@@ -340,5 +354,6 @@ jobs:
           ecr-account-url: << parameters.ecr-account-url >>
           certificate-id: << parameters.certificate-id >>
           hosted-zone-name: << parameters.hosted-zone-name >>
-          stack-name: << parameters.stack-name >>
+          network-stack-name: << parameters.network-stack-name >>
+          service-stack-name: << parameters.service-stack-name >>
           cloudformation-role: << parameters.cloudformation-role >>
