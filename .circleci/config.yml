@@ -248,7 +248,7 @@ commands:
             aws cloudformation deploy \
               --parameter-overrides "CertificateID=<< parameters.certificate-id >>" "HostedZoneName=<< parameters.hosted-zone-name >>" "Image=<< parameters.ecr-account-url >>/<< pipeline.parameters.docker-repo >>:<< pipeline.parameters.docker-img-version >>" "NetworkStackParameter=<< parameters.network-stack-name >>" \
               --stack-name << parameters.service-stack-name >> \
-              --template-file ./infra/cf.yaml \
+              --template-file ./infra/service.yaml \
               --capabilities CAPABILITY_NAMED_IAM \
               --role-arn << parameters.cloudformation-role >>
 
