@@ -40,11 +40,10 @@ workflows:
           aws-account-id: ${AWS_ACCOUNT_DEV}
           authenticate-aws:
             - authenticate-aws-book-a-desk-dev
-          aws-key-id-secret-id: ${AWS_ACCESS_KEY_ID_SECRET_DEV}
-          aws-secret-key-secret-id: ${AWS_SECRET_ACCESS_KEY_SECRET_DEV}
           certificate-id: ${ACM_CERTIFICATE_ID_DEV}
           hosted-zone-name: ${HOSTED_ZONE_NAME_DEV}
-          stack-name: << pipeline.parameters.stack-name >>
+          network-stack-name: << pipeline.parameters.network-stack-name >>
+          service-stack-name: << pipeline.parameters.backend-service-stack-name >>
           cloudformation-role: << pipeline.parameters.cloudformation-role-dev >>
           context:
             - aws-credentials
