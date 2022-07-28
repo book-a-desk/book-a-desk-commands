@@ -30,3 +30,4 @@ services:
       FeatureFlags:BookingCancellation: 'true'
       Okta:OktaDomain: 'localhost'
       Okta:OktaAudience: 'test'
+      FeatureFlags:GetBookings: 'true'
