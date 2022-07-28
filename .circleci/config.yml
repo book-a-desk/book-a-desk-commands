@@ -24,6 +24,31 @@ workflows:
       - build_image:
           requires:
             - build_and_test
+      - push-image:
+          name: push-image-to-dev
+          ecr-account-url: ${AWS_ECR_ACCOUNT_URL_DEV}
+          aws-account-id: ${AWS_ACCOUNT_DEV}
+          authenticate-aws:
+            - authenticate-aws-book-a-desk-dev
+          context:
+            - aws-credentials
+          requires:
+            - build_image
+      - deploy:
+          name: deploy-to-dev
+          ecr-account-url: ${AWS_ECR_ACCOUNT_URL_DEV}
+          aws-account-id: ${AWS_ACCOUNT_DEV}
+          authenticate-aws:
+            - authenticate-aws-book-a-desk-dev
+          certificate-id: ${ACM_CERTIFICATE_ID_DEV}
+          hosted-zone-name: ${HOSTED_ZONE_NAME_DEV}
+          network-stack-name: << pipeline.parameters.network-stack-name >>
+          service-stack-name: << pipeline.parameters.backend-service-stack-name >>
+          cloudformation-role: << pipeline.parameters.cloudformation-role-dev >>
+          context:
+            - aws-credentials
+          requires:
+            - push-image-to-dev
 
   production:
     when:
