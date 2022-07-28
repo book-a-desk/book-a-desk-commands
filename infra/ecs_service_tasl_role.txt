@@ -1,0 +1,5 @@
+ecsTaskRole
+AWS service: ecs-tasks 
+Policies:
+- AmazonDynamoDBFullAccess
+- AmazonSSMReadOnlyAccess

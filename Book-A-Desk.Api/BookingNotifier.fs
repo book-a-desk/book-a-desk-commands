@@ -8,6 +8,7 @@ open System
 open Book_A_Desk.Api.Models
 open Book_A_Desk.Domain.Office.Domain
 open Book_A_Desk.Domain.QueriesHandler
+open MimeKit.Text
 
 type BookingNotifier =
     {
@@ -90,21 +91,74 @@ module rec BookingNotifier =
             |> mailMessage.Cc.Add
         
         mailMessage.Subject <- emailNotificationDetails.Subject
-        let bodyPart = TextPart("plain")
+        let bodyPart = TextPart(TextFormat.Html)
         
         bodyPart.Text <- emailNotificationDetails.Text
         mailMessage.Body <- bodyPart
         mailMessage
+
+    let newLine = "<br>"
+
+    let healthQuestionnaireMailMessageFr =
+            $"Merci de bien vouloir répondre au questionnaire sur l'état de santé. Si vois répondez oui à l'une des questions, nous vous demandons de rester chez vous.{newLine}" +
+            $"Si vous avez d’autres questions, n’hésitez pas à écrire à <a href=\"mailto:Anastasia.vlahos@broadsign.com\">Anastasia.vlahos@broadsign.com</a>.{newLine}{newLine}" +
+            $"Lien:  <a href=\"https://forms.gle/FyzgXfst8FYRukih9\">Questionnaire sur la santé</a>.{newLine}{newLine}"
+
+    let healthQuestionnaireMailMessageEn =
+            $"We ask that you please fill out our health questionnaire. Should you answer yes to any of the questions, we politely ask that you refrain from coming into the office.{newLine}" +
+            $"If you have any questions at all, please feel free to reach out to <a href=\"mailto:Anastasia.vlahos@broadsign.com\">Anastasia.vlahos@broadsign.com</a>.{newLine}{newLine}" +
+            $"Link:  <a href=\"https://forms.gle/FyzgXfst8FYRukih9\">Health questionnaire</a>.{newLine}{newLine}"
+
+    let vaccinationPolicyMailMessageFr =
+        $"Nous souhaitons annoncer 2 changements dans notre politique de vaccination :{newLine}{newLine}" +
+        $"1. Tout d’abord, nous allons mettre à jour notre politique pour permettre aux employés et aux visiteurs non vaccinés de venir au bureau sur présentation d’un résultat négatif à un test rapide de dépistage de la COVID-19.{newLine}" +
+        $"2. Les employés vaccinés ne devront plus s’inscrire à l’avance pour se rendre au bureau ou remplir le questionnaire de santé. Cependant, vous devrez toujours respecter la politique ci-jointe et vous abstenir de vous rendre au bureau si vous présentez des symptômes de la COVID-19, si vous recevez un test positif à la COVID-19 ou si vous avez été en contact avec quelqu’un qui a reçu un test positif à la COVID-19.{newLine}{newLine}" +
+        $"Vous trouverez notre politique de vaccination dans Bamboo.{newLine}{newLine}" +
+        $"Si vous avez des questions, n’hésitez pas à communiquer RH.{newLine}" +
+        $"Merci!{newLine}{newLine}"
+
+    let vaccinationPolicyMailMessageEn =
+        $"We would like to announce 2 changes to our vaccination policy:{newLine}{newLine}" +
+        $"1. First, we will be updating our policy to allow unvaccinated employees and visitors to come to the office upon provision of a negative COVID-19 test result obtained from a rapid test.{newLine}" +
+        $"2. Vaccinated employees will no longer have to register in advance to go to the office or fill out the health questionnaire. However, they will still be expected to follow the attached policy and refrain from going into the office if they are experiencing symptoms that would lead them to believe that they could have COVID-19, tested positive for COVID-19 or were exposed to someone who tested positive.{newLine}{newLine}" +
+        $"Please find our updated vaccination policy in Bamboo.{newLine}{newLine}" +
+        $"For any questions, don't be shy to reach out HR.{newLine}" +
+        $"Thank you!"
+    
+    let getOfficeNameInFrench (officeName : string) =
+        if officeName = "Montreal" then "Montréal" else officeName
         
+    let getOpeningHoursInFrench (officeName : string) =
+        if officeName = "Berlin" then "de 7h à 19h du mardi au jeudi"
+        elif officeName = "Montreal" then "de 7h30 à 18h30 du mardi au jeudi"  
+        else ""
+
     let createMailText (bookingDate : DateTime) (office : Office) =
             let (CityName officeName) = office.City
-            $"You have booked a desk at %s{bookingDate.ToShortDateString()} in the Office %s{officeName}{Environment.NewLine}" +
-            $"Opening hours: {office.OpeningHoursText}{Environment.NewLine}" +
-            "It is your responsibility to verify that the office is open for the date that you have booked"
-    
+            let bookingDateFr = bookingDate.ToString("dd/MM/yyyy")
+            let bookingDateEn = bookingDate.ToString("MM/dd/yyyy")
+            let openingHoursFr = getOpeningHoursInFrench officeName
+            let officeNameFr = getOfficeNameInFrench officeName
+
+            $"Vous avez effectué une réservation le %s{bookingDateFr} au bureau de %s{officeNameFr} (Heures d'ouverture : {openingHoursFr}).{newLine}" +
+            $"Vous êtes responsable de vérifier que le bureau est ouvert à la date que vous avez réservée.{newLine}{newLine}" +
+            vaccinationPolicyMailMessageFr +
+            $"------------------------------------------{newLine}{newLine}" +
+            $"You have booked a desk at %s{bookingDateEn} in the Office %s{officeName} (Opening hours: {office.OpeningHoursText}).{newLine}" +
+            $"It is your responsibility to verify that the office is open for the date that you have booked.{newLine}{newLine}" +
+            vaccinationPolicyMailMessageEn
+
     let createOfficeRestriction (office : Office) =
             let (CityName officeName) = office.City
-            "We inform you that the office has some restrictions."
+            let officeNameFr = getOfficeNameInFrench officeName
+            
+            $"Nous vous informons que le bureau de %s{officeNameFr} a certaines restrictions.{newLine}" +
+            $"Veuillez lire attentivement les dernières mises à jour de la politique de vaccination :{newLine}{newLine}" +
+            vaccinationPolicyMailMessageFr +
+            $"------------------------------------------{newLine}{newLine}" +
+            $"We inform you that the Office %s{officeName} has some restrictions.{newLine}" +
+            $"Please read carefully the last updates on vaccination policy:{newLine}{newLine}" +
+            vaccinationPolicyMailMessageEn
             
     let getOffice officeId getOffices : Result<_,_> = result {
         let! officeId =
