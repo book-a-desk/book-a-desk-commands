@@ -34,6 +34,12 @@ type Booking =
         Date: DateTime
         User: UserReference
     }
+    
+type Bookings =
+    {
+        Items: Booking array
+    }    
+    
 module Booking =
     
     let private officeIdValue (OfficeId e) = e
@@ -90,4 +96,5 @@ type RestrictionNotifier =
 type FeatureFlags =
     {
         BookingCancellation: bool
+        GetBookings: bool
     }

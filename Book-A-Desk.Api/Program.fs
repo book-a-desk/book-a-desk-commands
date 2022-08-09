@@ -49,6 +49,7 @@ let configureCors (ctx : WebHostBuilderContext) (builder : CorsPolicyBuilder) =
 let configureFeatureFlags (config : IConfiguration) =
     {
         BookingCancellation = config.["FeatureFlags:BookingCancellation"] |> bool.Parse
+        GetBookings = config.["FeatureFlags:GetBookings"] |> bool.Parse
     }
 
 let configureApp (ctx : WebHostBuilderContext) (app : IApplicationBuilder) =
@@ -92,14 +93,7 @@ let configureApp (ctx : WebHostBuilderContext) (app : IApplicationBuilder) =
 let configureAppConfiguration (builder : IConfigurationBuilder) =
     match useDevelopmentStorage with
     | false ->
-        let region = Environment.GetEnvironmentVariable("AWS_REGION")
-        let awsKeyId = Environment.GetEnvironmentVariable("AWS_KEYID")
-        let awsSecretKey = Environment.GetEnvironmentVariable("AWS_SECRETKEY")
-        let credentials = BasicAWSCredentials(awsKeyId, awsSecretKey)
-        let options = AWSOptions()
-        options.Region <- RegionEndpoint.GetBySystemName(region)
-        options.Credentials <- credentials
-        builder.AddSystemsManager($"/BookADesk/", options) |> ignore
+        builder.AddSystemsManager($"/BookADesk/", AWSOptions()) |> ignore
     | true -> ()
     
 let configureDynamoDB (sp : ServiceProvider) =

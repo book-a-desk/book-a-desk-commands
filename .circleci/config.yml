@@ -75,11 +75,10 @@ workflows:
           aws-account-id: ${AWS_ACCOUNT_DEV}
           authenticate-aws:
             - authenticate-aws-book-a-desk-dev
-          aws-key-id-secret-id: ${AWS_ACCESS_KEY_ID_SECRET_DEV}
-          aws-secret-key-secret-id: ${AWS_SECRET_ACCESS_KEY_SECRET_DEV}
           certificate-id: ${ACM_CERTIFICATE_ID_DEV}
           hosted-zone-name: ${HOSTED_ZONE_NAME_DEV}
-          stack-name: << pipeline.parameters.stack-name >>
+          network-stack-name: << pipeline.parameters.network-stack-name >>
+          service-stack-name: << pipeline.parameters.backend-service-stack-name >>
           cloudformation-role: << pipeline.parameters.cloudformation-role-dev >>
           context:
             - aws-credentials
@@ -101,11 +100,10 @@ workflows:
           aws-account-id: ${AWS_ACCOUNT_TEST}
           authenticate-aws:
             - authenticate-aws-book-a-desk-test
-          aws-key-id-secret-id: ${AWS_ACCESS_KEY_ID_SECRET_TEST}
-          aws-secret-key-secret-id: ${AWS_SECRET_ACCESS_KEY_SECRET_TEST}
           certificate-id: ${ACM_CERTIFICATE_ID_TEST}
           hosted-zone-name: ${HOSTED_ZONE_NAME_TEST}
-          stack-name: << pipeline.parameters.stack-name >>
+          network-stack-name: << pipeline.parameters.network-stack-name >>
+          service-stack-name: << pipeline.parameters.backend-service-stack-name >>
           cloudformation-role: << pipeline.parameters.cloudformation-role-test >>
           context:
             - aws-credentials
@@ -132,11 +130,10 @@ workflows:
           aws-account-id: ${AWS_ACCOUNT_PROD}
           authenticate-aws:
             - authenticate-aws-book-a-desk-prod
-          aws-key-id-secret-id: ${AWS_ACCESS_KEY_ID_SECRET_PROD}
-          aws-secret-key-secret-id: ${AWS_SECRET_ACCESS_KEY_SECRET_PROD}
           certificate-id: ${ACM_CERTIFICATE_ID_PROD}
           hosted-zone-name: ${HOSTED_ZONE_NAME_PROD}
-          stack-name: << pipeline.parameters.stack-name >>
+          network-stack-name: << pipeline.parameters.network-stack-name >>
+          service-stack-name: << pipeline.parameters.backend-service-stack-name >>
           cloudformation-role: << pipeline.parameters.cloudformation-role-prod >>
           context:
             - aws-credentials
@@ -166,9 +163,12 @@ parameters:
   cloudformation-role-prod:
     type: string
     default: arn:aws:iam::${AWS_ACCOUNT_PROD}:role/cloudformationstackbackendprod
-  stack-name:
+  network-stack-name:
     type: string
-    default: book-a-desk-backend
+    default: book-a-desk-network
+  backend-service-stack-name:
+    type: string
+    default: book-a-desk-backend-service
 
 commands:
   publish-test-results:
@@ -251,17 +251,15 @@ commands:
 
   aws-cloudformation-deploy:
     parameters:
-      aws-key-id-secret-id:
-        type: string
-      aws-secret-key-secret-id:
-        type: string
       certificate-id:
         type: string
       hosted-zone-name:
         type: string
       ecr-account-url:
         type: string
-      stack-name:
+      network-stack-name:
+        type: string
+      service-stack-name:
         type: string
       cloudformation-role:
         type: string
@@ -270,9 +268,13 @@ commands:
           name: Ensure infrastructure is up to date
           command: |
             aws cloudformation deploy \
-              --parameter-overrides "AWSKeyIDSecretID=<< parameters.aws-key-id-secret-id >>" "AWSSecretKeySecretID=<< parameters.aws-secret-key-secret-id >>" "CertificateID=<< parameters.certificate-id >>" "HostedZoneName=<< parameters.hosted-zone-name >>" "Image=<< parameters.ecr-account-url >>/<< pipeline.parameters.docker-repo >>:<< pipeline.parameters.docker-img-version >>" \
-              --stack-name << parameters.stack-name >> \
-              --template-file ./infra/cf.yaml \
+              --stack-name << parameters.network-stack-name >> \
+              --template-file ./infra/network.yaml \
+              --role-arn << parameters.cloudformation-role >>
+            aws cloudformation deploy \
+              --parameter-overrides "CertificateID=<< parameters.certificate-id >>" "HostedZoneName=<< parameters.hosted-zone-name >>" "Image=<< parameters.ecr-account-url >>/<< pipeline.parameters.docker-repo >>:<< pipeline.parameters.docker-img-version >>" "NetworkStackParameter=<< parameters.network-stack-name >>" \
+              --stack-name << parameters.service-stack-name >> \
+              --template-file ./infra/service.yaml \
               --capabilities CAPABILITY_NAMED_IAM \
               --role-arn << parameters.cloudformation-role >>
 
@@ -283,6 +285,7 @@ jobs:
         auth:
           username: mydockerhub-user
           password: $DOCKERHUB_PASSWORD
+    resource_class: small
     steps:
       - checkout
       - run:
@@ -303,9 +306,11 @@ jobs:
     docker:
       - image: circleci/buildpack-deps:latest
         user: root
+    resource_class: small
     steps:
       - checkout
-      - setup_remote_docker
+      - setup_remote_docker:
+          docker_layer_caching: true
       - run:
           name: Build Docker image
           command: |
@@ -323,7 +328,9 @@ jobs:
             - << pipeline.parameters.docker-tar-filename >>
 
   push-image:
-    machine: true
+    machine:
+      image: ubuntu-2004:202201-02
+    resource_class: medium
     parameters:
       ecr-account-url:
         type: string
@@ -343,7 +350,9 @@ jobs:
           aws-account-id: << parameters.aws-account-id >>
 
   deploy:
-    machine: true
+    machine:
+      image: ubuntu-2004:202201-02
+    resource_class: medium
     parameters:
       ecr-account-url:
         type: string
@@ -351,15 +360,13 @@ jobs:
         type: string
       authenticate-aws:
         type: steps
-      aws-key-id-secret-id:
-        type: string
-      aws-secret-key-secret-id:
-        type: string
       certificate-id:
         type: string
       hosted-zone-name:
         type: string
-      stack-name:
+      network-stack-name:
+        type: string
+      service-stack-name:
         type: string
       cloudformation-role:
         type: string
@@ -372,8 +379,7 @@ jobs:
       - aws-cloudformation-deploy:
           ecr-account-url: << parameters.ecr-account-url >>
           certificate-id: << parameters.certificate-id >>
-          aws-key-id-secret-id: << parameters.aws-key-id-secret-id >>
-          aws-secret-key-secret-id: << parameters.aws-secret-key-secret-id >>
           hosted-zone-name: << parameters.hosted-zone-name >>
-          stack-name: << parameters.stack-name >>
+          network-stack-name: << parameters.network-stack-name >>
+          service-stack-name: << parameters.service-stack-name >>
           cloudformation-role: << parameters.cloudformation-role >>

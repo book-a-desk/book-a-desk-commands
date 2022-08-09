@@ -56,6 +56,7 @@ let url = sprintf "http://localhost:/bookings"
 let featureFlag =
     {
         BookingCancellation = true
+        GetBookings = true
     }
 let mockOfficeRestrictionNotification _ _ = async { return Ok [()] }
 
