@@ -33,6 +33,27 @@ let ``Given empty bookings When a DeskBooked event is processed Then a Booking i
     Assert.Equal(bookedDesk.Date, deskBookedEvent.Date)
 
 [<Fact>]
+// TODO implement test
+let ``Given a booking When a DeskBooked event is processed Then there are two bookings stored`` () =
+    let aReservationAggregate = A.reservationAggregate
+    let bookedDate = DateTime.Today
+
+    let deskBookedEvent = ({
+        ReservationId = reservationId
+        Date = bookedDate
+        EmailAddress = emailAddress
+        OfficeId = officeId
+    } : Events.DeskBooked)
+
+    let aReservationAggregate = ReservationAggregate.applyEventTo aReservationAggregate (deskBookedEvent |> ReservationEvent.DeskBooked)
+
+    Assert.Equal(1, aReservationAggregate.BookedDesks.Length)
+    let bookedDesk = aReservationAggregate.BookedDesks.Head
+    Assert.Equal(bookedDesk.OfficeId, deskBookedEvent.OfficeId)
+    Assert.Equal(bookedDesk.EmailAddress, deskBookedEvent.EmailAddress)
+    Assert.Equal(bookedDesk.Date, deskBookedEvent.Date)
+
+[<Fact>]
 let ``Given a booking When a DeskCancelled event is processed Then a Booking is removed`` () =
     let bookedDate = DateTime.Today
     let bookedReservationAggregate =

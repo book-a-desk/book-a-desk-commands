@@ -17,7 +17,7 @@ module BookADeskValidator =
         let domainName = "@" + validDomainName
         let hasCorporateDomain = Regex.Match(emailToValidate.ToLower(), domainName)
         if isValidEmail && hasCorporateDomain.Success then
-            Ok()
+            Ok ()
         else
             ReservationError.InvalidEmailAddress |> Error
             

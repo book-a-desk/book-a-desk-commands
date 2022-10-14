@@ -8,6 +8,7 @@ open Book_A_Desk.Domain.Errors
 open Book_A_Desk.Domain.Office.Domain
 open Book_A_Desk.Domain.Reservation
 open Book_A_Desk.Domain.Reservation.Commands
+open Book_A_Desk.Domain.Reservation.Events
 
 module BookADeskCancellationValidator =
     
@@ -20,8 +21,14 @@ module BookADeskCancellationValidator =
     
     let private validateUserAlreadyBooked reservationAggregate emailAddress officeId (date : DateTime) = result {
         let alreadyBookedDesks =
-            reservationAggregate.BookedDesks
-            |> List.filter(fun bookedDesk -> bookedDesk.Date.Date = date.Date && bookedDesk.OfficeId = officeId && bookedDesk.EmailAddress = emailAddress)
+            reservationAggregate.ReservationEvents
+            |> List.filter (fun reservationEvent ->
+                 // TODO: For every reservation aggregate check if last status is booked and check if it is DeskBooked
+                 match reservationEvent with
+                 | DeskBooked bookedDesk ->
+                     bookedDesk.Date.Date = date.Date && bookedDesk.OfficeId = officeId && bookedDesk.EmailAddress = emailAddress
+                 | _ -> false)
+
         match alreadyBookedDesks with
         | [] ->
             let userHasNotBookedBeforeParam : UserBookingParam =

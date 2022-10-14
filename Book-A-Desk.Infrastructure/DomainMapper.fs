@@ -4,15 +4,17 @@ open System.Text.Json
 open Book_A_Desk.Domain
 open Book_A_Desk.Domain.Events
 open Book_A_Desk.Domain.Office.Domain
+open Book_A_Desk.Domain.Reservation
 open Book_A_Desk.Domain.Reservation.Domain
 open Book_A_Desk.Domain.Reservation.Events
 
 module rec DomainMapper =
-    let toDomain (infraEvents: Book_A_Desk.Infrastructure.ReservationEvent seq) =
-        Seq.map toDomainSingle infraEvents
+    let toDomain (infraAggregate: ReservationAggregate) =
+        infraAggregate.ReservationEvents
+        |> List.map toDomainSingle
         
-    let toDomainSingle (infraEvent : Book_A_Desk.Infrastructure.ReservationEvent) =
-        match infraEvent.ReservationType with
+    let toDomainSingle (infraAggregate : ) =
+        match infraAggregate.ReservationEvents.ReservationType with
         | ReservationType.DeskBooked ->
             let deskBooked = JsonSerializer.Deserialize<Book_A_Desk.Infrastructure.DeskBooked> infraEvent.Event
             {                    
