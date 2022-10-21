@@ -1,13 +1,12 @@
 namespace Book_A_Desk.Domain.Reservation.Commands
 
-open System
 open Book_A_Desk.Domain.Errors
 open Book_A_Desk.Domain.Reservation
 open Book_A_Desk.Domain.Reservation.Events
 
 type BookADeskReservationCommand =
     {
-        ExecuteWith: BookADesk -> ReservationAggregate -> Result<ReservationEvent list, ReservationError>
+        ExecuteWith: BookADesk -> ReservationAggregate -> Result<ReservationAggregate list, ReservationError>
     }
 
 module BookADeskReservationCommand =

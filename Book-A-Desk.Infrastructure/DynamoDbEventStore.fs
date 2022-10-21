@@ -2,7 +2,6 @@
 
 open Amazon.DynamoDBv2
 open Book_A_Desk.Domain.Reservation
-open Book_A_Desk.Domain.Reservation.Commands
 open Book_A_Desk.Domain.Reservation.Domain
 open FSharp.AWS.DynamoDB
 open FSharp.Control
@@ -11,41 +10,45 @@ module rec DynamoDbEventStore =
     
     type DynamoDbEventStore =
         {
-            GetReservationAggregateById: ReservationId -> Result<ReservationAggregate seq, string> Async
-            GetReservationAggregate: ReservationCommand -> Result<ReservationAggregate seq, string> Async
+            GetEvents: Result<ReservationAggregate seq, string> Async
+            GetReservationAggregateById: ReservationId -> Result<ReservationAggregate, string> Async
             SaveReservationAggregate: ReservationAggregate -> unit Async
         }
 
     let provide (dynamoDbClient : IAmazonDynamoDB) =
         let table =
             TableContext
-                .Create<ReservationAggregate>(
+                .Create<ReservationEvent>(
                     dynamoDbClient,
-                    tableName = "ReservationAggregates",
+                    tableName = "ReservationEvents",
                     createIfNotExists = false)
 
         {
+            GetEvents = getEvents table
             GetReservationAggregateById = getReservationAggregateById table
-            GetReservationAggregate = getReservationAggregate table
             SaveReservationAggregate = saveReservationAggregate table
         }
 
-    let private getReservationAggregateById table aggregateId = async {
-        let! result = table.QueryAsync(keyCondition = <@ fun (r : ReservationAggregate) -> r.Id = aggregateId @>)
+    let private getEvents table = async {
+        let! results = table.QueryAsync(keyCondition = <@ fun (r : ReservationEvent) -> 1=1 @>)
 
-        return Result.Ok(result)
+        let domainResults = DomainMapper.toDomain results
+
+        return Result.Ok(domainResults)
     }
 
-    let private getReservationAggregate table reservationCommand = async {
-        let! results = table.QueryAsync(keyCondition = <@ fun (r : ReservationAggregate) ->
-            r.ReservationEvents
-            |>
+    let private getReservationAggregateById table (ReservationId aggregateId) = async {
+        let! results = table.QueryAsync(keyCondition = <@ fun (r : ReservationEvent) -> r.AggregateId = aggregateId @>)
 
-                = reservationCommand @>)
-
-        return Result.Ok(results)
+        let domainResult = DomainMapper.toDomainByAggregateId aggregateId results
+        return Result.Ok(domainResult)
     }
 
     let private saveReservationAggregate table reservationAggregate = async {
-        do! table.UpdateItemAsync(reservationAggregate) |> Async.Ignore
-    }
+        let infraEvents = Map.map (fun _ reservationAggregate -> DomainMapper.toInfra reservationAggregate) (reservationAggregate.ReservationEvents |> List.toSeq)
+
+        let events = infraEvents
+                   |> EventBatcher.batchEvents
+                   |> AsyncSeq.ofSeq
+        do! AsyncSeq.iterAsync (fun infraEvents -> table.BatchPutItemsAsync(infraEvents) |> Async.Ignore) events
+   }

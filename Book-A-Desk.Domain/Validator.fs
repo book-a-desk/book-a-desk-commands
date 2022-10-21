@@ -33,3 +33,10 @@ module BookADeskValidator =
             ReservationError.InvalidOfficeId |> Error
         else
             Ok ()
+
+    let public doesReservationEventBelongsToReservation reservationEvent reservationCommand =
+
+        match reservationEvent with
+            | DeskBooked bookedEvent ->
+                bookedEvent.Date.Date = reservationCommand.Date && bookedDesk.OfficeId = officeId && bookedDesk.EmailAddress = emailAddress
+            | DeskCancelled cancelledEvent ->

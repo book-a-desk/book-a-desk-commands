@@ -14,7 +14,8 @@ type ReservationAggregate =
 module ReservationAggregate =
 
     let applyEventTo reservationAggregate (event: ReservationEvent) =
-        { reservationAggregate with
+        {
+          reservationAggregate with
             ReservationEvents = event :: reservationAggregate.ReservationEvents
         }
 

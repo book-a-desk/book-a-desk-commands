@@ -35,5 +35,5 @@ module rec ReservationsQueriesHandler =
         return List.where (fun booking -> booking.Date >= date) bookings
     }
         
-    let private isSameDate date1 date2 =
+    let private isSameDate (date1:DateTime) (date2:DateTime) =
         date1.Day = date2.Day && date1.Month = date2.Month && date1.Year = date2.Year

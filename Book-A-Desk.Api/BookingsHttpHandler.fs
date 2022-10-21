@@ -3,6 +3,7 @@
 open System
 
 open Amazon.DynamoDBv2
+open Book_A_Desk.Domain.Events
 open Book_A_Desk.Domain.Reservation.Queries
 open FsToolkit.ErrorHandling.Operator.Result
 open Microsoft.AspNetCore.Http
@@ -45,11 +46,15 @@ module BookingsHttpHandler =
 
     let private handleCommand command eventStore reservationCommandsFactory errorHandler = asyncResult {
         let! events =
-            eventStore.GetEvents aggregateId
+            eventStore.GetEvents
             |> Async.map(
                 Result.mapError (
                     errorHandler.MapStringToAssignBookADeskError >> errorHandler.ConvertErrorToResponseError))
-        let handler = ReservationsCommandHandler.provide (events |> List.ofSeq) reservationCommandsFactory
+
+        let handler =
+            ReservationsCommandHandler.provide
+                (events |> Seq.toList)
+                reservationCommandsFactory
         
         let! events =
             handler.Handle command
@@ -103,12 +108,12 @@ module BookingsHttpHandler =
             }
 
         let handleGetByEmailAndDateFromEventStore eventStore email date = asyncResult {
-            let! bookingEvents = eventStore.GetEvents aggregateId
+            let! bookingEvents = eventStore.GetReservationAggregateById aggregateId
             return! ReservationsQueriesHandler.getUserBookingsStartFrom bookingEvents email date
         }
         
         let handleGetByDateFromEventStore eventStore date = asyncResult {
-            let! bookingEvents = eventStore.GetEvents aggregateId
+            let! bookingEvents = eventStore.GetReservationAggregateById aggregateId
             return! ReservationsQueriesHandler.getUsersBookingsStartFrom bookingEvents date
         }
         

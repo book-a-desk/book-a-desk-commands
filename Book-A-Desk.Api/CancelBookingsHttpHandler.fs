@@ -3,6 +3,8 @@ namespace Book_A_Desk.Api
 open System
 
 open Amazon.DynamoDBv2
+open Book_A_Desk.Domain.Events
+open Book_A_Desk.Domain.Reservation
 open FsToolkit.ErrorHandling.Operator.Result
 open Microsoft.AspNetCore.Http
 open Giraffe
@@ -13,9 +15,7 @@ open Book_A_Desk.Api.Models
 open Book_A_Desk.Domain
 open Book_A_Desk.Domain.CommandHandler
 open Book_A_Desk.Domain.Office.Domain
-open Book_A_Desk.Domain.Reservation
 open Book_A_Desk.Domain.Reservation.Commands
-open Book_A_Desk.Domain.Reservation.Domain
 
 open Book_A_Desk.Infrastructure.DynamoDbEventStore
 
@@ -25,29 +25,36 @@ type CancelBookingsHttpHandler =
     }
 
 module CancelBookingsHttpHandler =
-    let private handleCommand command eventStore reservationCommandsFactory errorHandler = asyncResult {
-        let (ReservationId aggregateId) = ReservationAggregate.Id
-        let! events =
-            eventStore.GetEvents aggregateId
+    let private handleCommand (command: CancelBookADesk) eventStore reservationCommandsFactory errorHandler = asyncResult {
+        let aggregateId = command.AggregateId
+
+        let! reservationAggregate =
+            eventStore.GetReservationAggregateById aggregateId
             |> Async.map(
                 Result.mapError (
                     errorHandler.MapStringToAssignBookADeskError >> errorHandler.ConvertErrorToResponseError))
-        let handler = ReservationsCommandHandler.provide (events |> List.ofSeq) reservationCommandsFactory
+
+        let handler =
+            ReservationsCommandHandler.provide
+                reservationAggregate
+                reservationCommandsFactory
         
         let! events =
-            handler.Handle command
+            handler.Handle (CancelBookADesk command)
             |> Result.mapError (
                 errorHandler.MapReservationErrorToAssignBookADeskError >> errorHandler.ConvertErrorToResponseError)
                         
-        let appendEvents eventsToAppend : Async<unit> =
-            eventsToAppend
-            |> Seq.ofList
-            |> (fun events -> aggregateId, events)
-            |> List.singleton
-            |> Map.ofList
-            |> eventStore.AppendEvents
-            
-        return! appendEvents events
+        let appendEventsToReservationAggregate (reservationAggregate: ReservationAggregate) (eventsToAppend: DomainEvent list) =
+            {
+                ReservationAggregate.Id = reservationAggregate.Id
+                ReservationEvents =
+                    eventsToAppend
+                    |> List.map(fun (ReservationEvent reservationEvent) -> reservationEvent)
+                    |> List.append reservationAggregate.ReservationEvents
+            }
+            |> eventStore.SaveReservationAggregate
+
+        return! appendEventsToReservationAggregate reservationAggregate events
     }
 
     let initialize
@@ -59,15 +66,15 @@ module CancelBookingsHttpHandler =
             task {
                 let cmd =
                     {
-                        CancelBookADesk.OfficeId = Guid.Parse(cancelBooking.Office.Id) |> OfficeId // Consider TryParse and return 400 if not valid
+                        CancelBookADesk.AggregateId = cancelBooking.AggregateId
+                        OfficeId = Guid.Parse(cancelBooking.Office.Id) |> OfficeId // Consider TryParse and return 400 if not valid
                         Date = cancelBooking.Date
                         EmailAddress = EmailAddress cancelBooking.User.Email
                     }
 
                 let eventStore = provideEventStore (context.GetService<IAmazonDynamoDB>())
-                let command = CancelBookADesk cmd
 
-                let! result = handleCommand command eventStore reservationCommandsFactory errorHandler
+                let! result = handleCommand cmd eventStore reservationCommandsFactory errorHandler
                 match result with
                 | Ok _ ->
                     let output =

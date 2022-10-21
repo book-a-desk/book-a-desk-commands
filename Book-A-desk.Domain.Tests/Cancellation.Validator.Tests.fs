@@ -240,7 +240,7 @@ let ``GIVEN A Book-A-Desk Cancellation command with the user booked on a differe
 let ``GIVEN A Book-A-Desk Cancellation command with the user booked in a different office, WHEN validating the command, THEN validation should fail.`` () =
     let emailAddress = $"email@{domainName}"
     let cancelledDate = DateTime.MaxValue
-    let newOffice = An.newOffice
+    let newOffice = An.anotherOffice
     let command =
         {
             EmailAddress = EmailAddress emailAddress

@@ -1,79 +1,87 @@
 ﻿namespace Book_A_Desk.Infrastructure
 
+open System
 open System.Text.Json
-open Book_A_Desk.Domain
-open Book_A_Desk.Domain.Events
-open Book_A_Desk.Domain.Office.Domain
 open Book_A_Desk.Domain.Reservation
 open Book_A_Desk.Domain.Reservation.Domain
 open Book_A_Desk.Domain.Reservation.Events
+open Book_A_Desk.Infrastructure
 
 module rec DomainMapper =
-    let toDomain (infraAggregate: ReservationAggregate) =
-        infraAggregate.ReservationEvents
-        |> List.map toDomainSingle
-        
-    let toDomainSingle (infraAggregate : ) =
-        match infraAggregate.ReservationEvents.ReservationType with
-        | ReservationType.DeskBooked ->
-            let deskBooked = JsonSerializer.Deserialize<Book_A_Desk.Infrastructure.DeskBooked> infraEvent.Event
-            {                    
-                ReservationId = ReservationId infraEvent.AggregateId
+    let toDomainByAggregateId aggregateId (infraEvents: ReservationEvent seq) =
+        {
+            ReservationAggregate.Id = aggregateId |> ReservationId
+            ReservationEvents =
+                Seq.map toDomainSingle infraEvents
+                |> Seq.toList
+        }
+
+    let toDomain (infraEvents: ReservationEvent seq) =
+        infraEvents
+        |> Seq.groupBy (fun event -> event.AggregateId)
+        |> Seq.map(
+            fun (aggregateId, events) ->
+            {
+                ReservationAggregate.Id = aggregateId |> ReservationId
+                ReservationEvents =
+                    Seq.map toDomainSingle events
+                    |> Seq.toList
+            }
+        )
+
+    let toDomainSingle (infraEvent : ReservationEvent) =
+        match infraEvent.ReservationType with
+        | ReservationType.DeskBookedType ->
+            let deskBooked = JsonSerializer.Deserialize<DeskBooked> infraEvent.Event
+            {
                 Date = deskBooked.Date.Date
-                EmailAddress = EmailAddress deskBooked.EmailAddress
-                OfficeId = OfficeId deskBooked.OfficeId          
+                EmailAddress = deskBooked.EmailAddress
+                OfficeId = deskBooked.OfficeId
             } : DeskBooked
             |> DeskBooked
-            |> ReservationEvent
-        | ReservationType.DeskCancelled ->
-            let deskCancelled = JsonSerializer.Deserialize<Book_A_Desk.Infrastructure.DeskCancelled> infraEvent.Event
+        | ReservationType.DeskCancelledType ->
+            let deskCancelled = JsonSerializer.Deserialize<DeskCancelled> infraEvent.Event
             {
-                ReservationId = ReservationId infraEvent.AggregateId
                 Date = deskCancelled.Date.Date
-                EmailAddress = EmailAddress deskCancelled.EmailAddress
-                OfficeId = OfficeId deskCancelled.OfficeId
+                EmailAddress = deskCancelled.EmailAddress
+                OfficeId = deskCancelled.OfficeId
             } : DeskCancelled
             |> DeskCancelled
-            |> ReservationEvent
     
-    let toInfra (domainEvents: DomainEvent seq) =
-        Seq.map toInfraSingle domainEvents
+    let toInfra (reservationAggregate: ReservationAggregate) =
+        let (ReservationId reservationId) = reservationAggregate.Id
 
-    let private toInfraSingle (domainEvent: DomainEvent) =
-        match domainEvent with
-        | ReservationEvent reservationEvent ->
-            match reservationEvent with
-            | DeskBooked deskBooked ->
-                let (ReservationId reservationId) = deskBooked.ReservationId
-                let infraDeskBooked =
-                    {
-                        Date = deskBooked.Date
-                        EmailAddress =
-                            let (EmailAddress email) = deskBooked.EmailAddress
-                            email
-                        OfficeId =
-                            let (OfficeId officeId) = deskBooked.OfficeId
-                            officeId
-                    }
+        Seq.map toInfraSingle reservationAggregate.ReservationEvents
+        |> Seq.map (fun reservationEvent ->
                 {
-                    AggregateId = reservationId
-                    ReservationType = ReservationType.DeskBooked
-                    Event =  JsonSerializer.Serialize infraDeskBooked
+                    reservationEvent with
+                        AggregateId = reservationId
                 }
-            | DeskCancelled deskCancelled ->
-                let (ReservationId reservationId) = deskCancelled.ReservationId
-                let infraDeskCancelled =
-                    {
-                        Date = deskCancelled.Date
-                        EmailAddress =
-                            let (EmailAddress email) = deskCancelled.EmailAddress
-                            email
-                        OfficeId =
-                            let (OfficeId officeId) = deskCancelled.OfficeId
-                            officeId
-                    }
+            )
+
+    let private toInfraSingle (reservationEvent: Book_A_Desk.Domain.Reservation.Events.ReservationEvent) =
+        match reservationEvent with
+        | DeskBooked deskBooked ->
+            let infraDeskBooked =
                 {
-                    AggregateId = reservationId
-                    ReservationType = ReservationType.DeskCancelled
-                    Event = JsonSerializer.Serialize infraDeskCancelled
+                    Date = deskBooked.Date
+                    EmailAddress = deskBooked.EmailAddress
+                    OfficeId = deskBooked.OfficeId
                 }
+            {
+                AggregateId = Guid.Empty
+                ReservationType = ReservationType.DeskBookedType
+                Event =  JsonSerializer.Serialize infraDeskBooked
+            }
+        | DeskCancelled deskCancelled ->
+            let infraDeskCancelled =
+                {
+                    Date = deskCancelled.Date
+                    EmailAddress = deskCancelled.EmailAddress
+                    OfficeId = deskCancelled.OfficeId
+                }
+            {
+                AggregateId = Guid.Empty
+                ReservationType = ReservationType.DeskCancelledType
+                Event = JsonSerializer.Serialize infraDeskCancelled
+            }

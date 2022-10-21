@@ -9,20 +9,21 @@ open Book_A_Desk.Domain.Reservation.Commands
 
 type ReservationsCommandHandler =
     {
-        Handle: ReservationCommand -> Result<ReservationAggregate list,ReservationError>
+        Handle: ReservationCommand -> Result<DomainEvent list,ReservationError>
     }
     
 module ReservationsCommandHandler =  
-   let provide events reservationCommandsFactory =       
+   let provide
+    (reservationAggregate: ReservationAggregate)
+    reservationCommandsFactory =
        let handle (command : ReservationCommand) =
-            let run executeCommandWith cmd =
-                events
-                |> List.map (function | ReservationEvent event -> event)
-                |> ReservationAggregate.getCurrentStateFrom
+            let run executeCommandWith cmd reservationAggregate =
+                let reservationEvents =
+                    reservationAggregate.ReservationEvents
+
+                reservationAggregate
                 |> executeCommandWith cmd
                 |> Result.map (List.map (function event -> ReservationEvent event))
-
-            let reservationAggregate = getAggregateFrom command
 
             match command with
             | BookADesk command ->

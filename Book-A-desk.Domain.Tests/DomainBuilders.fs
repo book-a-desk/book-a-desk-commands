@@ -1,32 +1,25 @@
 ﻿module rec Book_A_desk.Domain.Tests
 
     open System
-    
     open Book_A_Desk.Domain
     open Book_A_Desk.Domain.Office.Domain
     open Book_A_Desk.Domain.Reservation
+    open Book_A_Desk.Domain.Reservation.Domain
+    open Book_A_Desk.Domain.Reservation.Events
+
 
     module A =
-        let reservationAggregate =
+        let booking =
             {
-                Id = ReservationAggregate.Id
-                BookedDesks = []
-            }
-    
-        let fullyBookedReservationAggregate () =  
-            let maxAllowedBookingsPerOffice =
-                 Offices.All
-                 |> List.sumBy (fun office -> office.BookableDesksPerDay)
-            {
-                Id = ReservationAggregate.Id
-                BookedDesks = [for _ in 1 .. maxAllowedBookingsPerOffice -> booking]
-            }
-            
-        let booking = 
-            {
-                OfficeId = OfficeId (Guid.NewGuid())
+                DeskBooked.OfficeId = OfficeId (Guid.NewGuid())
                 EmailAddress = EmailAddress "anEmailAddress@fake.com"
                 Date = DateTime.MaxValue
+            }
+
+        let reservationAggregate =
+            {
+                ReservationAggregate.Id = "11111111-1111-1111-1111-111111111111" |> Guid |> ReservationId
+                ReservationEvents = [DeskBooked booking]
             }
             
     module An =
@@ -37,7 +30,7 @@
                 BookableDesksPerDay = 32
                 OpeningHoursText = "Some Montreal opening hours"
             }
-        let newOffice =
+        let anotherOffice =
             {
                 Id = Guid.NewGuid() |> OfficeId
                 City = CityName "Berlin"

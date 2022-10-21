@@ -192,7 +192,7 @@ let ``GIVEN A Book-A-Desk Reservation command with the user booked on a differen
 let ``GIVEN A Book-A-Desk Reservation command with the user booked in a different office, WHEN validating the command, THEN validation should pass.`` () =
     let emailAddress = $"email@{domainName}"
     let bookedDate = DateTime.MaxValue
-    let newOffice = An.newOffice
+    let newOffice = An.anotherOffice
     let command =
         {
             EmailAddress = EmailAddress emailAddress

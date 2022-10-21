@@ -19,10 +19,9 @@ let ``GIVEN A Book-A-Desk Reservation command, WHEN executing the command and de
     let office = Offices.All.[0]
     let bookADesk = {
         BookADesk.EmailAddress = EmailAddress $"email@{domainName}"
-        BookADesk.Date = DateTime.Now.AddDays(1.)
-        BookADesk.OfficeId = office.Id
+        Date = DateTime.Now.AddDays(1.)
+        OfficeId = office.Id
     }
-
 
     let result = command.ExecuteWith bookADesk A.reservationAggregate
     match result with
@@ -37,12 +36,16 @@ let ``GIVEN A Book-A-Desk Reservation command, WHEN executing the command and de
     let office = Offices.All.[0]
     let bookADesk = {
         BookADesk.EmailAddress = EmailAddress $"email@{domainName}"
-        BookADesk.Date = DateTime.Now.AddDays(1.)
-        BookADesk.OfficeId = office.Id
+        Date = DateTime.Now.AddDays(1.)
+        OfficeId = office.Id
     }
 
     let result = command.ExecuteWith bookADesk A.reservationAggregate
     match result with
     | Error _ -> Assert.False(true)
     | Ok events ->
-        Assert.True(events |> List.forall (function | DeskBooked _ -> true | DeskCancelled _ -> false))
+        Assert.True(events
+                    |> List.forall (fun reservationAggregate ->
+                                        reservationAggregate.ReservationEvents
+                                        |> List.forall(function | DeskBooked _ -> true | DeskCancelled _ -> false))
+                    )

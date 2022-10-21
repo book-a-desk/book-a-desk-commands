@@ -3,6 +3,7 @@
 open System
 open Book_A_Desk.Domain
 open Book_A_Desk.Domain.Office.Domain
+open Book_A_Desk.Domain.Reservation.Domain
 
 type UserReference =
     {
@@ -57,6 +58,7 @@ module Booking =
     
 type Cancellation =
     {
+        AggregateId: ReservationId
         Office: OfficeReference
         Date: DateTime
         User: UserReference

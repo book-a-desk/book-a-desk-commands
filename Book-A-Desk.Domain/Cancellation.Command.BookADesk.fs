@@ -8,22 +8,25 @@ open Book_A_Desk.Domain.Reservation.Events
 
 type BookADeskCancellationCommand =
     {
-        ExecuteWith: CancelBookADesk -> ReservationAggregate -> Result<ReservationEvent list, ReservationError>
+        ExecuteWith: CancelBookADesk -> ReservationAggregate -> Result<ReservationAggregate list, ReservationError>
     }
 
 module BookADeskCancellationCommand =
     let provide offices domainName =
-        let validate (command:CancelBookADesk) reservationAggregate  =
+        let validate (command:CancelBookADesk) (reservationAggregate: ReservationAggregate) =
              BookADeskCancellationValidator.validateCommand offices command reservationAggregate domainName
 
         let execute (command:CancelBookADesk) reservationAggregate =
-            {
-                DeskCancelled.ReservationId = ReservationAggregate.Id
-                Date = command.Date
-                EmailAddress = command.EmailAddress
-                OfficeId = command.OfficeId
-            }
-            |> DeskCancelled
+            let deskCancelled =
+                {
+                    DeskCancelled.Date = command.Date
+                    EmailAddress = command.EmailAddress
+                    OfficeId = command.OfficeId
+                }
+                |> DeskCancelled
+
+            deskCancelled
+            |> ReservationAggregate.applyEventTo reservationAggregate
             |> List.singleton
 
         let executeWith cmd reservationAggregate =
