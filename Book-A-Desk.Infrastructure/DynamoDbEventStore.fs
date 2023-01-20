@@ -1,6 +1,5 @@
 ﻿namespace Book_A_Desk.Infrastructure
 
-open System
 open Amazon.DynamoDBv2
 open FSharp.AWS.DynamoDB
 open FSharp.Control
@@ -28,7 +27,7 @@ module rec DynamoDbEventStore =
         }
         
     let private getEvents table () = async {
-        let! results = table.QueryAsync(keyCondition = <@ fun (r : ReservationEvent) -> true @>)
+        let! results = table.ScanAsync()
         
         let domainResults = DomainMapper.toDomain results
         
