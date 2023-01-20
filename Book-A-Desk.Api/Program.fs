@@ -76,6 +76,7 @@ let configureApp (ctx : WebHostBuilderContext) (app : IApplicationBuilder) =
                                    officeRestrictionNotifier.NotifyOfficeRestrictions
                                    featureFlags
 
+    // TODO: Fix Okta issue in the following Mob programming sessions
     // let oktaDomain = ctx.Configuration.["Okta:OktaDomain"]
     // let oktaIssuer = getOktaIssuer oktaDomain
     // let configurationManager = getConfigurationManager oktaIssuer
@@ -84,7 +85,7 @@ let configureApp (ctx : WebHostBuilderContext) (app : IApplicationBuilder) =
     // let validateToken = JwtTokenValidator.validateToken configurationManager oktaIssuer oktaAudience
     
     let routes = Routes.provide apiDependencyFactory (fun _ -> Task.FromResult ValidToken)
-    //
+    // TODO: Fix Okta issue in the following Mob programming sessions
     // app.UseAuthentication()
     //    .UseAuthorization() |> ignore
     
@@ -122,12 +123,14 @@ let configureServices (services : IServiceCollection) =
     let serviceProvider = services.BuildServiceProvider()
     let config = serviceProvider.GetService<IConfiguration>()
     
+    // TODO: Fix Okta issue in the following Mob programming sessions
     // let oktaDomain = config.["Okta:OktaDomain"]
     // let oktaOptions = OktaWebApiOptions()
     // oktaOptions.OktaDomain <- oktaDomain
     
     services.AddGiraffe()
             .AddCors()
+            // TODO: Fix Okta issue in the following Mob programming sessions
             // .AddAuthentication(
             //     fun options ->
             //         options.DefaultAuthenticateScheme <- OktaDefaults.ApiAuthenticationScheme
