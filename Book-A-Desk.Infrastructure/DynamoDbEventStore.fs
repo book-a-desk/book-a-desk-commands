@@ -39,7 +39,7 @@ module rec DynamoDbEventStore =
         let infraEvents = DomainMapper.toInfra events
         
         let events = infraEvents
-                   |> EventBatcher.batchEvents
+                   |> Seq.splitInto 25
                    |> AsyncSeq.ofSeq
         do! AsyncSeq.iterAsync (fun infraEvents -> table.BatchPutItemsAsync(infraEvents) |> Async.Ignore) events
     }
