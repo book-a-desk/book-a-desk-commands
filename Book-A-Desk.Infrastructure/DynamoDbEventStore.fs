@@ -10,7 +10,7 @@ module rec DynamoDbEventStore =
     
     type DynamoDbEventStore =
         {        
-            GetEvents: Guid -> Result<DomainEvent seq, string> Async
+            GetEvents: unit -> Result<DomainEvent seq, string> Async
             AppendEvents: Map<Guid, DomainEvent seq> -> unit Async
         }
     
@@ -23,12 +23,12 @@ module rec DynamoDbEventStore =
                     createIfNotExists = false)
         
         {
-            GetEvents = getEvent table
+            GetEvents = getEvents table
             AppendEvents = appendEvent table
         }
         
-    let private getEvent table aggregateId = async {
-        let! results = table.QueryAsync(keyCondition = <@ fun (r : ReservationEvent) -> r.AggregateId = aggregateId @>)
+    let private getEvents table () = async {
+        let! results = table.QueryAsync(keyCondition = <@ fun (r : ReservationEvent) -> true @>)
         
         let domainResults = DomainMapper.toDomain results
         

@@ -10,7 +10,7 @@ type ReservationType =
 type ReservationEvent =
     {
         [<HashKey>]
-        AggregateId : Guid
+        EventId : Guid
         ReservationType : ReservationType
         Event: string
     }
