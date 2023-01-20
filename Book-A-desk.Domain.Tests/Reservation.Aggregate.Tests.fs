@@ -18,7 +18,6 @@ let ``Given empty bookings When a DeskBooked event is processed Then a Booking i
     let bookedDate = DateTime.Today
     
     let deskBookedEvent = ({
-        ReservationId = reservationId
         Date = bookedDate
         EmailAddress = emailAddress
         OfficeId = officeId
@@ -48,7 +47,6 @@ let ``Given a booking When a DeskCancelled event is processed Then a Booking is 
         }
     
     let deskBookedEvent = ({
-        ReservationId = reservationId
         Date = bookedDate
         EmailAddress = emailAddress
         OfficeId = officeId

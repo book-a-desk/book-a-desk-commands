@@ -26,9 +26,8 @@ type CancelBookingsHttpHandler =
 
 module CancelBookingsHttpHandler =
     let private handleCommand command eventStore reservationCommandsFactory errorHandler = asyncResult {
-        let (ReservationId aggregateId) = ReservationAggregate.Id
         let! events =
-            eventStore.GetEvents aggregateId
+            eventStore.GetEvents ()
             |> Async.map(
                 Result.mapError (
                     errorHandler.MapStringToAssignBookADeskError >> errorHandler.ConvertErrorToResponseError))
@@ -42,7 +41,8 @@ module CancelBookingsHttpHandler =
         let appendEvents eventsToAppend : Async<unit> =
             eventsToAppend
             |> Seq.ofList
-            |> (fun events -> aggregateId, events)
+            //ToDo: Fix me
+            |> (fun events -> Guid.Empty, events)
             |> List.singleton
             |> Map.ofList
             |> eventStore.AppendEvents

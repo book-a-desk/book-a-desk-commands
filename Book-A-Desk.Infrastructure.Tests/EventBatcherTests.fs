@@ -7,7 +7,7 @@ open Xunit
 let generateDeskBooked () =
     Seq.initInfinite (fun i ->
         {
-            AggregateId = Guid.NewGuid()
+            EventId = Guid.NewGuid()
             ReservationType = DeskBooked
             Event = $"SomeEvent{i}"
         })

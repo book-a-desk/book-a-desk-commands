@@ -83,8 +83,7 @@ module rec OfficesHttpHandler =
         }
         
     let private handleGetByDateFromEventStore eventStore getOffices date officeId = asyncResult {
-        let (ReservationId aggregateId) = ReservationAggregate.Id
-        let! bookingEvents = eventStore.GetEvents aggregateId
+        let! bookingEvents = eventStore.GetEvents ()
         let getBookingsForDate = ReservationsQueriesHandler.get bookingEvents
         let query =
             {

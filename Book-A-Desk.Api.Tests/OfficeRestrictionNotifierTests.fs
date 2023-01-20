@@ -50,7 +50,6 @@ let mockBooking =
     
 let aBooking =
         ({
-            ReservationId = ReservationAggregate.Id
             Date = date
             EmailAddress = "booking.user@domain.com" |> EmailAddress
             OfficeId = officeId |> OfficeId

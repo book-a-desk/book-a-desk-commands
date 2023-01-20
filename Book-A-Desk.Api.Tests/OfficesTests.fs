@@ -77,7 +77,6 @@ let ``GIVEN A Book-A-Desk server, WHEN getting the office availability by date, 
     let date = DateTime(2100,02,01)
     let aBooking =
         ({
-            ReservationId = ReservationAggregate.Id
             Date = date
             EmailAddress = "anEmail" |> EmailAddress
             OfficeId = officeId |> OfficeId
