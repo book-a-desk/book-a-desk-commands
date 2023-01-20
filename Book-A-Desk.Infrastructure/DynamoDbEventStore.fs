@@ -11,7 +11,7 @@ module rec DynamoDbEventStore =
     type DynamoDbEventStore =
         {        
             GetEvents: unit -> Result<DomainEvent seq, string> Async
-            AppendEvents: Map<Guid, DomainEvent seq> -> unit Async
+            AppendEvents: DomainEvent seq -> unit Async
         }
     
     let provide (dynamoDbClient : IAmazonDynamoDB) =
@@ -32,15 +32,14 @@ module rec DynamoDbEventStore =
         
         let domainResults = DomainMapper.toDomain results
         
-        return Result.Ok(domainResults)        
+        return Result.Ok(domainResults)
     }
     
     let private appendEvent table events = async {
-        let infraEvents = Map.map (fun _ events -> DomainMapper.toInfra events) events
+        let infraEvents = DomainMapper.toInfra events
         
         let events = infraEvents
                    |> EventBatcher.batchEvents
                    |> AsyncSeq.ofSeq
-        do! AsyncSeq.iterAsync (fun infraEvents -> table.BatchPutItemsAsync(infraEvents) |> Async.Ignore) events        
+        do! AsyncSeq.iterAsync (fun infraEvents -> table.BatchPutItemsAsync(infraEvents) |> Async.Ignore) events
     }
-        

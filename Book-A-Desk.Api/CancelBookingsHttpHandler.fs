@@ -41,10 +41,6 @@ module CancelBookingsHttpHandler =
         let appendEvents eventsToAppend : Async<unit> =
             eventsToAppend
             |> Seq.ofList
-            //ToDo: Fix me
-            |> (fun events -> Guid.Empty, events)
-            |> List.singleton
-            |> Map.ofList
             |> eventStore.AppendEvents
             
         return! appendEvents events

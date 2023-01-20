@@ -79,10 +79,8 @@ let ``GIVEN A Book-A-Desk server and a booking, WHEN cancelling a desk, THEN a d
         {
             GetEvents = fun _ ->
                 events |> Ok |> async.Return
-            AppendEvents = fun event ->
-                //ToDo: Fix me:
-                let reservationID = Guid.Empty
-                receivedEvents <- event.[reservationID]
+            AppendEvents = fun events ->
+                receivedEvents <- events
                 () |> async.Return
         } : DynamoDbEventStore
         

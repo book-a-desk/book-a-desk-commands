@@ -59,10 +59,6 @@ module BookingsHttpHandler =
         let appendEvents eventsToAppend : Async<unit> =
             eventsToAppend
             |> Seq.ofList
-            //Todo: Fix me:
-            |> (fun events -> Guid.Empty, events)
-            |> List.singleton
-            |> Map.ofList
             |> eventStore.AppendEvents
             
         return! appendEvents events
