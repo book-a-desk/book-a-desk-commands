@@ -46,4 +46,8 @@ Browse [this](https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/setup-
 
 After running `docker compose up`, you will need to create the tables required for Book a Desk by running these commands (requires aws cli):
 
-    aws dynamodb create-table --endpoint-url "http://localhost:9000" --table-name ReservationEvents --key-schema AttributeName=AggregateId,KeyType=HASH --attribute-definitions AttributeName=AggregateId,AttributeType=S --provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1
+    aws dynamodb create-table --endpoint-url "http://localhost:9000" --table-name ReservationEvents --key-schema AttributeName=EventId,KeyType=HASH --attribute-definitions AttributeName=EventId,AttributeType=S --provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1
+
+If you want to reset your table you can delete it using the following command:
+
+    aws dynamodb delete-table --endpoint-url "http://localhost:9000"--table-name ReservationEvents
