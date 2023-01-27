@@ -1,6 +1,5 @@
 ﻿namespace Book_A_Desk.Infrastructure
 
-open System
 open Amazon.DynamoDBv2
 open FSharp.AWS.DynamoDB
 open FSharp.Control
@@ -10,8 +9,8 @@ module rec DynamoDbEventStore =
     
     type DynamoDbEventStore =
         {        
-            GetEvents: Guid -> Result<DomainEvent seq, string> Async
-            AppendEvents: Map<Guid, DomainEvent seq> -> unit Async
+            GetEvents: unit -> Result<DomainEvent seq, string> Async
+            AppendEvents: DomainEvent seq -> unit Async
         }
     
     let provide (dynamoDbClient : IAmazonDynamoDB) =
@@ -23,24 +22,23 @@ module rec DynamoDbEventStore =
                     createIfNotExists = false)
         
         {
-            GetEvents = getEvent table
+            GetEvents = getEvents table
             AppendEvents = appendEvent table
         }
         
-    let private getEvent table aggregateId = async {
-        let! results = table.QueryAsync(keyCondition = <@ fun (r : ReservationEvent) -> r.AggregateId = aggregateId @>)
+    let private getEvents table () = async {
+        let! results = table.ScanAsync()
         
         let domainResults = DomainMapper.toDomain results
         
-        return Result.Ok(domainResults)        
+        return Result.Ok(domainResults)
     }
     
     let private appendEvent table events = async {
-        let infraEvents = Map.map (fun _ events -> DomainMapper.toInfra events) events
+        let infraEvents = DomainMapper.toInfra events
         
         let events = infraEvents
-                   |> EventBatcher.batchEvents
+                   |> Seq.splitInto 25
                    |> AsyncSeq.ofSeq
-        do! AsyncSeq.iterAsync (fun infraEvents -> table.BatchPutItemsAsync(infraEvents) |> Async.Ignore) events        
+        do! AsyncSeq.iterAsync (fun infraEvents -> table.BatchPutItemsAsync(infraEvents) |> Async.Ignore) events
     }
-        

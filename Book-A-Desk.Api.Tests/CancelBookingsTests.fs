@@ -67,8 +67,7 @@ let mockOfficeRestrictionNotification _ _ = async { return Ok [()] }
 let ``GIVEN A Book-A-Desk server and a booking, WHEN cancelling a desk, THEN a desk is cancelled`` () = async {
     let event =
         {
-            DeskBooked.ReservationId = ReservationAggregate.Id
-            Date = bookingDate
+            DeskBooked.Date = bookingDate
             EmailAddress = emailAddress |> EmailAddress
             OfficeId = mockOfficeId |> OfficeId
         } |> DeskBooked |> ReservationEvent
@@ -80,9 +79,8 @@ let ``GIVEN A Book-A-Desk server and a booking, WHEN cancelling a desk, THEN a d
         {
             GetEvents = fun _ ->
                 events |> Ok |> async.Return
-            AppendEvents = fun event ->
-                let (ReservationId reservationID) = ReservationAggregate.Id
-                receivedEvents <- event.[reservationID]
+            AppendEvents = fun events ->
+                receivedEvents <- events
                 () |> async.Return
         } : DynamoDbEventStore
         

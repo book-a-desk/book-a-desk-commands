@@ -18,7 +18,6 @@ module BookADeskCancellationCommand =
 
         let execute (command:CancelBookADesk) reservationAggregate =
             {
-                DeskCancelled.ReservationId = ReservationAggregate.Id
                 Date = command.Date
                 EmailAddress = command.EmailAddress
                 OfficeId = command.OfficeId

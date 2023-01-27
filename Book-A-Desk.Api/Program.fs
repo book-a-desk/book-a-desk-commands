@@ -1,4 +1,5 @@
 open System
+open System.Threading.Tasks
 open Amazon
 open Amazon.DynamoDBv2
 open Amazon.Extensions.NETCore.Setup
@@ -75,17 +76,18 @@ let configureApp (ctx : WebHostBuilderContext) (app : IApplicationBuilder) =
                                    officeRestrictionNotifier.NotifyOfficeRestrictions
                                    featureFlags
 
-    let oktaDomain = ctx.Configuration.["Okta:OktaDomain"]
-    let oktaIssuer = getOktaIssuer oktaDomain
-    let configurationManager = getConfigurationManager oktaIssuer
-    let oktaAudience = ctx.Configuration.["Okta:OktaAudience"]
+    // TODO: Fix Okta issue in the following Mob programming sessions
+    // let oktaDomain = ctx.Configuration.["Okta:OktaDomain"]
+    // let oktaIssuer = getOktaIssuer oktaDomain
+    // let configurationManager = getConfigurationManager oktaIssuer
+    // let oktaAudience = ctx.Configuration.["Okta:OktaAudience"]
+    //
+    // let validateToken = JwtTokenValidator.validateToken configurationManager oktaIssuer oktaAudience
     
-    let validateToken = JwtTokenValidator.validateToken configurationManager oktaIssuer oktaAudience
-    
-    let routes = Routes.provide apiDependencyFactory validateToken
-    
-    app.UseAuthentication()
-       .UseAuthorization() |> ignore
+    let routes = Routes.provide apiDependencyFactory (fun _ -> Task.FromResult ValidToken)
+    // TODO: Fix Okta issue in the following Mob programming sessions
+    // app.UseAuthentication()
+    //    .UseAuthorization() |> ignore
     
     app.UseCors(configureCors ctx)
        .UseGiraffe routes.HttpHandlers
@@ -121,18 +123,20 @@ let configureServices (services : IServiceCollection) =
     let serviceProvider = services.BuildServiceProvider()
     let config = serviceProvider.GetService<IConfiguration>()
     
-    let oktaDomain = config.["Okta:OktaDomain"]
-    let oktaOptions = OktaWebApiOptions()
-    oktaOptions.OktaDomain <- oktaDomain
+    // TODO: Fix Okta issue in the following Mob programming sessions
+    // let oktaDomain = config.["Okta:OktaDomain"]
+    // let oktaOptions = OktaWebApiOptions()
+    // oktaOptions.OktaDomain <- oktaDomain
     
     services.AddGiraffe()
             .AddCors()
-            .AddAuthentication(
-                fun options ->
-                    options.DefaultAuthenticateScheme <- OktaDefaults.ApiAuthenticationScheme
-                    options.DefaultChallengeScheme <- OktaDefaults.ApiAuthenticationScheme
-                    options.DefaultSignInScheme <- OktaDefaults.ApiAuthenticationScheme)
-            .AddOktaWebApi(oktaOptions)
+            // TODO: Fix Okta issue in the following Mob programming sessions
+            // .AddAuthentication(
+            //     fun options ->
+            //         options.DefaultAuthenticateScheme <- OktaDefaults.ApiAuthenticationScheme
+            //         options.DefaultChallengeScheme <- OktaDefaults.ApiAuthenticationScheme
+            //         options.DefaultSignInScheme <- OktaDefaults.ApiAuthenticationScheme)
+            // .AddOktaWebApi(oktaOptions)
             |> ignore
             
     services.AddAuthorization() |> ignore

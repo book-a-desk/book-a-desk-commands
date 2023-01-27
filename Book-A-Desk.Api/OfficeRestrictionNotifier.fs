@@ -19,8 +19,7 @@ module rec OfficeRestrictionNotifier =
     let provide (notifyRestriction: Models.Booking -> Async<Result<unit, string>>) =
 
         let getEventsByDateFromEventStore eventStore date = asyncResult {
-            let (ReservationId aggregateId) = ReservationAggregate.Id
-            let! bookingEvents = eventStore.GetEvents aggregateId
+            let! bookingEvents = eventStore.GetEvents ()
             let getBookingsForDate = ReservationsQueriesHandler.get bookingEvents
             return! getBookingsForDate date
         }

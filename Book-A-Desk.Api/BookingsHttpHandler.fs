@@ -44,9 +44,8 @@ module BookingsHttpHandler =
         }
 
     let private handleCommand command eventStore reservationCommandsFactory errorHandler = asyncResult {
-        let (ReservationId aggregateId) = ReservationAggregate.Id
         let! events =
-            eventStore.GetEvents aggregateId
+            eventStore.GetEvents ()
             |> Async.map(
                 Result.mapError (
                     errorHandler.MapStringToAssignBookADeskError >> errorHandler.ConvertErrorToResponseError))
@@ -60,9 +59,6 @@ module BookingsHttpHandler =
         let appendEvents eventsToAppend : Async<unit> =
             eventsToAppend
             |> Seq.ofList
-            |> (fun events -> aggregateId, events)
-            |> List.singleton
-            |> Map.ofList
             |> eventStore.AppendEvents
             
         return! appendEvents events
@@ -104,14 +100,12 @@ module BookingsHttpHandler =
             }
 
         let handleGetByEmailAndDateFromEventStore eventStore email date = asyncResult {
-            let (ReservationId aggregateId) = ReservationAggregate.Id
-            let! bookingEvents = eventStore.GetEvents aggregateId
+            let! bookingEvents = eventStore.GetEvents ()
             return! ReservationsQueriesHandler.getUserBookingsStartFrom bookingEvents email date
         }
         
         let handleGetByDateFromEventStore eventStore date = asyncResult {
-            let (ReservationId aggregateId) = ReservationAggregate.Id
-            let! bookingEvents = eventStore.GetEvents aggregateId
+            let! bookingEvents = eventStore.GetEvents ()
             return! ReservationsQueriesHandler.getUsersBookingsStartFrom bookingEvents date
         }
         

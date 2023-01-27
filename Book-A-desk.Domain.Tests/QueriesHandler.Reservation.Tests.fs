@@ -16,7 +16,6 @@ let ``GIVEN A ReservationQueriesHandler, WHEN getting the booking, THEN booking 
     let officeId = Guid.Parse("16C3D468-C115-4452-8502-58B821D6640B") |> OfficeId
     let aBooking =
         ({  
-            ReservationId = ReservationAggregate.Id
             Date = date
             EmailAddress = email 
             OfficeId = officeId 
@@ -40,7 +39,6 @@ let ``GIVEN A ReservationQueriesHandler, WHEN getting the booking and no booking
     let officeId = Guid.Parse("16C3D468-C115-4452-8502-58B821D6640B") |> OfficeId
     let aBooking =
         ({  
-            ReservationId = ReservationAggregate.Id
             Date = date
             EmailAddress = email 
             OfficeId = officeId 

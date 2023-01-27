@@ -60,7 +60,6 @@ let ``GIVEN A Book-A-Desk server, WHEN getting bookings, THEN bookings are retur
     let officeId = Guid.Parse("16C3D468-C115-4452-8502-58B821D6640B") |> OfficeId
     let aBooking =
         ({  
-            ReservationId = ReservationAggregate.Id
             Date = date
             EmailAddress = email 
             OfficeId = officeId 
@@ -98,7 +97,6 @@ let ``GIVEN A Book-A-Desk server and multiple bookings, WHEN getting bookings, T
     let date1 = DateTime(2100,02,01)
     let aBooking1 =
         ({  
-            ReservationId = ReservationAggregate.Id
             Date = date1
             EmailAddress = email1
             OfficeId = officeId 
@@ -108,7 +106,6 @@ let ``GIVEN A Book-A-Desk server and multiple bookings, WHEN getting bookings, T
     let date2 = DateTime(2100,02,01)
     let aBooking2 =
         ({  
-            ReservationId = ReservationAggregate.Id
             Date = date2
             EmailAddress = email2 
             OfficeId = officeId 
@@ -117,7 +114,6 @@ let ``GIVEN A Book-A-Desk server and multiple bookings, WHEN getting bookings, T
     let date3 = DateTime(2030,01,30)
     let aBooking3 =
         ({  
-            ReservationId = ReservationAggregate.Id
             Date = date3
             EmailAddress = email1
             OfficeId = officeId 
@@ -155,7 +151,6 @@ let ``GIVEN A Book-A-Desk server and multiple bookings, WHEN getting bookings wi
     let date1 = DateTime(2100, 01, 20)
     let aBooking1 =
         ({  
-            ReservationId = ReservationAggregate.Id
             Date = date1
             EmailAddress = email1
             OfficeId = officeId 
@@ -165,7 +160,6 @@ let ``GIVEN A Book-A-Desk server and multiple bookings, WHEN getting bookings wi
     let date2 = DateTime(2100, 01, 21)
     let aBooking2 =
         ({  
-            ReservationId = ReservationAggregate.Id
             Date = date2
             EmailAddress = email2 
             OfficeId = officeId 
@@ -174,7 +168,6 @@ let ``GIVEN A Book-A-Desk server and multiple bookings, WHEN getting bookings wi
     let date3 = DateTime(2100, 01, 22)
     let aBooking3 =
         ({  
-            ReservationId = ReservationAggregate.Id
             Date = date3
             EmailAddress = email2
             OfficeId = officeId 
