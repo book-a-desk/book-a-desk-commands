@@ -52,7 +52,7 @@ workflows:
 
   production:
     when:
-      equal: ["trunk", << pipeline.git.branch >>]
+      equal: ["mob2", << pipeline.git.branch >>]
     jobs:
       - build_and_test
       - build_image:
@@ -83,61 +83,61 @@ workflows:
             - aws-credentials
           requires:
             - push-image-to-dev
-      - push-image:
-          name: push-image-to-test
-          ecr-account-url: ${AWS_ECR_ACCOUNT_URL_TEST}
-          aws-account-id: ${AWS_ACCOUNT_TEST}
-          authenticate-aws:
-            - authenticate-aws-book-a-desk-test
-          context:
-            - aws-credentials
-          requires:
-            - deploy-to-dev
-      - deploy:
-          name: deploy-to-test
-          ecr-account-url: ${AWS_ECR_ACCOUNT_URL_TEST}
-          aws-account-id: ${AWS_ACCOUNT_TEST}
-          authenticate-aws:
-            - authenticate-aws-book-a-desk-test
-          certificate-id: ${ACM_CERTIFICATE_ID_TEST}
-          hosted-zone-name: ${HOSTED_ZONE_NAME_TEST}
-          network-stack-name: << pipeline.parameters.network-stack-name >>
-          service-stack-name: << pipeline.parameters.backend-service-stack-name >>
-          cloudformation-role: << pipeline.parameters.cloudformation-role-test >>
-          context:
-            - aws-credentials
-          requires:
-            - push-image-to-test
-      - production-gate:
-          type:
-            approval
-          requires:
-            - deploy-to-test
-      - push-image:
-          name: push-image-to-prod
-          ecr-account-url: ${AWS_ECR_ACCOUNT_URL_PROD}
-          aws-account-id: ${AWS_ACCOUNT_PROD}
-          authenticate-aws:
-            - authenticate-aws-book-a-desk-prod
-          context:
-            - aws-credentials
-          requires:
-            - production-gate
-      - deploy:
-          name: deploy-to-prod
-          ecr-account-url: ${AWS_ECR_ACCOUNT_URL_PROD}
-          aws-account-id: ${AWS_ACCOUNT_PROD}
-          authenticate-aws:
-            - authenticate-aws-book-a-desk-prod
-          certificate-id: ${ACM_CERTIFICATE_ID_PROD}
-          hosted-zone-name: ${HOSTED_ZONE_NAME_PROD}
-          network-stack-name: << pipeline.parameters.network-stack-name >>
-          service-stack-name: << pipeline.parameters.backend-service-stack-name >>
-          cloudformation-role: << pipeline.parameters.cloudformation-role-prod >>
-          context:
-            - aws-credentials
-          requires:
-            - push-image-to-prod
+#      - push-image:
+#          name: push-image-to-test
+#          ecr-account-url: ${AWS_ECR_ACCOUNT_URL_TEST}
+#          aws-account-id: ${AWS_ACCOUNT_TEST}
+#          authenticate-aws:
+#            - authenticate-aws-book-a-desk-test
+#          context:
+#            - aws-credentials
+#          requires:
+#            - deploy-to-dev
+#      - deploy:
+#          name: deploy-to-test
+#          ecr-account-url: ${AWS_ECR_ACCOUNT_URL_TEST}
+#          aws-account-id: ${AWS_ACCOUNT_TEST}
+#          authenticate-aws:
+#            - authenticate-aws-book-a-desk-test
+#          certificate-id: ${ACM_CERTIFICATE_ID_TEST}
+#          hosted-zone-name: ${HOSTED_ZONE_NAME_TEST}
+#          network-stack-name: << pipeline.parameters.network-stack-name >>
+#          service-stack-name: << pipeline.parameters.backend-service-stack-name >>
+#          cloudformation-role: << pipeline.parameters.cloudformation-role-test >>
+#          context:
+#            - aws-credentials
+#          requires:
+#            - push-image-to-test
+#      - production-gate:
+#          type:
+#            approval
+#          requires:
+#            - deploy-to-test
+#      - push-image:
+#          name: push-image-to-prod
+#          ecr-account-url: ${AWS_ECR_ACCOUNT_URL_PROD}
+#          aws-account-id: ${AWS_ACCOUNT_PROD}
+#          authenticate-aws:
+#            - authenticate-aws-book-a-desk-prod
+#          context:
+#            - aws-credentials
+#          requires:
+#            - production-gate
+#      - deploy:
+#          name: deploy-to-prod
+#          ecr-account-url: ${AWS_ECR_ACCOUNT_URL_PROD}
+#          aws-account-id: ${AWS_ACCOUNT_PROD}
+#          authenticate-aws:
+#            - authenticate-aws-book-a-desk-prod
+#          certificate-id: ${ACM_CERTIFICATE_ID_PROD}
+#          hosted-zone-name: ${HOSTED_ZONE_NAME_PROD}
+#          network-stack-name: << pipeline.parameters.network-stack-name >>
+#          service-stack-name: << pipeline.parameters.backend-service-stack-name >>
+#          cloudformation-role: << pipeline.parameters.cloudformation-role-prod >>
+#          context:
+#            - aws-credentials
+#          requires:
+#            - push-image-to-prod
 
 orbs:
   aws-ecs: circleci/aws-ecs@2.0.0
