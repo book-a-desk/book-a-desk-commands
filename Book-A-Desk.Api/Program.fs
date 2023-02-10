@@ -78,10 +78,9 @@ let configureApp (ctx : WebHostBuilderContext) (app : IApplicationBuilder) =
     let configurationManager = getConfigurationManager oktaIssuer
     let oktaAudience = ctx.Configuration.["Okta:OktaAudience"]
     
-    // TODO: Incomplete part, token validation
     let validateToken = JwtTokenValidator.validateToken configurationManager oktaIssuer oktaAudience
     
-    let routes = Routes.provide apiDependencyFactory (fun _ -> Task.FromResult ValidToken)
+    let routes = Routes.provide apiDependencyFactory validateToken
     app.UseAuthentication()
        .UseAuthorization() |> ignore
     

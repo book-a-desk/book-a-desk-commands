@@ -28,6 +28,6 @@ services:
       AWS_DEVELOPMENTURL: 'http://dynamodb-local:8000'
       DOMAINNAME: 'broadsign.com'
       FeatureFlags:BookingCancellation: 'true'
-      Okta:OktaDomain: 'https://localhost'
+      Okta:OktaDomain: 'https://dev-05054243.okta.com'
       Okta:OktaAudience: 'test'
       FeatureFlags:GetBookings: 'true'
