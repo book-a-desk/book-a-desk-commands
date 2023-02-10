@@ -26,8 +26,7 @@ let getConfigurationManager oktaIssuer =
     let metadataAddress = oktaIssuer + "/.well-known/oauth-authorization-server"
     ConfigurationManager<OpenIdConnectConfiguration>(
         metadataAddress,
-        OpenIdConnectConfigurationRetriever(),
-        HttpDocumentRetriever())
+        OpenIdConnectConfigurationRetriever())
     
 
 let configureCors (ctx : WebHostBuilderContext) (builder : CorsPolicyBuilder) =

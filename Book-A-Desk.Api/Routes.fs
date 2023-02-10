@@ -33,8 +33,10 @@ module Routes =
         | Ok bearerToken ->
             match! validateToken bearerToken with
             | ValidToken ->
+                printfn "ValidToken"
                 return! next context
             | InvalidToken message ->
+                printfn "InvalidToken"
                 return! failAuthorization message context
         | Error e ->
             return! failAuthorization $"Could not get bearer token: {e}" context
