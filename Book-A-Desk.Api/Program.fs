@@ -23,7 +23,7 @@ let useDevelopmentStorage = Environment.GetEnvironmentVariable("AWS_DEVELOPMENTS
 
 
 let getConfigurationManager oktaIssuer =
-    let metadataAddress = oktaIssuer + "/.well-known/oauth-authorization-server"
+    let metadataAddress = oktaIssuer + "/.well-known/openid-configuration"
     ConfigurationManager<OpenIdConnectConfiguration>(
         metadataAddress,
         OpenIdConnectConfigurationRetriever())

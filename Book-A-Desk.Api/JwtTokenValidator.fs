@@ -24,7 +24,7 @@ module JwtTokenValidator =
         validationParameters.RequireSignedTokens <- true
         validationParameters.ValidateIssuer <- true
         validationParameters.ValidIssuer <- issuer
-        validationParameters.ValidateAudience <- true
+        validationParameters.ValidateAudience <- false
         validationParameters.ValidAudience <- audience
         validationParameters.ValidateIssuerSigningKey <- true
         validationParameters.IssuerSigningKeys <- signingKeys
