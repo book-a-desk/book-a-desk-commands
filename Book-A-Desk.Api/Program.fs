@@ -1,5 +1,5 @@
 open System
-open System.Threading.Tasks
+open System.Threading
 open Amazon.DynamoDBv2
 open Amazon.Extensions.NETCore.Setup
 open Microsoft.AspNetCore.Builder
@@ -21,11 +21,11 @@ open Okta.AspNetCore
  
 let useDevelopmentStorage = Environment.GetEnvironmentVariable("AWS_DEVELOPMENTSTORAGE") |> bool.Parse
 
-let getOktaIssuer oktaDomain = $"https://{oktaDomain}/oauth2/default"
 
 let getConfigurationManager oktaIssuer =
+    let metadataAddress = oktaIssuer + "/.well-known/oauth-authorization-server"
     ConfigurationManager<OpenIdConnectConfiguration>(
-        oktaIssuer + "/.well-known/oauth-authorization-server",
+        metadataAddress,
         OpenIdConnectConfigurationRetriever(),
         HttpDocumentRetriever())
     
@@ -74,7 +74,7 @@ let configureApp (ctx : WebHostBuilderContext) (app : IApplicationBuilder) =
                                    featureFlags
 
     let oktaDomain = ctx.Configuration.["Okta:OktaDomain"]
-    let oktaIssuer = getOktaIssuer oktaDomain
+    let oktaIssuer = oktaDomain
     let configurationManager = getConfigurationManager oktaIssuer
     let oktaAudience = ctx.Configuration.["Okta:OktaAudience"]
     
