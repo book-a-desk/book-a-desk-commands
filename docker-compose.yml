@@ -29,5 +29,5 @@ services:
       DOMAINNAME: 'broadsign.com'
       FeatureFlags:BookingCancellation: 'true'
       Okta:OktaDomain: 'https://dev-05054243.okta.com'
-      Okta:OktaAudience: 'test'
+      Okta:OktaAudience: '0oa3x87srayaxvqxS5d7'
       FeatureFlags:GetBookings: 'true'

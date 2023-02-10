@@ -31,6 +31,7 @@ module Routes =
         
         match bearerToken with
         | Ok bearerToken ->
+            let bearerToken = bearerToken.Replace("Bearer ", "")
             match! validateToken bearerToken with
             | ValidToken ->
                 printfn "ValidToken"

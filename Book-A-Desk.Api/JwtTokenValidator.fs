@@ -16,6 +16,7 @@ module JwtTokenValidator =
         audience
         (bearerToken : string)
         = task {
+        printfn $"Audience is: {audience}"
         let! config = configurationManager.GetConfigurationAsync(CancellationToken.None)
         let signingKeys = config.SigningKeys        
         let validationParameters = TokenValidationParameters()
