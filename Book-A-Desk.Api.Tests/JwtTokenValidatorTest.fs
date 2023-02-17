@@ -16,7 +16,7 @@ type TestFile =
 
 [<Fact>]
 let ``Given a valid bearer token When validating the token Then the bearer token is valid`` () = async {
-    let oktaIssuer = "https://dev-05054243.okta.com"
+    let oktaIssuer = "https://dev-05054243.okta.com/oauth2/default"
     let metadataAddress = oktaIssuer + "/.well-known/openid-configuration"
     let audience = "0oa3x87srayaxvqxS5d7"
     let configurationManager = ConfigurationManager<OpenIdConnectConfiguration>(
