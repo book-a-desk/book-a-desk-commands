@@ -23,7 +23,9 @@ let ``Given a valid bearer token When validating the token Then the bearer token
         metadataAddress,
         OpenIdConnectConfigurationRetriever())
     let! configuration = configurationManager.GetConfigurationAsync(CancellationToken.None) |> Async.AwaitTask
-    
+    let testConfig = new OpenIdConnectConfiguration()
+    testConfig.SigningKeys <- 
+  
     let testFileContent = File.ReadAllText "testConfig.json"
     let testFile = JsonConvert.DeserializeObject<TestFile> testFileContent
     
