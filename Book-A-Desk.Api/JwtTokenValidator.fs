@@ -30,18 +30,19 @@ module rec JwtTokenValidator =
         validationParameters.ValidateIssuerSigningKey <- false
         validationParameters.ValidateLifetime <- false
         validationParameters.ClockSkew <- TimeSpan.FromMinutes(2.0)
-        
+        validationParameters.ValidAlgorithms <- [SecurityAlgorithms.RsaSha256]
+        validationParameters.IssuerSigningKeys <- signingKeys
         
         try
-            let test = JwtSecurityTokenHandler()
+            (*let test = JwtSecurityTokenHandler()
             
-            let jwtSecurityToken = test.ReadJwtToken(bearerToken)
+            let jwtSecurityToken = test.ReadJwtToken(bearerToken)*)
             
-            (*let _, token =
+            let _, token =
                 (JwtSecurityTokenHandler())
                     .ValidateToken(bearerToken, validationParameters)
                             
-            let jwtSecurityToken = (token :?> JwtSecurityToken)*)
+            let jwtSecurityToken = (token :?> JwtSecurityToken)
             
             match manualValidation jwtSecurityToken issuer audience SecurityAlgorithms.RsaSha256 with
             | true ->
