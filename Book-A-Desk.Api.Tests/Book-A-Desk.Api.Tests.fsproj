@@ -18,6 +18,7 @@
     <Compile Include="BookingNotifierTests.fs" />
     <Compile Include="CancelBookingsTests.fs" />
     <Compile Include="OfficeRestrictionNotifierTests.fs" />
+    <Compile Include="JwtTokenValidatorTest.fs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -35,6 +36,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Book-A-Desk.Api\Book-A-Desk.Api.fsproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="testConfig.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   
 </Project>

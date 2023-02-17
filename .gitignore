@@ -7,3 +7,5 @@ out/
 /.idea/
 
 *.user
+
+testConfig.json

@@ -17,10 +17,8 @@ open Book_A_Desk.Infrastructure
 open Book_A_Desk.Domain.CommandHandler
 open Microsoft.IdentityModel.Protocols
 open Microsoft.IdentityModel.Protocols.OpenIdConnect
-open Okta.AspNetCore
  
 let useDevelopmentStorage = Environment.GetEnvironmentVariable("AWS_DEVELOPMENTSTORAGE") |> bool.Parse
-
 
 let getConfigurationManager oktaIssuer =
     let metadataAddress = oktaIssuer + "/.well-known/openid-configuration"
@@ -80,8 +78,6 @@ let configureApp (ctx : WebHostBuilderContext) (app : IApplicationBuilder) =
     let validateToken = JwtTokenValidator.validateToken configurationManager oktaIssuer oktaAudience
     
     let routes = Routes.provide apiDependencyFactory validateToken
-    app.UseAuthentication()
-       .UseAuthorization() |> ignore
     
     app.UseCors(configureCors ctx)
        .UseGiraffe routes.HttpHandlers
@@ -117,18 +113,8 @@ let configureServices (services : IServiceCollection) =
     let serviceProvider = services.BuildServiceProvider()
     let config = serviceProvider.GetService<IConfiguration>()
     
-    let oktaDomain = config.["Okta:OktaDomain"]
-    let oktaOptions = OktaWebApiOptions()
-    oktaOptions.OktaDomain <- oktaDomain
-    
     services.AddGiraffe()
             .AddCors()
-            .AddAuthentication(
-                fun options ->
-                    options.DefaultAuthenticateScheme <- OktaDefaults.ApiAuthenticationScheme
-                    options.DefaultChallengeScheme <- OktaDefaults.ApiAuthenticationScheme
-                    options.DefaultSignInScheme <- OktaDefaults.ApiAuthenticationScheme)
-            .AddOktaWebApi(oktaOptions)
             |> ignore
             
     services.AddAuthorization() |> ignore
