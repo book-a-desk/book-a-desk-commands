@@ -30,7 +30,7 @@ let ``Given a valid bearer token When validating the token Then the bearer token
     let bearerToken = testFile.BearerToken
     
     let validatedToken =
-        JwtTokenValidator.validateTokenPure
+        JwtTokenValidator.validateTokenWithConfig
             configuration
             oktaIssuer
             audience

@@ -11,6 +11,16 @@ open Microsoft.IdentityModel.Tokens
 
 module rec JwtTokenValidator =
     let validateToken
+        (configuration: ConfigurationManager<OpenIdConnectConfiguration>)
+        issuer
+        audience
+        (bearerToken : string)
+        = task {
+            let! config = configuration.GetConfigurationAsync()
+            return validateTokenWithConfig config issuer audience bearerToken 
+        }
+            
+    let validateTokenWithConfig 
         (configuration: OpenIdConnectConfiguration)
         issuer
         audience
