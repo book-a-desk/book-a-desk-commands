@@ -75,6 +75,7 @@ let configureApp (ctx : WebHostBuilderContext) (app : IApplicationBuilder) =
     let configurationManager = getConfigurationManager oktaIssuer
     let oktaAudience = ctx.Configuration.["Okta:OktaAudience"]
     
+    
     let validateToken = JwtTokenValidator.validateToken configurationManager oktaIssuer oktaAudience
     
     let routes = Routes.provide apiDependencyFactory validateToken
