@@ -13,11 +13,28 @@ To run the image inside a container:
 ## Docker Setup for local development
 Building the local image:
 
-    docker build -t book-a-desk:local .
+    docker build -f docker/Dockerfile -t book-a-desk:local .
 
 Running Book A Desk with a local dynamo db instance:
 
-    docker compose up
+    docker compose -f docker/docker-compose.yml up
+
+Environment variables are declared in `docker/.env`.
+Please create that file with this template
+```
+AWS_REGION="<aws-region>"
+AWS_ACCESS_KEY_ID="DUMMYIDEXAMPLE"
+AWS_SECRET_ACCESS_KEY="DUMMYEXAMPLEKEY"
+DynamoDB__ReservationTableName="ReservationEvents"
+DynamoDB__OfficeTableName="Offices"
+AWS_DEVELOPMENTSTORAGE="true"
+AWS_DEVELOPMENTURL="http://dynamodb-local:8000"
+DOMAINNAME="broadsign.com"
+FeatureFlags__BookingCancellation="true"
+FeatureFlags__GetBookings="true"
+Okta__OktaDomain="<your-okta-domain>"
+Okta__OktaAudience="<your-okta-client-id>"
+```
 
 This will start a local Book a Desk container listening to port 5000 and a dynamo db local instance listening on port 9000.
 
