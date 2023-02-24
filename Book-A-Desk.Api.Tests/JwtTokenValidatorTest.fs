@@ -2,6 +2,9 @@
 
 open System.Collections.Generic
 open System.IO
+open System.Security.Cryptography
+open System.Text
+open System.Text.Unicode
 open System.Threading
 open Book_A_Desk.Api
 open Microsoft.IdentityModel.Protocols
@@ -183,11 +186,13 @@ let ``Given a valid bearer token When validating the token Then the bearer token
     let audience = "0oa3x87srayaxvqxS5d7"
     let configuration = OpenIdConnectConfiguration(configurationJson)
     
-    configuration.JsonWebKeySet = JsonConvert.DeserializeObject<JsonWebKeySet>(keys) |> ignore
-    configuration.JsonWebKeySet.GetSigningKeys()
-    |> Seq.iter (fun key ->
-        configuration.SigningKeys.Add(key)
-        )
+    let rsa1 = RSA.Create()
+    rsa1.ImportRSAPublicKey(Encoding.UTF8.GetBytes("QhktjLwN6Kj9cdvt7i1k5-86peIf7LFiVhQ52qIlIAc")) |> ignore
+    let rsa2 = RSA.Create()
+    rsa2.ImportRSAPublicKey(Encoding.UTF8.GetBytes("xqXzzfcJvA9Y5uFMkj5fvB-y4bLlrYvcWLzj3Q3TvrA")) |> ignore
+    
+    configuration.SigningKeys.Add(RsaSecurityKey(rsa1))
+    configuration.SigningKeys.Add(RsaSecurityKey(rsa2))
     
     let validatedToken =
         JwtTokenValidator.validateTokenWithConfig
