@@ -1,5 +1,4 @@
 open System
-open System.Threading
 open Amazon.DynamoDBv2
 open Amazon.Extensions.NETCore.Setup
 open Microsoft.AspNetCore.Builder
