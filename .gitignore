@@ -9,4 +9,3 @@ out/
 *.user
 
 testConfig.json
-docker/.env

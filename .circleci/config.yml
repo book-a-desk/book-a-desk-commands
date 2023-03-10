@@ -313,7 +313,7 @@ jobs:
       - run:
           name: Build Docker image
           command: |
-            docker build -f docker/Dockerfile -t << pipeline.parameters.docker-repo >>:<< pipeline.parameters.docker-img-version >> \
+            docker build -t << pipeline.parameters.docker-repo >>:<< pipeline.parameters.docker-img-version >> \
               --build-arg AWSREGION=$AWS_REGION --build-arg AWS_DEVELOPMENTSTORAGE=false .
       - run:
           name: Save Docker image
