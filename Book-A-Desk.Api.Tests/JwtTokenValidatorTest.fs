@@ -169,7 +169,6 @@ let bearerToken = "eyJraWQiOiJRaGt0akx3TjZLajljZHZ0N2kxazUtODZwZUlmN0xGaVZoUTUyc
 
 [<Fact>]
 let ``Given a valid bearer token When validating the token Then the bearer token is valid`` () = async {
-    let oktaIssuer = "https://dev-05054243.okta.com/oauth2/default"
     let audience = "0oa3x87srayaxvqxS5d7"
     let configuration = OpenIdConnectConfiguration(configurationJson)
     
@@ -183,7 +182,6 @@ let ``Given a valid bearer token When validating the token Then the bearer token
     let validatedToken =
         JwtTokenValidator.validateTokenWithConfig
             configuration
-            oktaIssuer
             audience
             bearerToken
         
