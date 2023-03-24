@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:5.0-alpine AS build-env
+FROM mcr.microsoft.com/dotnet/sdk:6.0-alpine AS build-env
 ARG AWSREGION
 WORKDIR /app
 COPY Book-A-Desk.Api/*.fsproj ./Book-A-Desk.Api/
@@ -14,7 +14,7 @@ RUN dotnet publish \
         ./Book-A-Desk.Api
 
 # runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:5.0-alpine
+FROM mcr.microsoft.com/dotnet/aspnet:6.0-alpine
 ARG ENVIRONMENT
 ARG AWSREGION
 ARG AWS_DEVELOPMENTSTORAGE
