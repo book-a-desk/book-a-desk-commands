@@ -11,17 +11,15 @@ open Microsoft.IdentityModel.Tokens
 module rec JwtTokenValidator =
     let validateToken
         (configuration: ConfigurationManager<OpenIdConnectConfiguration>)
-        issuer
         audience
         (bearerToken : string)
         = task {
             let! config = configuration.GetConfigurationAsync()
-            return validateTokenWithConfig config issuer audience bearerToken 
+            return validateTokenWithConfig config audience bearerToken 
         }
             
     let validateTokenWithConfig 
         (configuration: OpenIdConnectConfiguration)
-        issuer
         audience
         (bearerToken : string)
         =
@@ -30,7 +28,7 @@ module rec JwtTokenValidator =
         validationParameters.RequireExpirationTime <- false
         validationParameters.RequireSignedTokens <- true
         validationParameters.ValidateIssuer <- true
-        validationParameters.ValidIssuer <- issuer
+        validationParameters.ValidIssuer <- configuration.Issuer
         validationParameters.ValidateAudience <- true
         validationParameters.ValidAudience <- audience
         validationParameters.ValidateIssuerSigningKey <- true

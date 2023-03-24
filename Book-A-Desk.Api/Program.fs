@@ -20,7 +20,7 @@ open Microsoft.IdentityModel.Protocols.OpenIdConnect
 let useDevelopmentStorage = Environment.GetEnvironmentVariable("AWS_DEVELOPMENTSTORAGE") |> bool.Parse
 
 let getConfigurationManager oktaIssuer =
-    let metadataAddress = oktaIssuer + "/.well-known/openid-configuration"
+    let metadataAddress = oktaIssuer + "/oauth2/default/.well-known/openid-configuration"
     ConfigurationManager<OpenIdConnectConfiguration>(
         metadataAddress,
         OpenIdConnectConfigurationRetriever())
@@ -74,8 +74,7 @@ let configureApp (ctx : WebHostBuilderContext) (app : IApplicationBuilder) =
     let configurationManager = getConfigurationManager oktaIssuer
     let oktaAudience = ctx.Configuration.["Okta:OktaAudience"]
     
-    
-    let validateToken = JwtTokenValidator.validateToken configurationManager oktaIssuer oktaAudience
+    let validateToken = JwtTokenValidator.validateToken configurationManager oktaAudience
     
     let routes = Routes.provide apiDependencyFactory validateToken
     
