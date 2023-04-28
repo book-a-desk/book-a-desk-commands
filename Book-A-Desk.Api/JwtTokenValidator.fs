@@ -2,53 +2,48 @@
 
 open System
 open System.IdentityModel.Tokens.Jwt
-open System.Threading
 
 open FSharp.Control.Tasks.V2.ContextInsensitive
 open Microsoft.IdentityModel.Protocols
 open Microsoft.IdentityModel.Protocols.OpenIdConnect
 open Microsoft.IdentityModel.Tokens
 
-module JwtTokenValidator =
+module rec JwtTokenValidator =
     let validateToken
-        (configurationManager : IConfigurationManager<OpenIdConnectConfiguration>)
-        issuer
+        (configuration: ConfigurationManager<OpenIdConnectConfiguration>)
         audience
         (bearerToken : string)
         = task {
-        let! config = configurationManager.GetConfigurationAsync(CancellationToken.None)
-        let signingKeys = config.SigningKeys        
+            let! config = configuration.GetConfigurationAsync()
+            return validateTokenWithConfig config audience bearerToken 
+        }
+            
+    let validateTokenWithConfig 
+        (configuration: OpenIdConnectConfiguration)
+        audience
+        (bearerToken : string)
+        =
+        let signingKeys = configuration.SigningKeys        
         let validationParameters = TokenValidationParameters()
-        validationParameters.RequireExpirationTime <- true
+        validationParameters.RequireExpirationTime <- false
         validationParameters.RequireSignedTokens <- true
         validationParameters.ValidateIssuer <- true
-        validationParameters.ValidIssuer <- issuer
+        validationParameters.ValidIssuer <- configuration.Issuer
         validationParameters.ValidateAudience <- true
         validationParameters.ValidAudience <- audience
         validationParameters.ValidateIssuerSigningKey <- true
-        validationParameters.IssuerSigningKeys <- signingKeys
-        validationParameters.ValidateLifetime <- true
+        validationParameters.ValidateLifetime <- false
         validationParameters.ClockSkew <- TimeSpan.FromMinutes(2.0)
+        validationParameters.ValidAlgorithms <- [SecurityAlgorithms.RsaSha256]
+        validationParameters.IssuerSigningKeys <- signingKeys
         
         try
-            let _, token =
-                (JwtSecurityTokenHandler())
-                    .ValidateToken(bearerToken, validationParameters)
+            JwtSecurityTokenHandler()
+                .ValidateToken(bearerToken, validationParameters)
+                |> ignore
                             
-            let jwtSecurityToken = (token :?> JwtSecurityToken)
-            
-            match jwtSecurityToken <> null with
-            | true ->
-                // Okta uses RsaSha256
-                let expectedAlg = SecurityAlgorithms.RsaSha256
-                let header = jwtSecurityToken.Header
-                
-                match header <> null && header.Alg = expectedAlg with
-                | true ->
-                    return ValidToken
-                | false -> return InvalidToken "Unexpected algorithm"
-            | false -> return InvalidToken "Did not get a security token"
+            ValidToken
         with
         | e ->
-            return InvalidToken $"Token Validation Error: {e}"
-    }
+            printfn $"Token Validation Error: {e}"
+            InvalidToken $"Token Validation Error: {e}"

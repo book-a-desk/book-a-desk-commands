@@ -1,9 +1,6 @@
 open System
-open System.Threading.Tasks
-open Amazon
 open Amazon.DynamoDBv2
 open Amazon.Extensions.NETCore.Setup
-open Amazon.Runtime
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Cors.Infrastructure
 open Microsoft.AspNetCore.Hosting
@@ -19,18 +16,14 @@ open Book_A_Desk.Infrastructure
 open Book_A_Desk.Domain.CommandHandler
 open Microsoft.IdentityModel.Protocols
 open Microsoft.IdentityModel.Protocols.OpenIdConnect
-open Microsoft.IdentityModel.Tokens
-open Okta.AspNetCore
  
 let useDevelopmentStorage = Environment.GetEnvironmentVariable("AWS_DEVELOPMENTSTORAGE") |> bool.Parse
 
-let getOktaIssuer oktaDomain = $"https://{oktaDomain}/oauth2/default"
-
 let getConfigurationManager oktaIssuer =
+    let metadataAddress = oktaIssuer + "/oauth2/default/.well-known/openid-configuration"
     ConfigurationManager<OpenIdConnectConfiguration>(
-        oktaIssuer + "/.well-known/oauth-authorization-server",
-        OpenIdConnectConfigurationRetriever(),
-        HttpDocumentRetriever())
+        metadataAddress,
+        OpenIdConnectConfigurationRetriever())
     
 
 let configureCors (ctx : WebHostBuilderContext) (builder : CorsPolicyBuilder) =
@@ -76,18 +69,14 @@ let configureApp (ctx : WebHostBuilderContext) (app : IApplicationBuilder) =
                                    officeRestrictionNotifier.NotifyOfficeRestrictions
                                    featureFlags
 
-    // TODO: Fix Okta issue in the following Mob programming sessions
-    // let oktaDomain = ctx.Configuration.["Okta:OktaDomain"]
-    // let oktaIssuer = getOktaIssuer oktaDomain
-    // let configurationManager = getConfigurationManager oktaIssuer
-    // let oktaAudience = ctx.Configuration.["Okta:OktaAudience"]
-    //
-    // let validateToken = JwtTokenValidator.validateToken configurationManager oktaIssuer oktaAudience
+    let oktaDomain = ctx.Configuration.["Okta:OktaDomain"]
+    let oktaIssuer = oktaDomain
+    let configurationManager = getConfigurationManager oktaIssuer
+    let oktaAudience = ctx.Configuration.["Okta:OktaAudience"]
     
-    let routes = Routes.provide apiDependencyFactory (fun _ -> Task.FromResult ValidToken)
-    // TODO: Fix Okta issue in the following Mob programming sessions
-    // app.UseAuthentication()
-    //    .UseAuthorization() |> ignore
+    let validateToken = JwtTokenValidator.validateToken configurationManager oktaAudience
+    
+    let routes = Routes.provide apiDependencyFactory validateToken
     
     app.UseCors(configureCors ctx)
        .UseGiraffe routes.HttpHandlers
@@ -123,20 +112,8 @@ let configureServices (services : IServiceCollection) =
     let serviceProvider = services.BuildServiceProvider()
     let config = serviceProvider.GetService<IConfiguration>()
     
-    // TODO: Fix Okta issue in the following Mob programming sessions
-    // let oktaDomain = config.["Okta:OktaDomain"]
-    // let oktaOptions = OktaWebApiOptions()
-    // oktaOptions.OktaDomain <- oktaDomain
-    
     services.AddGiraffe()
             .AddCors()
-            // TODO: Fix Okta issue in the following Mob programming sessions
-            // .AddAuthentication(
-            //     fun options ->
-            //         options.DefaultAuthenticateScheme <- OktaDefaults.ApiAuthenticationScheme
-            //         options.DefaultChallengeScheme <- OktaDefaults.ApiAuthenticationScheme
-            //         options.DefaultSignInScheme <- OktaDefaults.ApiAuthenticationScheme)
-            // .AddOktaWebApi(oktaOptions)
             |> ignore
             
     services.AddAuthorization() |> ignore

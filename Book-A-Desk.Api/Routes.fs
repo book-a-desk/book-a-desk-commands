@@ -30,13 +30,14 @@ module Routes =
             context.GetRequestHeader("Authorization")
         
         match bearerToken with
-        | Ok bearerToken ->            
+        | Ok bearerToken ->
             let bearerToken = bearerToken.Replace("Bearer ", "")
-            
             match! validateToken bearerToken with
             | ValidToken ->
+                printfn "ValidToken"
                 return! next context
             | InvalidToken message ->
+                printfn "InvalidToken"
                 return! failAuthorization message context
         | Error e ->
             return! failAuthorization $"Could not get bearer token: {e}" context

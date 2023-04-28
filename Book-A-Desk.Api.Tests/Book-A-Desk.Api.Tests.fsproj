@@ -18,6 +18,7 @@
     <Compile Include="BookingNotifierTests.fs" />
     <Compile Include="CancelBookingsTests.fs" />
     <Compile Include="OfficeRestrictionNotifierTests.fs" />
+    <Compile Include="JwtTokenValidatorTest.fs" />
   </ItemGroup>
 
   <ItemGroup>
