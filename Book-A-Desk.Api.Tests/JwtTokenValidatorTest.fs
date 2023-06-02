@@ -188,4 +188,5 @@ let ``Given a valid bearer token When validating the token Then the bearer token
     match validatedToken with
     | ValidToken -> ()
     | InvalidToken error -> failwith $"Token was invalid: {error}"
+    | ConnectionError error -> failwith $"Connection Error {error}"
 }

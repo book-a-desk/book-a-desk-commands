@@ -10,12 +10,17 @@ open Microsoft.IdentityModel.Tokens
 
 module rec JwtTokenValidator =
     let validateToken
+        metadataAddress
         (configuration: ConfigurationManager<OpenIdConnectConfiguration>)
         audience
         (bearerToken : string)
         = task {
-            let! config = configuration.GetConfigurationAsync()
-            return validateTokenWithConfig config audience bearerToken 
+            try
+                let! config = configuration.GetConfigurationAsync()
+                return validateTokenWithConfig config audience bearerToken 
+            with
+            | e ->
+                return ConnectionError $"Connection Error while getting configuration for {metadataAddress}: {e}"
         }
             
     let validateTokenWithConfig 

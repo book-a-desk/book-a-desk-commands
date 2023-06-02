@@ -21,9 +21,10 @@ let useDevelopmentStorage = Environment.GetEnvironmentVariable("AWS_DEVELOPMENTS
 
 let getConfigurationManager oktaIssuer =
     let metadataAddress = oktaIssuer + "/oauth2/default/.well-known/openid-configuration"
+    printfn $"Getting Metadata from {metadataAddress}"
     ConfigurationManager<OpenIdConnectConfiguration>(
         metadataAddress,
-        OpenIdConnectConfigurationRetriever())
+        OpenIdConnectConfigurationRetriever()), metadataAddress
     
 
 let configureCors (ctx : WebHostBuilderContext) (builder : CorsPolicyBuilder) =
@@ -71,10 +72,11 @@ let configureApp (ctx : WebHostBuilderContext) (app : IApplicationBuilder) =
 
     let oktaDomain = ctx.Configuration.["Okta:OktaDomain"]
     let oktaIssuer = oktaDomain
-    let configurationManager = getConfigurationManager oktaIssuer
+    printfn $"Okta Issue is {oktaIssuer}"
+    let configurationManager, metadataAddress = getConfigurationManager oktaIssuer
     let oktaAudience = ctx.Configuration.["Okta:OktaAudience"]
     
-    let validateToken = JwtTokenValidator.validateToken configurationManager oktaAudience
+    let validateToken = JwtTokenValidator.validateToken metadataAddress configurationManager oktaAudience
     
     let routes = Routes.provide apiDependencyFactory validateToken
     
