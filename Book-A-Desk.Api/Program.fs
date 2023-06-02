@@ -70,11 +70,11 @@ let configureApp (ctx : WebHostBuilderContext) (app : IApplicationBuilder) =
                                    officeRestrictionNotifier.NotifyOfficeRestrictions
                                    featureFlags
 
-    let oktaDomain = ctx.Configuration.["Okta_OktaDomain"]
+    let oktaDomain = ctx.Configuration.["Okta:OktaDomain"]
     let oktaIssuer = oktaDomain
     printfn $"Okta Issue is {oktaIssuer}"
     let configurationManager, metadataAddress = getConfigurationManager oktaIssuer
-    let oktaAudience = ctx.Configuration.["Okta_OktaAudience"]
+    let oktaAudience = ctx.Configuration.["Okta:OktaAudience"]
     
     let validateToken = JwtTokenValidator.validateToken metadataAddress configurationManager oktaAudience
     
