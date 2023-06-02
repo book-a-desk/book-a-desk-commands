@@ -17,9 +17,8 @@ type TokenValidationResult =
 | InvalidToken of string
     
 module Routes =
-    let private failAuthorization message context =
-        let failHandler = (text message >=> setStatusCode 401)
-        failHandler earlyReturn context
+    let private failAuthorization message next context =
+        RequestErrors.unauthorized "Bearer" "BookADesk" (text message) next context
     
     let private authorize
         (validateToken : string -> Task<TokenValidationResult>)
@@ -37,10 +36,10 @@ module Routes =
                 printfn "ValidToken"
                 return! next context
             | InvalidToken message ->
-                printfn "InvalidToken"
-                return! failAuthorization message context
+                printfn $"InvalidToken {message}"
+                return! failAuthorization message next context
         | Error e ->
-            return! failAuthorization $"Could not get bearer token: {e}" context
+            return! failAuthorization $"Could not get bearer token: {e}" next context
     }
 
     let provide (apiDependencyFactory:ApiDependencyFactory) validateToken =
