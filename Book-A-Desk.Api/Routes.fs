@@ -15,10 +15,13 @@ type Routes =
 type TokenValidationResult =
 | ValidToken
 | InvalidToken of string
+| ConnectionError of string
     
 module Routes =
     let private failAuthorization message next context =
         RequestErrors.unauthorized "Bearer" "BookADesk" (text message) next context
+    let private internalServerError message next context =
+        ServerErrors.internalError (text message) next context
     
     let private authorize
         (validateToken : string -> Task<TokenValidationResult>)
@@ -38,6 +41,9 @@ module Routes =
             | InvalidToken message ->
                 printfn $"InvalidToken {message}"
                 return! failAuthorization message next context
+            | ConnectionError message ->
+                printfn $"ConnectionError {message}"
+                return! internalServerError message next context
         | Error e ->
             return! failAuthorization $"Could not get bearer token: {e}" next context
     }

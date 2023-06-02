@@ -20,7 +20,7 @@ module rec JwtTokenValidator =
                 return validateTokenWithConfig config audience bearerToken 
             with
             | e ->
-                return InvalidToken $"Token Validation Error while getting configuration for {metadataAddress}: {e}"
+                return ConnectionError $"Connection Error while getting configuration for {metadataAddress}: {e}"
         }
             
     let validateTokenWithConfig 
