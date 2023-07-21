@@ -26,3 +26,11 @@ module InputParser =
         let officeId = officeIdGuid |> OfficeId        
         if wasParsed then Ok officeId
         else Error ()
+
+    let parseOfficeIdFromContext (context : HttpContext) =
+        context.TryGetQueryStringValue "office"
+        |> Option.bind (fun (office: string) ->
+            match parseOfficeId office with 
+            | Ok officeId -> Some officeId
+            | Error () -> None
+        )

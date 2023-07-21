@@ -5,6 +5,7 @@ open Book_A_Desk.Core
 open Book_A_Desk.Domain
 open Book_A_Desk.Domain.Events
 open Book_A_Desk.Domain.Reservation
+open Book_A_Desk.Domain.Office.Domain
 
 module rec ReservationsQueriesHandler =
     let get (bookingEvents : seq<DomainEvent>) (date : DateTime) : Result<Booking list, string> = result {
@@ -15,6 +16,16 @@ module rec ReservationsQueriesHandler =
         let bookings = (ReservationAggregate.getCurrentStateFrom bookingEvents).BookedDesks
         let isSameDate = isSameDate date
         return List.where (fun booking -> isSameDate booking.Date) bookings
+    }
+
+    let getUserBookingsByOfficeFrom (bookingEvents : seq<DomainEvent>) (date : DateTime) (office : OfficeId) : Result<Booking list, string> = result {
+        let bookingEvents =
+                bookingEvents
+                |> Seq.map (function | ReservationEvent event -> event)
+        
+        let bookings = (ReservationAggregate.getCurrentStateFrom bookingEvents).BookedDesks
+        let isSameDate = isSameDate date
+        return List.where (fun booking -> isSameDate booking.Date && booking.OfficeId = office) bookings
     }
     
     let getUserBookingsStartFrom (bookingEvents : seq<DomainEvent>) (email : EmailAddress) (date : DateTime) : Result<Booking list, string> = result {
