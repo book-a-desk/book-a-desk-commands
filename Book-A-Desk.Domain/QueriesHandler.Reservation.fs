@@ -45,6 +45,19 @@ module rec ReservationsQueriesHandler =
         let bookings = (ReservationAggregate.getCurrentStateFrom bookingEvents).BookedDesks
         return List.where (fun booking -> booking.Date >= date) bookings
     }
+
+    let getFilteredBookings (bookingEvents : seq<DomainEvent>) (date : DateTime option)  (officeId : OfficeId option) (email : EmailAddress option) : Result<Booking list, string> = result {
+        let bookingEvents =
+                bookingEvents
+                |> Seq.map (function | ReservationEvent event -> event)
+        
+        let bookings = (ReservationAggregate.getCurrentStateFrom bookingEvents).BookedDesks
+        return 
+            bookings
+            |> List.where (fun booking -> if date.IsNone then true else date.Value = booking.Date)
+            |> List.where (fun booking -> if officeId.IsNone then true else officeId.Value = booking.OfficeId)
+            |> List.where (fun booking -> if email.IsNone then true else email.Value = booking.EmailAddress)
+    }
         
     let private isSameDate date1 date2 =
         date1.Day = date2.Day && date1.Month = date2.Month && date1.Year = date2.Year

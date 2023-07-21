@@ -23,8 +23,7 @@ open Book_A_Desk.Infrastructure.DynamoDbEventStore
 type BookingsHttpHandler =
     {
         HandlePostWith: Models.Booking -> HttpHandler
-        HandleGetByEmailAndDate: unit -> HttpHandler
-        HandleGetByDateAndOffice: unit -> HttpHandler
+        HandleGet: unit -> HttpHandler
     }
 
 module BookingsHttpHandler =
@@ -100,105 +99,35 @@ module BookingsHttpHandler =
                     return! json response.Error next context
             }
 
-        let handleGetByEmailAndDateFromEventStore eventStore email date = asyncResult {
+        let handleGet eventStore date officeId email = asyncResult {
             let! bookingEvents = eventStore.GetEvents ()
-            return! ReservationsQueriesHandler.getUserBookingsStartFrom bookingEvents email date
+            return! ReservationsQueriesHandler.getFilteredBookings bookingEvents date officeId email
         }
         
-        let handleGetByDateFromEventStore eventStore date = asyncResult {
-            let! bookingEvents = eventStore.GetEvents ()
-            return! ReservationsQueriesHandler.getUsersBookingsStartFrom bookingEvents date
-        }
-
-        let handleGetOneDateFromEventStore eventStore date office = asyncResult {
-            let! bookingEvents = eventStore.GetEvents ()
-            return! ReservationsQueriesHandler.getUserBookingsByOfficeFrom bookingEvents date office
-        }
-
-        let getEmailAddresses (bookings: Booking list) =
-            bookings
-            |> List.map (fun booking -> booking.EmailAddress)
-            |> List.map (fun (EmailAddress email) -> email)
-            |> List.toArray
-
-        let handleGetByDateAndOffice () = fun next context ->
-            task {
-                if featureFlags.GetBookings then
-                    let office = InputParser.parseOfficeIdFromContext context
-                    let date = InputParser.parseDateFromContext context
-                    match office, date with
-                    | None, None ->
-                        context.SetStatusCode(400)
-                        return! text "OfficeID and date could not be parsed" next context
-                    | Some _, None ->
-                        context.SetStatusCode(400)
-                        return! text "Date could not be parsed" next context
-                    | None, Some _ ->
-                        context.SetStatusCode(400)
-                        return! text "OfficeID could not be parsed" next context
-                    | Some office, Some date ->
-                        let eventStore = provideEventStore (context.GetService<IAmazonDynamoDB>())
-                        let! result = handleGetOneDateFromEventStore eventStore date office
-
-                        match result with
-                        | Ok bookings ->
-                            let emailAddresses = getEmailAddresses bookings
-
-                            return! json emailAddresses next context
-                        | Error e ->
-                            context.SetStatusCode(500)
-                            return! text ("Internal Error: " + e) next context
-                else
-                    context.SetStatusCode(404)
-                    return! text "Not Found" next context
-        }
-        
-        let handleGetByEmailAndDate () = fun next context ->
+        let handleGet () = fun next context ->
             task {
                 if featureFlags.GetBookings then
                     let email = InputParser.parseEmailFromContext context
                     let date = InputParser.parseDateFromContext context
-                    match email, date with
-                    | None, None ->
-                        context.SetStatusCode(400)
-                        return! text "Email and start date could not be parsed" next context
-                    | Some _, None ->
-                        context.SetStatusCode(400)
-                        return! text "Start date could not be parsed" next context
-                    | None, Some date ->
-                        let eventStore = provideEventStore (context.GetService<IAmazonDynamoDB>())
-                        let! result = handleGetByDateFromEventStore eventStore date
-                        
-                        match result with
-                        | Ok bookings ->
-                            let bookings =
-                                bookings
-                                |> List.map (fun (booking:Booking) ->
-                                    Booking.value booking.OfficeId booking.Date booking.EmailAddress
-                                    )
-                                |> List.toArray
-                                |> fun l -> { Bookings.Items = l }
-                            return! json bookings next context
-                        | Error e ->
-                            context.SetStatusCode(500)
-                            return! text ("Internal Error: " + e) next context
-                    | Some email, Some date ->
-                        let eventStore = provideEventStore (context.GetService<IAmazonDynamoDB>())
-                        let! result = handleGetByEmailAndDateFromEventStore eventStore email date
-                        
-                        match result with
-                        | Ok bookings ->
-                            let bookings =
-                                bookings
-                                |> List.map (fun (booking:Booking) ->
-                                    Booking.value booking.OfficeId booking.Date booking.EmailAddress
-                                    )
-                                |> List.toArray
-                                |> fun l -> { Bookings.Items = l }
-                            return! json bookings next context
-                        | Error e ->
-                            context.SetStatusCode(500)
-                            return! text ("Internal Error: " + e) next context
+                    let officeId = InputParser.parseOfficeIdFromContext context
+
+                    
+                    let eventStore = provideEventStore (context.GetService<IAmazonDynamoDB>())
+                    let! result = handleGet eventStore date officeId email
+                    
+                    match result with
+                    | Ok bookings ->
+                        let bookings =
+                            bookings
+                            |> List.map (fun (booking:Booking) ->
+                                Booking.value booking.OfficeId booking.Date booking.EmailAddress
+                                )
+                            |> List.toArray
+                            |> fun l -> { Bookings.Items = l }
+                        return! json bookings next context
+                    | Error e ->
+                        context.SetStatusCode(500)
+                        return! text ("Internal Error: " + e) next context
                 else
                     context.SetStatusCode(404)
                     return! text "Not Found" next context
@@ -206,6 +135,5 @@ module BookingsHttpHandler =
         
         {
             HandlePostWith = handlePostWith
-            HandleGetByEmailAndDate = handleGetByEmailAndDate
-            HandleGetByDateAndOffice = handleGetByDateAndOffice
+            HandleGet = handleGet
         }
