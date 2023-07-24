@@ -29,7 +29,6 @@ type BookingsHttpHandler =
 module BookingsHttpHandler =
     let private notifyBooking output (booking : Models.Booking) notifySuccess errorHandler next context =
         task {
-            // remember me
             let! sent = notifySuccess booking
             match sent with
             | Ok _ ->
