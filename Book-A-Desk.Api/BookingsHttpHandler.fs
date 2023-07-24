@@ -29,6 +29,7 @@ type BookingsHttpHandler =
 module BookingsHttpHandler =
     let private notifyBooking output (booking : Models.Booking) notifySuccess errorHandler next context =
         task {
+            // remember me
             let! sent = notifySuccess booking
             match sent with
             | Ok _ ->
@@ -101,9 +102,22 @@ module BookingsHttpHandler =
 
         let handleGet eventStore date officeId email = asyncResult {
             let! bookingEvents = eventStore.GetEvents ()
-            return! ReservationsQueriesHandler.getFilteredBookings bookingEvents date officeId email
+
+            match officeId with
+            | Some _ -> 
+                return! ReservationsQueriesHandler.getFilteredBookings bookingEvents date officeId email
+            | None ->
+                match email, date with
+                | Some email, Some date ->
+                    return! ReservationsQueriesHandler.getUserBookingsStartFrom bookingEvents email date
+                | None, Some date -> 
+                    return! ReservationsQueriesHandler.getUsersBookingsStartFrom bookingEvents date
+                | _, _ ->
+                    return! ReservationsQueriesHandler.getFilteredBookings bookingEvents date officeId email
+            
         }
         
+
         let handleGet () = fun next context ->
             task {
                 if featureFlags.GetBookings then
@@ -120,8 +134,7 @@ module BookingsHttpHandler =
                         let bookings =
                             bookings
                             |> List.map (fun (booking:Booking) ->
-                                Booking.value booking.OfficeId booking.Date booking.EmailAddress
-                                )
+                                Booking.value booking.OfficeId booking.Date booking.EmailAddress)
                             |> List.toArray
                             |> fun l -> { Bookings.Items = l }
                         return! json bookings next context
