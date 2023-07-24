@@ -17,16 +17,6 @@ module rec ReservationsQueriesHandler =
         let isSameDate = isSameDate date
         return List.where (fun booking -> isSameDate booking.Date) bookings
     }
-
-    let getUserBookingsByOfficeFrom (bookingEvents : seq<DomainEvent>) (date : DateTime) (office : OfficeId) : Result<Booking list, string> = result {
-        let bookingEvents =
-                bookingEvents
-                |> Seq.map (function | ReservationEvent event -> event)
-        
-        let bookings = (ReservationAggregate.getCurrentStateFrom bookingEvents).BookedDesks
-        let isSameDate = isSameDate date
-        return List.where (fun booking -> isSameDate booking.Date && booking.OfficeId = office) bookings
-    }
     
     let getUserBookingsStartFrom (bookingEvents : seq<DomainEvent>) (email : EmailAddress) (date : DateTime) : Result<Booking list, string> = result {
         let bookingEvents =
