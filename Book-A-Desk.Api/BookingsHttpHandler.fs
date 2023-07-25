@@ -99,23 +99,10 @@ module BookingsHttpHandler =
                     return! json response.Error next context
             }
 
-        let handleGet eventStore date officeId email = asyncResult {
+        let getBookingsFrom eventStore date officeId email = asyncResult {
             let! bookingEvents = eventStore.GetEvents ()
-
-            match officeId with
-            | Some _ -> 
-                return! ReservationsQueriesHandler.getFilteredBookings bookingEvents date officeId email
-            | None ->
-                match email, date with
-                | Some email, Some date ->
-                    return! ReservationsQueriesHandler.getUserBookingsStartFrom bookingEvents email date
-                | None, Some date -> 
-                    return! ReservationsQueriesHandler.getUsersBookingsStartFrom bookingEvents date
-                | _, _ ->
-                    return! ReservationsQueriesHandler.getFilteredBookings bookingEvents date officeId email
-            
+            return! ReservationsQueriesHandler.getFilteredBookings bookingEvents date officeId email
         }
-        
 
         let handleGet () = fun next context ->
             task {
@@ -125,7 +112,7 @@ module BookingsHttpHandler =
                     let officeId = InputParser.parseOfficeIdFromContext context
 
                     let eventStore = provideEventStore (context.GetService<IAmazonDynamoDB>())
-                    let! result = handleGet eventStore date officeId email
+                    let! result = getBookingsFrom eventStore date officeId email
                     
                     match result with
                     | Ok bookings ->

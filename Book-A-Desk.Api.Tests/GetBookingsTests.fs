@@ -56,7 +56,6 @@ let ``GIVEN A Book-A-Desk server, WHEN getting bookings, THEN bookings are retur
     let emailQuery = "unit@test.com"
     let email = emailQuery |> EmailAddress
     let date = DateTime(2100,02,01)
-    let dateQuery = DateTime(2030,02,01)
     let officeId = Guid.Parse("16C3D468-C115-4452-8502-58B821D6640B") |> OfficeId
     let aBooking =
         ({  
@@ -76,7 +75,7 @@ let ``GIVEN A Book-A-Desk server, WHEN getting bookings, THEN bookings are retur
     let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification mockOfficeRestrictionNotification featureFlag
     use httpClient = TestServer.createAndRun mockApiDependencyFactory
     
-    let! result = HttpRequest.getAsyncGetContent httpClient $"http://localhost/bookings?email={emailQuery}&date={dateQuery.ToString()}"
+    let! result = HttpRequest.getAsyncGetContent httpClient $"http://localhost/bookings?email={emailQuery}&date={date.ToString()}"
 
     let deserializedResult = JsonConvert.DeserializeObject<Bookings>(result)
 
@@ -88,36 +87,35 @@ let ``GIVEN A Book-A-Desk server, WHEN getting bookings, THEN bookings are retur
 }
 
 [<Fact>]
-let ``GIVEN A Book-A-Desk server and multiple bookings, WHEN getting bookings, THEN only bookings of queried user and future date are returned`` () = async {
+let ``GIVEN A Book-A-Desk server and multiple bookings, WHEN getting bookings by Email, THEN only bookings of queried Email are returned and ordered by date`` () = async {
     let emailQuery = "unit1@test.com"
-    let dateQuery = DateTime(2030,02,01)
     let officeId = Guid.Parse("16C3D468-C115-4452-8502-58B821D6640B") |> OfficeId
     
     let email1 = emailQuery |> EmailAddress
-    let date1 = DateTime(2100,02,01)
+    let date1 = DateTime(2020,01,01)
     let aBooking1 =
         ({  
             Date = date1
             EmailAddress = email1
             OfficeId = officeId 
-        } : Events.DeskBooked) |> ReservationEvent.DeskBooked |> ReservationEvent
+        } : Events.DeskBooked) |> DeskBooked |> ReservationEvent
         
-    let email2 = "unit2@test.com" |> EmailAddress
-    let date2 = DateTime(2100,02,01)
+    let date2 = DateTime(2030,01,01)
     let aBooking2 =
         ({  
             Date = date2
-            EmailAddress = email2 
+            EmailAddress = email1 
             OfficeId = officeId 
-        } : Events.DeskBooked) |> ReservationEvent.DeskBooked |> ReservationEvent
+        } : Events.DeskBooked) |> DeskBooked |> ReservationEvent
         
-    let date3 = DateTime(2030,01,30)
+    let email3 = "unit2@test.com" |> EmailAddress
+    let date3 = DateTime(2030,01,01)
     let aBooking3 =
         ({  
             Date = date3
-            EmailAddress = email1
+            EmailAddress = email3
             OfficeId = officeId 
-        } : Events.DeskBooked) |> ReservationEvent.DeskBooked |> ReservationEvent
+        } : Events.DeskBooked) |> DeskBooked |> ReservationEvent
         
     let mockProvideEventStore _ =
         {
@@ -130,64 +128,20 @@ let ``GIVEN A Book-A-Desk server and multiple bookings, WHEN getting bookings, T
     let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification mockOfficeRestrictionNotification featureFlag
     use httpClient = TestServer.createAndRun mockApiDependencyFactory
     
-    let! result = HttpRequest.getAsyncGetContent httpClient $"http://localhost/bookings?email={emailQuery}&date={dateQuery.ToString()}"
+    let! result = HttpRequest.getAsyncGetContent httpClient $"http://localhost/bookings?email={emailQuery}"
 
     let deserializedResult = JsonConvert.DeserializeObject<Bookings>(result)
-
-    let booking = deserializedResult.Items.[0]
     let (OfficeId officeId) = officeId
-    Assert.Equal(emailQuery, booking.User.Email)
-    Assert.Equal(date1, booking.Date)
-    Assert.Equal(officeId.ToString(), booking.Office.Id)
-}
 
-[<Fact>]
-let ``GIVEN A Book-A-Desk server and multiple bookings, WHEN getting bookings without email provided, THEN all bookings of future date are returned`` () = async {
-    let emailQuery = "email1@test.com"
-    let dateQuery = DateTime(2030,02,01)
-    let officeId = Guid.Parse("16C3D468-C115-4452-8502-58B821D6640B") |> OfficeId
-    
-    let email1 = emailQuery |> EmailAddress
-    let date1 = DateTime(2100, 01, 20)
-    let aBooking1 =
-        ({  
-            Date = date1
-            EmailAddress = email1
-            OfficeId = officeId 
-        } : Events.DeskBooked) |> ReservationEvent.DeskBooked |> ReservationEvent
-        
-    let email2 = "email2@test.com" |> EmailAddress
-    let date2 = DateTime(2100, 01, 21)
-    let aBooking2 =
-        ({  
-            Date = date2
-            EmailAddress = email2 
-            OfficeId = officeId 
-        } : Events.DeskBooked) |> ReservationEvent.DeskBooked |> ReservationEvent
-        
-    let date3 = DateTime(2100, 01, 22)
-    let aBooking3 =
-        ({  
-            Date = date3
-            EmailAddress = email2
-            OfficeId = officeId 
-        } : Events.DeskBooked) |> ReservationEvent.DeskBooked |> ReservationEvent
-        
-    let mockProvideEventStore _ =
-        {
-            GetEvents = fun _ -> [aBooking1; aBooking2; aBooking3] |> Seq.ofList |> Ok |> async.Return
-            AppendEvents = fun _ -> failwith "should not be called"
-        } : DynamoDbEventStore
-    
-    let mockEmailNotification _ = asyncResult { return () }
-        
-    let mockApiDependencyFactory = ApiDependencyFactory.provide mockProvideEventStore mockReservationCommandFactory mockGetOffices mockEmailNotification mockOfficeRestrictionNotification featureFlag
-    use httpClient = TestServer.createAndRun mockApiDependencyFactory
-    
-    let! result = HttpRequest.getAsyncGetContent httpClient $"http://localhost/bookings?date={dateQuery.ToString()}"
+    Assert.Equal(deserializedResult.Items.Length, 2)
 
-    let deserializedResult = JsonConvert.DeserializeObject<Bookings>(result)
-
-    let bookings = deserializedResult.Items
-    Assert.Equal(3, bookings.Length)
+    let booking1 = deserializedResult.Items.[0]
+    Assert.Equal(emailQuery, booking1.User.Email)
+    Assert.Equal(date1, booking1.Date)
+    Assert.Equal(officeId.ToString(), booking1.Office.Id)
+    
+    let booking2  = deserializedResult.Items.[1]
+    Assert.Equal(emailQuery, booking2.User.Email)
+    Assert.Equal(date2, booking2.Date)
+    Assert.Equal(officeId.ToString(), booking2.Office.Id)
 }
