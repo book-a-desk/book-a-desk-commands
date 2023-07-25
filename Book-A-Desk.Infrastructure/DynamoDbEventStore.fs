@@ -19,7 +19,7 @@ module rec DynamoDbEventStore =
                 .Create<ReservationEvent>(
                     dynamoDbClient,
                     tableName = "ReservationEvents",
-                    createIfNotExists = true)
+                    createIfNotExists = false)
         
         {
             GetEvents = getEvents table

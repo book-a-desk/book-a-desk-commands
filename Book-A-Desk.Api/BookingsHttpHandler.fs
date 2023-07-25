@@ -124,7 +124,6 @@ module BookingsHttpHandler =
                     let date = InputParser.parseDateFromContext context
                     let officeId = InputParser.parseOfficeIdFromContext context
 
-                    
                     let eventStore = provideEventStore (context.GetService<IAmazonDynamoDB>())
                     let! result = handleGet eventStore date officeId email
                     
