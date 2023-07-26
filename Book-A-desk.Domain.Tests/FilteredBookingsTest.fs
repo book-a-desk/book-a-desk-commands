@@ -10,8 +10,12 @@ open Book_A_Desk.Domain.Reservation
 open Book_A_Desk.Domain.Reservation.Queries
 open Book_A_Desk.Domain.Reservation.Events
 
-let officeId = Guid.NewGuid ()
-let date = DateTime(2100,02,01)
+let email = "lasnikr"
+let altEmail = "dummy"
+let office = Guid.Parse("11111111-1111-1111-1111-111111111111")
+let altOffice = Guid.Parse("22222222-2222-2222-2222-222222222222")
+let date = DateTime(2000,05,03)
+let altDate = DateTime(2100,05,03)
 
 let createDeskBookedEvent date officeId email : DomainEvent =
     ({
@@ -20,11 +24,11 @@ let createDeskBookedEvent date officeId email : DomainEvent =
             OfficeId = officeId |> OfficeId
     }: Events.DeskBooked) |> DeskBooked |> ReservationEvent
 
-let bookings : DomainEvent seq = 
+let bookingEvents : DomainEvent seq = 
     [
-        createDeskBookedEvent date officeId "lasnikr"
-        createDeskBookedEvent date officeId "user"
-        createDeskBookedEvent date officeId "dummy"
+        createDeskBookedEvent altDate   office    email
+        createDeskBookedEvent date      altOffice email
+        createDeskBookedEvent date      office    altEmail
     ]
 
 let getBookingsFrom (bookingEvents : seq<DomainEvent>) (date : DateTime option)  (officeId : OfficeId option) (email : EmailAddress option) =
@@ -35,23 +39,43 @@ let getBookingsFrom (bookingEvents : seq<DomainEvent>) (date : DateTime option) 
 
 [<Fact>]
 let ``GIVEN booking events and a date WHEN filtering bookings THEN all bookings for the date are returned`` () = async {
-    let bookingEvents = bookings
     let bookings = getBookingsFrom bookingEvents (Some date) None None
     
-    Assert.Equal(bookings.Length, 3)
+    Assert.Equal(bookings.Length, 2)
     Assert.Equal(date, bookings[0].Date)
     Assert.Equal(date, bookings[1].Date)
-    Assert.Equal(date, bookings[2].Date)
 }
 
-// [<Fact>]
-// let ``GIVEN booking events and an email WHEN filtering bookings THEN all bookings for the email are returned`` () = async {
-// }
+[<Fact>]
+let ``GIVEN booking events and an officeId WHEN filtering bookings THEN all bookings for the officeId are returned`` () = async {
+    let officeId = office |> OfficeId
 
-// [<Fact>]
-// let ``GIVEN booking events and an officeId WHEN filtering bookings THEN all bookings for the officeId are returned`` () = async {
-// }
+    let bookings = getBookingsFrom bookingEvents None (Some officeId) None
+    
+    Assert.Equal(bookings.Length, 2)
+    Assert.Equal(officeId, bookings[0].OfficeId)
+    Assert.Equal(officeId, bookings[1].OfficeId)
+}
 
-// [<Fact>]
-// let ``GIVEN booking events, an officeId and an email WHEN filtering bookings THEN all bookings for the officeId are returned`` () = async {
-// }
+[<Fact>]
+let ``GIVEN booking events and an email WHEN filtering bookings THEN all bookings for the email are returned`` () = async {
+    let emailAddress = email |> EmailAddress
+
+    let bookings = getBookingsFrom bookingEvents None None (Some emailAddress)
+    
+    Assert.Equal(bookings.Length, 2)
+    Assert.Equal(emailAddress, bookings[0].EmailAddress)
+    Assert.Equal(emailAddress, bookings[1].EmailAddress)
+}
+
+[<Fact>]
+let ``GIVEN booking events, an officeId and an email WHEN filtering bookings THEN all bookings for the officeId and email are returned`` () = async {
+    let officeId = office |> OfficeId
+    let emailAddress = email |> EmailAddress
+
+    let bookings = getBookingsFrom bookingEvents None (Some officeId) (Some emailAddress)
+
+    Assert.Equal(bookings.Length, 1)
+    Assert.Equal(emailAddress, bookings[0].EmailAddress)
+    Assert.Equal(officeId, bookings[0].OfficeId)
+}
