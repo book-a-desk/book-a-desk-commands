@@ -1,14 +1,10 @@
-module Book_A_Desk.Api.Tests.FilteredBookingsTest
+module Book_A_Desk.Domain.Tests.FilteredBookingsTest
 
-open FsToolkit.ErrorHandling
 open System
 open Xunit
 
-open Book_A_Desk.Api.Models
 open Book_A_Desk.Domain.Office.Domain
-open Book_A_Desk.Infrastructure.DynamoDbEventStore
 open Book_A_Desk.Domain
-open Book_A_Desk.Infrastructure
 open Book_A_Desk.Domain.Events
 open Book_A_Desk.Domain.Reservation
 open Book_A_Desk.Domain.Reservation.Queries
@@ -20,7 +16,7 @@ let date = DateTime(2100,02,01)
 let createDeskBookedEvent date officeId email : DomainEvent =
     ({
             Date = date
-            EmailAddress = "lasnikr" |> EmailAddress
+            EmailAddress = email |> EmailAddress
             OfficeId = officeId |> OfficeId
     }: Events.DeskBooked) |> DeskBooked |> ReservationEvent
 
@@ -31,35 +27,15 @@ let bookings : DomainEvent seq =
         createDeskBookedEvent date officeId "dummy"
     ]
 
-let mockProvideEventStore =
-    {
-        GetEvents = fun _ -> bookings |> Ok |> async.Return
-        AppendEvents = fun _ -> failwith "should not be called"
-    } : DynamoDbEventStore.DynamoDbEventStore
-
-let getBookingEvents : Option<seq<DomainEvent>> =
-    async {
-        let! result = mockProvideEventStore.GetEvents()
-        match result with
-        | Ok events -> return Some events
-        | Error errorMessage -> return None
-    }
-    |> Async.RunSynchronously
-
-let getBookingsFrom (bookingEvents : Option<seq<DomainEvent>>) (date : DateTime option)  (officeId : OfficeId option) (email : EmailAddress option) =
-    match bookingEvents with 
-    | Some bookingEvents -> 
-        let result = ReservationsQueriesHandler.getFilteredBookings bookingEvents date officeId email
-        match result with
-        | Ok bookings ->
-           bookings
-
-        | Error e -> failwith "Error occured"
-    | None -> failwith "Empty booking events"
+let getBookingsFrom (bookingEvents : seq<DomainEvent>) (date : DateTime option)  (officeId : OfficeId option) (email : EmailAddress option) =
+    let result = ReservationsQueriesHandler.getFilteredBookings bookingEvents date officeId email
+    match result with
+    | Ok bookings -> bookings
+    | Error _ -> failwith "Error occured"
 
 [<Fact>]
 let ``GIVEN booking events and a date WHEN filtering bookings THEN all bookings for the date are returned`` () = async {
-    let bookingEvents = getBookingEvents
+    let bookingEvents = bookings
     let bookings = getBookingsFrom bookingEvents (Some date) None None
     
     Assert.Equal(bookings.Length, 3)
