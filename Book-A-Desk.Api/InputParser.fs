@@ -23,6 +23,14 @@ module InputParser =
         
     let parseOfficeId (reference: string) =
         let wasParsed, officeIdGuid = Guid.TryParse reference
-        let officeId = officeIdGuid |> OfficeId        
-        if wasParsed then Ok officeId
-        else Error ()
+        
+        if wasParsed then
+            let officeId = officeIdGuid |> OfficeId
+            Some officeId
+        else
+            None
+
+    let parseOfficeIdFromContext (context : HttpContext) =
+        context.TryGetQueryStringValue "office"
+        |> Option.bind (fun (office: string) ->
+            parseOfficeId office)

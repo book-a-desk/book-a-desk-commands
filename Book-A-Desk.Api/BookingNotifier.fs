@@ -161,14 +161,17 @@ module rec BookingNotifier =
             vaccinationPolicyMailMessageEn
             
     let getOffice officeId getOffices : Result<_,_> = result {
-        let! officeId =
-            InputParser.parseOfficeId officeId
-            |> Result.mapError (fun _ -> "OfficeId is invalid")
-        let! office = OfficeQueriesHandler.getOfficeById officeId getOffices
-        
-        match office with
-        | Some office ->
-            return office
+        let officeId = InputParser.parseOfficeId officeId
+
+        match officeId with 
+        | Some officeId ->
+            let! office = OfficeQueriesHandler.getOfficeById officeId getOffices
+
+            match office with
+            | Some office ->
+                return office
+            | None ->
+                return! Error "Could not find Office"
         | None ->
-            return! Error "Could not find Office"        
+            return! Error "OfficeId is invalid"
     }

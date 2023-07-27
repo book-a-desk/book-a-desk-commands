@@ -77,7 +77,7 @@ module Routes =
                 GET >=> choose [
                     route "/bookings" >=>  (
                         apiDependencyFactory.CreateBookingsHttpHandler ()
-                        |> fun h -> h.HandleGetByEmailAndDate ()
+                        |> fun h -> h.HandleGet ()
                     )
                 ]
                 GET >=> choose [ 
